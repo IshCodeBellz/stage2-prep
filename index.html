@@ -1,0 +1,1367 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Stage 2 Test Simulators — Trainee Train Driver</title>
+<meta name="theme-color" content="#0F151B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stage 2">
+<meta name="description" content="Practice simulators for the GTS trainee train driver Stage 2 assessments.">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACtklEQVR42u3dMVbCQBRAUeHQW1m5CBdATcluXAa7oaRmAezIwgZBQmaAzM+f+zo8FHG4foYkBxfvH59v0n8tLYHgEByCQ3AIDsEhOASH4BAcEhyCQ3AIDsEhOASH4BAcgkOCQ3AIDsEhOASH4BAcgkNwSHAIDsEhOASHmraKcBCn3Z+HX9+dvhjrzfb84fGwb3s8i7bfJnjBolsiFyyCEGmGY4BFV0QGWDQnsowso+iZiWUUPdOGVElxlA6DrMOjdBhMPzxMDoXBUTcG8g2PujEw8fAwOXSzlSW4O6K6PSkHR7GYfqzAUW8lvZIGZ0grdpdtX4a7B1x3eBW7y4nPk5ocxTSvrfz+JN8gaXNtpWh4hF30x3evRcNj+ssrPso+NFGuKZx2ec7KuCr7ql9n5JFHvirrfo4QH3rdz9HLiYRnEen9TrCs5eAOx0RE5ujDp5XXfpyp+/QOBx9w8DFbH3DwAQcfcPABRwYfcOimj/jDA46WBfcBh80HHDYfcHhzgcPwgMPwgMPwMDk0s+EBh+EBh+CY9fCI9s4Ch+AQHN5Z4BAcgkNwCA5l2ZPCITgEh+AQHIJDMfPNPjI5BIfgEByCQ3AIDsEhOASHBIfgEByCQ3AIDsEhOASH4JDgEByCQ3AIDsEhOASH4BAcEhyCQ3Doma0iHMR6sz1/eDzs+3wxoq1D4699uliObonEXIdmOAaWoysikddhGXlFip6ZWEardbAhVSQcpX8EWYdH/HUwORQGRx3/fMNjFutgcggOwSE4lBFH3Zm+fOdJZ7EOJoci4Sjln/XySvx1MDkUDMf4P4LcV2WDr4P7OULkfo6xS+NOsCDr4B8AyoZUcAgOwSE4BIfgEByCQ3BIcAgOwSE4BIfgEByCQ3AIDgkOwSE4BIfgEByCQ3AIDsEhwSE4BIfgEBxq2w/PXLb0yN3MIwAAAABJRU5ErkJggg==">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACtklEQVR42u3dMVbCQBRAUeHQW1m5CBdATcluXAa7oaRmAezIwgZBQmaAzM+f+zo8FHG4foYkBxfvH59v0n8tLYHgEByCQ3AIDsEhOASH4BAcEhyCQ3AIDsEhOASH4BAcgkOCQ3AIDsEhOASH4BAcgkNwSHAIDsEhOASHmraKcBCn3Z+HX9+dvhjrzfb84fGwb3s8i7bfJnjBolsiFyyCEGmGY4BFV0QGWDQnsowso+iZiWUUPdOGVElxlA6DrMOjdBhMPzxMDoXBUTcG8g2PujEw8fAwOXSzlSW4O6K6PSkHR7GYfqzAUW8lvZIGZ0grdpdtX4a7B1x3eBW7y4nPk5ocxTSvrfz+JN8gaXNtpWh4hF30x3evRcNj+ssrPso+NFGuKZx2ec7KuCr7ql9n5JFHvirrfo4QH3rdz9HLiYRnEen9TrCs5eAOx0RE5ujDp5XXfpyp+/QOBx9w8DFbH3DwAQcfcPABRwYfcOimj/jDA46WBfcBh80HHDYfcHhzgcPwgMPwgMPwMDk0s+EBh+EBh+CY9fCI9s4Ch+AQHN5Z4BAcgkNwCA5l2ZPCITgEh+AQHIJDMfPNPjI5BIfgEByCQ3AIDsEhOASHBIfgEByCQ3AIDsEhOASH4JDgEByCQ3AIDsEhOASH4BAcEhyCQ3Doma0iHMR6sz1/eDzs+3wxoq1D4699uliObonEXIdmOAaWoysikddhGXlFip6ZWEardbAhVSQcpX8EWYdH/HUwORQGRx3/fMNjFutgcggOwSE4lBFH3Zm+fOdJZ7EOJoci4Sjln/XySvx1MDkUDMf4P4LcV2WDr4P7OULkfo6xS+NOsCDr4B8AyoZUcAgOwSE4BIfgEByCQ3BIcAgOwSE4BIfgEByCQ3AIDgkOwSE4BIfgEByCQ3AIDsEhwSE4BIfgEBxq2w/PXLb0yN3MIwAAAABJRU5ErkJggg==">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+  :root{
+    --desk:#0F151B;        /* cab desk */
+    --panel:#18212A;
+    --line:#26333F;
+    --ink:#E6EDF3;
+    --muted:#8FA3B0;
+    --amber:#E0A11B;       /* caution aspect */
+    --green:#2E8B57;       /* proceed */
+    --red:#C6321E;         /* danger */
+    --paper:#FFFFFF;       /* test surfaces stay true to the real tests */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--desk); color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:16px; line-height:1.5;
+    -webkit-text-size-adjust:100%;
+    padding:0 0 env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:22px 18px 60px}
+  h1{font-size:1.45rem;line-height:1.2;letter-spacing:-.02em;margin:0 0 4px;font-weight:650}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 26px}
+  h2{font-size:1.15rem;letter-spacing:-.01em;margin:0 0 2px;font-weight:620}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* drill list — hairline rows, not cards */
+  .drill{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--line)}
+  .drill:last-of-type{border-bottom:1px solid var(--line)}
+  .lamp{width:11px;height:11px;border-radius:50%;flex:0 0 11px;margin-top:7px;
+        background:#2A3A47;box-shadow:inset 0 0 0 1px #0008}
+  .lamp.done{background:var(--green)}
+  .drill .body{flex:1;min-width:0}
+  .drill p{margin:3px 0 0;color:var(--muted);font-size:.88rem}
+  .meta{color:var(--muted);font-size:.78rem;margin-top:6px;font-variant-numeric:tabular-nums}
+  button{font:inherit;cursor:pointer;border-radius:7px;border:1px solid var(--line);
+         background:var(--panel);color:var(--ink);padding:9px 15px;white-space:nowrap}
+  button:hover{border-color:#3A4C5C}
+  button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  button.go{background:var(--amber);border-color:var(--amber);color:#171003;font-weight:600}
+  button.ghost{background:transparent}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+  /* screens */
+  .screen{display:none}
+  .screen.on{display:block}
+  .bar{position:sticky;top:0;z-index:10;background:var(--desk);border-bottom:1px solid var(--line);
+       display:flex;gap:12px;align-items:center;padding:12px 18px;margin:0 -18px 18px}
+  .bar .t{margin-left:auto;font-variant-numeric:tabular-nums;font-size:1.05rem;color:var(--amber)}
+  .note{background:var(--panel);border-left:3px solid var(--amber);padding:12px 14px;border-radius:0 7px 7px 0;
+        font-size:.9rem;margin:16px 0}
+  ul{padding-left:20px;margin:10px 0}
+  li{margin:5px 0;font-size:.93rem}
+
+  /* paper surfaces — accurate to the real tests */
+  .paper{background:var(--paper);color:#111;border-radius:8px;padding:12px;margin-top:14px}
+
+  .grid1{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px}
+  .sq{position:relative;aspect-ratio:1;border:1.5px solid #222;background:#fff;border-radius:2px;
+      cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .sq i{position:absolute;width:7px;height:7px;background:#111;border-radius:50%}
+  .sq i.c0{top:3px;left:3px} .sq i.c1{top:3px;right:3px}
+  .sq i.c2{bottom:3px;right:3px} .sq i.c3{bottom:3px;left:3px}
+  .sq.mk{background:
+      linear-gradient(to top right,transparent calc(50% - 1.2px),#C6321E calc(50% - 1.2px),
+      #C6321E calc(50% + 1.2px),transparent calc(50% + 1.2px)) , #fff}
+  .sq.hit{border-color:var(--green)} .sq.miss{border-color:var(--red);background:#FDECEA}
+  .sq.fa{border-color:#E0A11B;background:#FEF6E3}
+
+  .grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px}
+  .lb{border:1.5px solid #222;border-radius:2px;padding:5px 2px;background:#fff;cursor:pointer;
+      display:grid;grid-template-columns:1fr 1fr;gap:0 6px;justify-items:center;
+      font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.35;
+      -webkit-tap-highlight-color:transparent}
+  .lb.mk{background:
+      linear-gradient(to top right,transparent calc(50% - 1.2px),#C6321E calc(50% - 1.2px),
+      #C6321E calc(50% + 1.2px),transparent calc(50% + 1.2px)) , #fff}
+  .lb.hit{border-color:var(--green)} .lb.miss{border-color:var(--red);background:#FDECEA}
+  .lb.fa{border-color:#E0A11B;background:#FEF6E3}
+
+  /* dual */
+  .dual{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;justify-items:center;
+        min-height:190px}
+  .bigsq{width:112px;height:112px}
+  .bigsq i{width:13px;height:13px}
+  .bigsq i.c0{top:6px;left:6px} .bigsq i.c1{top:6px;right:6px}
+  .bigsq i.c2{bottom:6px;right:6px} .bigsq i.c3{bottom:6px;left:6px}
+  .biglb{font-size:1.3rem;padding:14px 10px;gap:0 20px;cursor:default}
+  .prog{height:4px;background:#26333F;border-radius:3px;overflow:hidden;margin-top:14px}
+  .prog b{display:block;height:100%;background:var(--amber);width:0}
+  .flag{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .flag button{padding:16px 8px;font-size:.95rem}
+  .flag button.armed{background:var(--red);border-color:var(--red);color:#fff}
+
+  /* wafv */
+  .vig{background:#fff;border-radius:8px;height:64vh;min-height:340px;display:grid;place-items:center;
+       cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+  .vsq{width:96px;height:96px;border-radius:3px;background:#9A9A9A;visibility:hidden}
+
+  /* atavt */
+  .scene{background:#fff;border-radius:8px;overflow:hidden;aspect-ratio:4/3}
+  .scene svg{display:block;width:100%;height:100%}
+  .blank{background:#fff;border-radius:8px;aspect-ratio:4/3;display:grid;place-items:center;color:#bbb}
+  .opts{display:grid;gap:8px;margin-top:14px}
+  .opts label{display:flex;gap:11px;align-items:center;background:var(--panel);border:1px solid var(--line);
+              border-radius:7px;padding:13px 14px;cursor:pointer;font-size:.95rem}
+  .opts input{width:19px;height:19px;accent-color:var(--amber);flex:0 0 auto}
+  .opts label:has(input:checked){border-color:var(--amber)}
+
+  /* two-hand */
+  .cvswrap{background:#fff;border-radius:8px;padding:6px;margin-top:12px}
+  .cvswrap canvas{display:block;width:100%;height:auto;border-radius:4px;touch-action:none}
+  .pads{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .pad{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+       height:118px;touch-action:none;-webkit-tap-highlight-color:transparent;overflow:hidden}
+  .pad span{position:absolute;left:0;right:0;top:7px;text-align:center;font-size:.72rem;color:var(--muted)}
+  .pad b{position:absolute;width:46px;height:46px;border-radius:50%;background:var(--amber);
+         left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
+  .pad.v b{background:#5B8FB9}
+  .outside{color:var(--red);font-weight:620}
+
+  /* ranking */
+  .scenbox{background:var(--panel);border-left:3px solid var(--amber);padding:13px 14px;
+           border-radius:0 8px 8px 0;font-size:.96rem;line-height:1.5}
+  .ranks{display:grid;gap:9px;margin-top:14px}
+  .rankopt{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);
+           border-radius:8px;padding:12px 13px;cursor:pointer;font-size:.93rem;line-height:1.42;
+           -webkit-tap-highlight-color:transparent}
+  .rankopt .badge{flex:0 0 26px;height:26px;border-radius:50%;border:1px solid var(--line);
+                  display:grid;place-items:center;font-size:.85rem;font-weight:650;color:var(--muted)}
+  .rankopt.set{border-color:var(--amber)}
+  .rankopt.set .badge{background:var(--amber);color:#171003;border-color:var(--amber)}
+  .hintline{color:var(--muted);font-size:.82rem;margin-top:10px}
+
+  /* rating */
+  .ratewrap{display:grid;gap:12px;margin-top:14px}
+  .rateopt{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 13px}
+  .rateopt p{margin:0 0 10px;font-size:.93rem;line-height:1.42}
+  .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .scale button{padding:11px 0;font-size:.95rem;font-variant-numeric:tabular-nums}
+  .scale button.sel{background:var(--amber);border-color:var(--amber);color:#171003;font-weight:650}
+  .scalekey{display:flex;justify-content:space-between;color:var(--muted);font-size:.72rem;margin-top:5px}
+
+  /* review + chain */
+  .rev{border:1px solid var(--line);border-radius:8px;padding:12px 13px;margin-top:11px}
+  .rev h4{margin:0 0 6px;font-size:.9rem;font-weight:620}
+  .rev p{margin:5px 0;font-size:.87rem;line-height:1.42;color:var(--muted)}
+  .rev .ok{color:var(--green)} .rev .bad{color:var(--red)}
+  .chainbar{background:var(--panel);border:1px solid var(--amber);border-radius:8px;
+            padding:10px 13px;font-size:.86rem;margin-bottom:14px}
+
+  .res{border-top:1px solid var(--line);margin-top:20px;padding-top:16px}
+  .stat{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);
+        font-variant-numeric:tabular-nums}
+  .stat b{font-weight:620}
+  .big{font-size:2.1rem;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:6px 0}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<!-- ================= MENU ================= -->
+<section id="menu" class="screen on">
+  <h1>Stage 2 test simulators</h1>
+  <p class="sub" id="countdown">GTS trainee train driver · assessment 22 September, Watford</p>
+
+  <div class="drill">
+    <span class="lamp" id="l-vse1"></span>
+    <div class="body">
+      <h2>VSE task 1 — dot sequence</h2>
+      <p>The dot moves clockwise around the corners. Mark every square where the sequence breaks.</p>
+      <div class="meta">180 squares · target 3 min</div>
+    </div>
+    <button class="go" onclick="VSE1.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-vse2"></span>
+    <div class="body">
+      <h2>VSE task 2 — letter columns</h2>
+      <p>Mark each box where the two columns hold different letters. Order does not matter.</p>
+      <div class="meta">96 boxes · target 3 min 12 s</div>
+    </div>
+    <button class="go" onclick="VSE2.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-vse3"></span>
+    <div class="body">
+      <h2>VSE task 3 — both at once</h2>
+      <p>Four seconds a pair, auto-advancing. The dot sequence is the primary task.</p>
+      <div class="meta">45 pairs · 3 min</div>
+    </div>
+    <button class="go" onclick="VSE3.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-wafv"></span>
+    <div class="body">
+      <h2>WAFV — vigilance</h2>
+      <p>A grey square flashes. Respond the moment it appears darker than usual.</p>
+      <div class="meta">choose 5, 10 or 30 min</div>
+    </div>
+    <div class="row">
+      <button onclick="WAFV.start(5)">5</button>
+      <button onclick="WAFV.start(10)">10</button>
+      <button class="go" onclick="WAFV.start(30)">30</button>
+    </div>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-atavt"></span>
+    <div class="body">
+      <h2>ATAVT — perception</h2>
+      <p>A traffic scene flashes for one second. Report which objects you saw.</p>
+      <div class="meta">20 scenes · about 6 min</div>
+    </div>
+    <button class="go" onclick="ATAVT.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-hand"></span>
+    <div class="body">
+      <h2>2-Hand — co-ordination</h2>
+      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel.</p>
+      <div class="meta">6 runs · buzzer on contact</div>
+    </div>
+    <button class="go" onclick="HAND.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-sjt"></span>
+    <div class="body">
+      <h2>M7-SJT — ranking</h2>
+      <p>Put four responses in order of preference. 45 seconds a situation, auto-advancing.</p>
+      <div class="meta">8 situations · 6 min</div>
+    </div>
+    <button class="go" onclick="SJT.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-sje"></span>
+    <div class="body">
+      <h2>SJE — rating</h2>
+      <p>Rate each response 1 to 5. Checks your answers against each other for contradictions.</p>
+      <div class="meta">6 scenarios · untimed</div>
+    </div>
+    <button class="go" onclick="SJE.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-day"></span>
+    <div class="body">
+      <h2>Day mode</h2>
+      <p>Every drill back to back in one sitting, at full length. Rehearses the fatigue, not just the tasks.</p>
+      <div class="meta">about 1 hr 15 · do this twice before the day</div>
+    </div>
+    <button onclick="DAY.start()">Run</button>
+  </div>
+
+  <div class="note">
+    Run these on the largest screen you have. The real assessments are on a desktop with a keyboard,
+    and a phone flatters your scores on the two visual search tasks.
+  </div>
+
+  <p class="sub" style="margin-top:22px">
+    Original exercises built to drill the same skills. Not the OPC or Vienna tests, and not affiliated
+    with them — use alongside the licensed booklets you were sent, not instead of them.
+  </p>
+</section>
+
+<!-- ================= GENERIC TEST SHELL ================= -->
+<section id="test" class="screen">
+  <div class="bar">
+    <button class="ghost" onclick="App.quit()">Back</button>
+    <strong id="t-title"></strong>
+    <span class="t num" id="t-clock"></span>
+  </div>
+  <div id="t-body"></div>
+</section>
+
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const el = (t,c,h) => { const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; };
+const rnd = n => Math.floor(Math.random()*n);
+const pick = a => a[rnd(a.length)];
+const mmss = s => Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
+
+/* ---- progress, saved on this device only. Degrades to memory if storage is blocked. */
+const Store = (()=>{
+  const KEY="stage2.progress.v1";
+  let mem={}, ok=true;
+  try{
+    const raw=localStorage.getItem(KEY);
+    mem = raw ? JSON.parse(raw) : {};
+    localStorage.setItem(KEY, JSON.stringify(mem));   // prove it is writable
+  }catch(e){ ok=false; mem={}; }
+  const save=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(mem)); }catch(e){ ok=false; } };
+  return {
+    ok:()=>ok,
+    get:id=>mem[id],
+    bump(id, score, low, unit){
+      const r = mem[id] || {n:0};
+      r.n++;
+      if(score!=null && isFinite(score)){
+        const v = Math.round(score*10)/10;
+        if(r.best==null || (low ? v<r.best : v>r.best)) r.best=v;
+      }
+      if(unit!=null) r.u=unit;
+      if(low) r.low=1;
+      r.t=Date.now();
+      mem[id]=r; save();
+    },
+    clear(){ mem={}; try{ localStorage.removeItem(KEY); }catch(e){} }
+  };
+})();
+
+function paintMenu(){
+  document.querySelectorAll("#menu .drill").forEach(dv=>{
+    const lamp=dv.querySelector(".lamp"); if(!lamp) return;
+    const id=lamp.id.replace("l-","");
+    const rec=Store.get(id);
+    let line=dv.querySelector(".best");
+    if(!line){ line=el("div","best"); dv.querySelector(".body").appendChild(line); }
+    if(rec && rec.n){
+      lamp.classList.add("done");
+      line.classList.remove("none");
+      const attempts = rec.n + (rec.n===1?" attempt":" attempts");
+      line.textContent = rec.best!=null
+        ? (rec.low?"Lowest ":"Best ") + rec.best + (rec.u||"") + " · " + attempts
+        : attempts;
+    } else {
+      lamp.classList.remove("done");
+      line.classList.add("none");
+      line.textContent = "not attempted yet";
+    }
+  });
+}
+
+function paintCountdown(){
+  const c=document.getElementById("countdown"); if(!c) return;
+  const target=new Date("2026-09-22T09:00:00+01:00");
+  const days=Math.ceil((target-Date.now())/86400000);
+  let tail;
+  if(days>1) tail = days+" days to go";
+  else if(days===1) tail = "tomorrow";
+  else if(days===0) tail = "today — good luck";
+  else tail = "assessment date passed";
+  c.textContent="GTS trainee train driver · Watford, 22 September · "+tail;
+}
+
+function buildFooter(){
+  const m=document.getElementById("menu");
+  if(document.getElementById("foot")) return;
+  const f=el("div","foot"); f.id="foot";
+  const b=el("button","ghost","Reset saved progress");
+  b.onclick=()=>{
+    if(confirm("Clear all saved scores and attempt counts? This cannot be undone.")){
+      Store.clear(); paintMenu();
+    }
+  };
+  f.appendChild(b);
+  if(!Store.ok()){
+    f.appendChild(el("span","warn",
+      "Scores cannot be saved here — this preview blocks browser storage. Open the hosted or downloaded copy and progress will persist between sessions."));
+  }
+  m.appendChild(f);
+}
+
+const App = {
+  timer:null, tick:null, active:null, chain:[],
+  open(title, node){
+    $("#menu").classList.remove("on");
+    $("#test").classList.add("on");
+    $("#t-title").textContent = title;
+    $("#t-body").replaceChildren(node);
+    window.scrollTo(0,0);
+  },
+  clock(txt){ $("#t-clock").textContent = txt || ""; },
+  quit(){
+    paintMenu();
+    clearInterval(this.tick); clearTimeout(this.timer);
+    if(this.active && this.active.stop) this.active.stop();
+    this.active=null;
+    $("#test").classList.remove("on"); $("#menu").classList.add("on");
+    this.clock("");
+  },
+  done(id, score, low, unit){
+    Store.bump(id, score, low, unit);
+    paintMenu();
+  },
+  countUp(onTick){
+    const t0=Date.now();
+    this.tick=setInterval(()=>{ const s=(Date.now()-t0)/1000; this.clock(mmss(s)); if(onTick)onTick(s); },250);
+    return ()=>(Date.now()-t0)/1000;
+  },
+  countDown(secs, onEnd){
+    const t0=Date.now();
+    this.tick=setInterval(()=>{
+      const left=secs-(Date.now()-t0)/1000;
+      if(left<=0){ clearInterval(this.tick); this.clock("0:00"); onEnd(); }
+      else this.clock(mmss(left));
+    },250);
+  },
+  results(title, rows, coach, headline){
+    const w=el("div","res");
+    if(headline){ w.appendChild(el("div","big",headline)); }
+    w.appendChild(el("h2",null,title));
+    rows.forEach(([k,v])=>{
+      const r=el("div","stat"); r.appendChild(el("span",null,k)); r.appendChild(el("b",null,v)); w.appendChild(r);
+    });
+    if(coach) w.appendChild(el("div","note",coach));
+    const row=el("div","row"); row.style.marginTop="16px";
+    if(App.chain && App.chain.length){
+      const nxt=App.chain[0];
+      const cb=el("button","go","Continue — "+nxt.name);
+      cb.onclick=()=>{ const n=App.chain.shift(); clearInterval(App.tick); clearTimeout(App.timer); n.run(); };
+      row.appendChild(cb);
+      const sb=el("button","ghost","Stop here");
+      sb.onclick=()=>{ App.chain=[]; App.quit(); };
+      row.appendChild(sb);
+    } else {
+      const b=el("button","go","Back to the list"); b.onclick=()=>App.quit();
+      row.appendChild(b);
+    }
+    w.appendChild(row);
+    return w;
+  }
+};
+
+/* ---------------------------------------------------------------- VSE 1 */
+const VSE1 = {
+  N:180,
+  start(){
+    // corner order 0=TL 1=TR 2=BR 3=BL, normal step +1
+    const seq=[], err=[];
+    let c=rnd(4);
+    seq.push(c); err.push(false);
+    for(let i=1;i<this.N;i++){
+      let bad = Math.random()<0.085;
+      if(bad){ c = (c + (Math.random()<0.5 ? 2 : 3)) % 4; }  // skip a corner, or go backwards
+      else { c = (c+1)%4; }
+      seq.push(c); err.push(bad);
+    }
+    this.seq=seq; this.err=err; this.marked=new Array(this.N).fill(false);
+
+    const box=el("div");
+    box.appendChild(el("p","sub","Work left to right, line after line. Tap a square where the dot has skipped a corner or gone backwards. About one second a square."));
+    const paper=el("div","paper");
+    const g=el("div","grid1");
+    seq.forEach((corner,i)=>{
+      const s=el("div","sq"); s.appendChild(el("i","c"+corner));
+      s.onclick=()=>{ this.marked[i]=!this.marked[i]; s.classList.toggle("mk"); };
+      g.appendChild(s);
+    });
+    paper.appendChild(g); box.appendChild(paper);
+    this.grid=g;
+
+    const b=el("button","go","Finish and score");
+    b.onclick=()=>this.finish();
+    const r=el("div","row"); r.style.marginTop="16px"; r.appendChild(b);
+    box.appendChild(r);
+
+    App.open("VSE task 1", box);
+    this.getT = App.countUp();
+    App.active=this;
+  },
+  finish(){
+    clearInterval(App.tick);
+    const t=this.getT();
+    let hit=0,miss=0,fa=0;
+    for(let i=0;i<this.N;i++){
+      const sq=this.grid.children[i];
+      if(this.err[i] && this.marked[i]){hit++; sq.classList.add("hit");}
+      else if(this.err[i] && !this.marked[i]){miss++; sq.classList.add("miss");}
+      else if(!this.err[i] && this.marked[i]){fa++; sq.classList.add("fa");}
+    }
+    const total=hit+miss;
+    App.done("vse1", total? hit/total*100 : null, false, "%");
+    const coach = fa>hit*0.25
+      ? "Your false marks are high relative to your hits. You are marking on suspicion rather than on a confirmed break in the sequence. Hold the previous corner in mind and compare — do not mark because a square merely looks wrong."
+      : miss>total*0.3
+      ? "You are missing more than you are catching. The usual cause is reading each square in isolation. The error only exists in the transition, so keep the previous corner live in your head as you move."
+      : "Solid. Now work on holding this accuracy while speeding up — the real test paces you at about a second a square.";
+    $("#t-body").appendChild(App.results("Scores",[
+      ["Errors present", total],
+      ["Caught", hit],
+      ["Missed", miss],
+      ["Marked in error", fa],
+      ["Time", mmss(t)],
+      ["Seconds per square", (t/this.N).toFixed(2)]
+    ], coach, hit+"/"+total));
+    $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
+  },
+  stop(){}
+};
+
+/* ---------------------------------------------------------------- VSE 2 */
+const LETTERS="ABCDEFGHJKLMNPQRSTUVWXYZ".split("");
+function makeBox(isErr){
+  const left=[0,0,0,0].map(()=>pick(LETTERS));
+  let right=left.slice();
+  // shuffle
+  for(let i=3;i>0;i--){const j=rnd(i+1);[right[i],right[j]]=[right[j],right[i]];}
+  if(isErr){
+    const i=rnd(4);
+    let n=pick(LETTERS); while(n===right[i]) n=pick(LETTERS);
+    right[i]=n;
+    // guard: ensure multisets really differ
+    const s=a=>a.slice().sort().join("");
+    if(s(left)===s(right)){ right[i] = right[i]==="A"?"B":"A"; }
+  }
+  return {left,right};
+}
+function boxNode(b, big){
+  const n=el("div","lb"+(big?" biglb":""));
+  for(let i=0;i<4;i++){
+    n.appendChild(el("span",null,b.left[i]));
+    n.appendChild(el("span",null,b.right[i]));
+  }
+  return n;
+}
+const VSE2 = {
+  N:96,
+  start(){
+    this.items=[]; this.marked=new Array(this.N).fill(false);
+    for(let i=0;i<this.N;i++){ const e=Math.random()<0.26; this.items.push({...makeBox(e), err:e}); }
+    const box=el("div");
+    box.appendChild(el("p","sub","Tap every box where the two columns hold different letters. The same letters in a different order still match. No more than two seconds a box."));
+    const paper=el("div","paper"); const g=el("div","grid2");
+    this.items.forEach((it,i)=>{
+      const n=boxNode(it);
+      n.onclick=()=>{ this.marked[i]=!this.marked[i]; n.classList.toggle("mk"); };
+      g.appendChild(n);
+    });
+    paper.appendChild(g); box.appendChild(paper); this.grid=g;
+    const b=el("button","go","Finish and score"); b.onclick=()=>this.finish();
+    const r=el("div","row"); r.style.marginTop="16px"; r.appendChild(b); box.appendChild(r);
+    App.open("VSE task 2", box);
+    this.getT=App.countUp(); App.active=this;
+  },
+  finish(){
+    clearInterval(App.tick);
+    const t=this.getT(); let hit=0,miss=0,fa=0;
+    this.items.forEach((it,i)=>{
+      const n=this.grid.children[i];
+      if(it.err&&this.marked[i]){hit++;n.classList.add("hit");}
+      else if(it.err&&!this.marked[i]){miss++;n.classList.add("miss");}
+      else if(!it.err&&this.marked[i]){fa++;n.classList.add("fa");}
+    });
+    const total=hit+miss;
+    App.done("vse2", total? hit/total*100 : null, false, "%");
+    const coach = fa>3
+      ? "Most of your false marks will be boxes where the letters matched but sat in a different order. Compare the sets, not the rows — read the left column, then check each letter off against the right."
+      : "Read the left column as a whole rather than letter by letter, then sweep the right for anything that is not in that set. It is faster than four separate comparisons.";
+    $("#t-body").appendChild(App.results("Scores",[
+      ["Mismatched boxes", total],["Caught", hit],["Missed", miss],
+      ["Marked in error", fa],["Time", mmss(t)],["Seconds per box",(t/this.N).toFixed(2)]
+    ], coach, hit+"/"+total));
+    $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
+  },
+  stop(){}
+};
+
+/* ---------------------------------------------------------------- VSE 3 (dual, paced) */
+const VSE3 = {
+  N:45, PACE:4000,
+  start(){
+    // dot stream
+    let c=rnd(4); this.dots=[]; this.dotErr=[];
+    this.dots.push(c); this.dotErr.push(false);
+    for(let i=1;i<this.N;i++){
+      const bad=Math.random()<0.11;
+      c = bad ? (c+(Math.random()<0.5?2:3))%4 : (c+1)%4;
+      this.dots.push(c); this.dotErr.push(bad);
+    }
+    this.boxes=[]; for(let i=0;i<this.N;i++){const e=Math.random()<0.28; this.boxes.push({...makeBox(e),err:e});}
+    this.i=0; this.aDot=false; this.aBox=false;
+    this.repDot=new Array(this.N).fill(false); this.repBox=new Array(this.N).fill(false);
+
+    const box=el("div");
+    box.appendChild(el("p","sub","Four seconds a pair, advancing on its own. The dot sequence is the primary task — protect it."));
+    const stage=el("div","paper");
+    const d=el("div","dual");
+    this.sqEl=el("div","sq bigsq"); this.sqEl.appendChild(el("i","c0"));
+    this.lbEl=boxNode(this.boxes[0], true);
+    d.appendChild(this.sqEl); d.appendChild(this.lbEl);
+    stage.appendChild(d); box.appendChild(stage);
+
+    const f=el("div","flag");
+    this.bD=el("button",null,"Dot error"); this.bB=el("button",null,"Letter error");
+    this.bD.onclick=()=>{this.aDot=!this.aDot;this.bD.classList.toggle("armed");};
+    this.bB.onclick=()=>{this.aBox=!this.aBox;this.bB.classList.toggle("armed");};
+    f.appendChild(this.bD); f.appendChild(this.bB); box.appendChild(f);
+    const p=el("div","prog"); this.pb=el("b"); p.appendChild(this.pb); box.appendChild(p);
+
+    App.open("VSE task 3", box);
+    App.active=this;
+    this.render(); this.loop();
+  },
+  render(){
+    const i=this.i;
+    this.sqEl.replaceChildren(el("i","c"+this.dots[i]));
+    const nb=boxNode(this.boxes[i], true);
+    this.lbEl.replaceWith(nb); this.lbEl=nb;
+    this.pb.style.width = (i/this.N*100)+"%";
+    App.clock((i+1)+" / "+this.N);
+  },
+  loop(){
+    App.timer=setTimeout(()=>{
+      this.repDot[this.i]=this.aDot; this.repBox[this.i]=this.aBox;
+      this.aDot=false; this.aBox=false;
+      this.bD.classList.remove("armed"); this.bB.classList.remove("armed");
+      this.i++;
+      if(this.i>=this.N){ this.finish(); return; }
+      this.render(); this.loop();
+    }, this.PACE);
+  },
+  finish(){
+    clearTimeout(App.timer);
+    const sc=(errs,reps)=>{let h=0,m=0,f=0;errs.forEach((e,i)=>{if(e&&reps[i])h++;else if(e&&!reps[i])m++;else if(!e&&reps[i])f++;});return{h,m,f};};
+    const D=sc(this.dotErr,this.repDot);
+    const B=sc(this.boxes.map(b=>b.err),this.repBox);
+    App.done("vse3", (D.h+D.m)? D.h/(D.h+D.m)*100 : null, false, "% dots");
+    const dropped = D.m > B.m;
+    const coach = dropped
+      ? "You protected the letters at the expense of the dots. That is the wrong trade: the dot sequence is the primary task, and it is also the one you cannot recover, because each judgement depends on the square before it. Let the letters slip first."
+      : "Right priority — the dots held up. Now close the gap on the letters without letting the dot accuracy fall.";
+    $("#t-body").appendChild(App.results("Scores",[
+      ["Dot errors present", D.h+D.m],["Dots caught", D.h],["Dots missed", D.m],["Dots marked in error", D.f],
+      ["Letter errors present", B.h+B.m],["Letters caught", B.h],["Letters missed", B.m],["Letters marked in error", B.f]
+    ], coach, D.h+"/"+(D.h+D.m)+" · "+B.h+"/"+(B.h+B.m)));
+    $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
+  },
+  stop(){ clearTimeout(App.timer); }
+};
+
+/* ---------------------------------------------------------------- WAFV */
+const WAFV = {
+  ON:600, OFF:400, WINDOW:1400, P:0.09,
+  start(mins){
+    this.hits=0;this.miss=0;this.fa=0;this.rts=[];this.trials=0;
+    this.armed=false;this.onset=0;this.ended=false;
+    const box=el("div");
+    box.appendChild(el("p","sub","Tap the panel — or press the space bar — the moment the square appears darker than usual. Nothing to do otherwise."));
+    const v=el("div","vig"); this.sq=el("div","vsq"); v.appendChild(this.sq);
+    v.onclick=()=>this.respond();
+    box.appendChild(v);
+    box.appendChild(el("p","sub","Sit at a comfortable distance and do not look away. The real test runs for thirty minutes."));
+    App.open("WAFV vigilance", box);
+    this.key=e=>{ if(e.code==="Space"){e.preventDefault();this.respond();} };
+    window.addEventListener("keydown",this.key);
+    App.active=this;
+    App.countDown(mins*60, ()=>this.finish());
+    this.cycle();
+  },
+  cycle(){
+    if(this.ended) return;
+    const target = Math.random()<this.P;
+    this.trials++;
+    this.sq.style.background = target ? "#6E6E6E" : "#9A9A9A";
+    this.sq.style.visibility="visible";
+    if(target){ this.armed=true; this.onset=performance.now(); this.counted=false; }
+    App.timer=setTimeout(()=>{
+      this.sq.style.visibility="hidden";
+      App.timer=setTimeout(()=>{ this.cycle(); }, this.OFF);
+    }, this.ON);
+    if(target){
+      setTimeout(()=>{ if(this.armed && !this.counted){ this.miss++; this.armed=false; } }, this.WINDOW);
+    }
+  },
+  respond(){
+    if(this.ended) return;
+    if(this.armed && !this.counted){
+      this.counted=true; this.armed=false;
+      this.hits++; this.rts.push(performance.now()-this.onset);
+    } else {
+      this.fa++;
+    }
+  },
+  finish(){
+    this.ended=true; clearTimeout(App.timer);
+    window.removeEventListener("keydown",this.key);
+    const mean = this.rts.length ? Math.round(this.rts.reduce((a,b)=>a+b,0)/this.rts.length) : 0;
+    const tot=this.hits+this.miss;
+    App.done("wafv", tot? this.hits/tot*100 : null, false, "%");
+    const half=Math.ceil(this.rts.length/2);
+    const early=this.rts.slice(0,half), late=this.rts.slice(half);
+    const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+    const drift = late.length&&early.length ? Math.round(avg(late)-avg(early)) : 0;
+    const coach = this.fa>tot*0.4
+      ? "Too many responses when nothing darkened. Errors are penalised on this test, so a twitchy finger costs you more than a slightly slow one. Wait until you have actually seen the change."
+      : drift>60
+      ? "Your reactions slowed noticeably across the run — that is the vigilance decrement, and it is exactly what this test is built to measure. Practise the full thirty minutes rather than short bursts, because the back half is where it is decided."
+      : "Steady. Keep running the full thirty minutes; the difficulty is not the reaction, it is holding it for half an hour.";
+    $("#t-body").appendChild(App.results("Scores",[
+      ["Targets", tot],["Caught", this.hits],["Missed", this.miss],
+      ["Responses in error", this.fa],
+      ["Mean reaction", mean+" ms"],
+      ["Drift, first half to second", (drift>0?"+":"")+drift+" ms"],
+      ["Flashes shown", this.trials]
+    ], coach, this.hits+"/"+tot));
+    $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
+  },
+  stop(){ this.ended=true; clearTimeout(App.timer); window.removeEventListener("keydown",this.key); }
+};
+
+/* ---------------------------------------------------------------- ATAVT */
+const CATS=[["ped","Pedestrians"],["veh","Motor vehicles"],["bike","Bikes, motorcycles or scooters"],
+            ["sign","Road signs"],["light","Traffic lights"]];
+function scene(has){
+  const P=[];
+  P.push(`<rect width="400" height="300" fill="#CBD9E6"/>`);                    // sky
+  P.push(`<rect y="150" width="400" height="150" fill="#8A8A8A"/>`);            // road
+  P.push(`<rect y="150" width="400" height="18" fill="#B9B4AA"/>`);             // kerb strip
+  for(let x=10;x<400;x+=46) P.push(`<rect x="${x}" y="228" width="26" height="4" fill="#EEE"/>`);
+  // buildings
+  for(let i=0;i<4;i++){
+    const w=50+rnd(40), h=50+rnd(70), x=i*100+rnd(20);
+    P.push(`<rect x="${x}" y="${150-h}" width="${w}" height="${h}" fill="#6F7C88"/>`);
+    for(let r=0;r<Math.floor(h/22);r++) for(let cc=0;cc<Math.floor(w/22);cc++)
+      P.push(`<rect x="${x+6+cc*22}" y="${150-h+7+r*22}" width="9" height="11" fill="#93A3B0"/>`);
+  }
+  if(has.veh){ const n=1+rnd(2); for(let k=0;k<n;k++){ const x=20+rnd(280), y=195+rnd(55), s=.8+Math.random()*.5;
+    P.push(`<g transform="translate(${x},${y}) scale(${s})"><rect width="76" height="24" rx="5" fill="#2F4A63"/>
+      <path d="M14 0 L26 -16 L54 -16 L64 0 Z" fill="#3C5C78"/>
+      <circle cx="19" cy="26" r="8" fill="#1A1A1A"/><circle cx="59" cy="26" r="8" fill="#1A1A1A"/></g>`); } }
+  if(has.ped){ const n=1+rnd(2); for(let k=0;k<n;k++){ const x=15+rnd(360), y=155+rnd(14);
+    P.push(`<g transform="translate(${x},${y})"><circle cy="-26" r="5" fill="#2B2B2B"/>
+      <rect x="-4" y="-21" width="8" height="15" rx="3" fill="#B8442E"/>
+      <rect x="-4" y="-6" width="3" height="10" fill="#2B2B2B"/><rect x="1" y="-6" width="3" height="10" fill="#2B2B2B"/></g>`); } }
+  if(has.bike){ const x=30+rnd(300), y=205+rnd(45);
+    P.push(`<g transform="translate(${x},${y})"><circle r="11" fill="none" stroke="#1F1F1F" stroke-width="2.5"/>
+      <circle cx="30" r="11" fill="none" stroke="#1F1F1F" stroke-width="2.5"/>
+      <path d="M0 0 L12 -14 L30 0 M12 -14 L18 0" stroke="#1F7A4C" stroke-width="2.5" fill="none"/>
+      <circle cx="14" cy="-26" r="5" fill="#2B2B2B"/></g>`); }
+  if(has.sign){ const x=25+rnd(340);
+    P.push(`<g transform="translate(${x},120)"><rect x="-2" width="4" height="42" fill="#777"/>` +
+      (Math.random()<0.5
+        ? `<circle cy="-12" r="14" fill="#fff" stroke="#C6321E" stroke-width="5"/>`
+        : `<path d="M0 -28 L15 0 L-15 0 Z" fill="#fff" stroke="#C6321E" stroke-width="4"/>`) + `</g>`); }
+  if(has.light){ const x=30+rnd(330);
+    P.push(`<g transform="translate(${x},96)"><rect x="-2" y="18" width="4" height="52" fill="#666"/>
+      <rect x="-11" y="-18" width="22" height="40" rx="4" fill="#2B2B2B"/>
+      <circle cy="-9" r="5.5" fill="#C6321E"/><circle cy="2" r="5.5" fill="#5A5A2E"/><circle cy="13" r="5.5" fill="#2E5A3A"/></g>`); }
+  return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${P.join("")}</svg>`;
+}
+const ATAVT = {
+  N:20, FLASH:1000,
+  start(){
+    this.i=0; this.log=[];
+    this.trials=[];
+    for(let i=0;i<this.N;i++){
+      let h={}; let any=false;
+      CATS.forEach(([k])=>{ h[k]=Math.random()<0.5; if(h[k])any=true; });
+      if(!any) h[pick(CATS)[0]]=true;
+      this.trials.push(h);
+    }
+    App.open("ATAVT perception", el("div"));
+    App.active=this;
+    this.show();
+  },
+  show(){
+    App.clock((this.i+1)+" / "+this.N);
+    const box=el("div");
+    box.appendChild(el("p","sub","Watch closely. The scene appears for one second."));
+    const s=el("div","scene"); s.innerHTML=scene(this.trials[this.i]);
+    box.appendChild(s);
+    $("#t-body").replaceChildren(box);
+    App.timer=setTimeout(()=>this.ask(), this.FLASH);
+  },
+  ask(){
+    const box=el("div");
+    box.appendChild(el("p","sub","Which of these did you see?"));
+    box.appendChild(el("div","blank","scene hidden"));
+    const o=el("div","opts");
+    CATS.forEach(([k,label])=>{
+      const l=el("label"); const c=el("input"); c.type="checkbox"; c.dataset.k=k;
+      l.appendChild(c); l.appendChild(el("span",null,label)); o.appendChild(l);
+    });
+    box.appendChild(o);
+    const b=el("button","go", this.i===this.N-1 ? "Finish and score" : "Next scene");
+    b.onclick=()=>{
+      const got={}; o.querySelectorAll("input").forEach(c=>got[c.dataset.k]=c.checked);
+      this.log.push(got); this.i++;
+      if(this.i>=this.N) this.finish(); else this.show();
+    };
+    const r=el("div","row"); r.style.marginTop="16px"; r.appendChild(b); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+  },
+  finish(){
+    App.clock("");
+    let exact=0, hit=0, miss=0, fa=0;
+    const perCat={};
+    CATS.forEach(([k])=>perCat[k]={m:0,f:0});
+    this.trials.forEach((t,i)=>{
+      const g=this.log[i]; let ok=true;
+      CATS.forEach(([k])=>{
+        if(t[k]&&g[k])hit++;
+        else if(t[k]&&!g[k]){miss++;perCat[k].m++;ok=false;}
+        else if(!t[k]&&g[k]){fa++;perCat[k].f++;ok=false;}
+      });
+      if(ok)exact++;
+    });
+    App.done("atavt", exact/this.N*100, false, "%");
+    let worst=null; CATS.forEach(([k,l])=>{ if(perCat[k].m>0 && (!worst||perCat[k].m>perCat[worst[0]].m)) worst=[k,l]; });
+    const coach = (miss===0 && fa===0)
+      ? "Clean run. Shorten the exposure by treating the scene as a single glance rather than a look — on the day it is gone before you can move your eyes across it."
+      : fa>miss
+      ? "You are reporting objects that were not there. Under a one-second exposure the mind fills in what a street scene usually contains — a road implies signs, traffic implies lights. Report what you saw, not what fits."
+      : worst
+      ? "Most missed: "+worst[1].toLowerCase()+". Take the whole frame in at once rather than scanning it; at one second there is no time to move your eyes, so let the scene land as a single impression and read it back afterwards."
+      : "Your misses are spread evenly rather than concentrated in one type. Let the scene land as a single impression and read it back afterwards, rather than hunting for one object at a time.";
+    $("#t-body").appendChild(App.results("Scores",[
+      ["Scenes exactly right", exact+" / "+this.N],
+      ["Objects present and reported", hit],
+      ["Objects present and missed", miss],
+      ["Objects reported but absent", fa]
+    ], coach, exact+"/"+this.N));
+  },
+  stop(){ clearTimeout(App.timer); }
+};
+
+/* ---------------------------------------------------------------- 2-HAND */
+let AC=null;
+function buzzer(on){
+  try{
+    if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+    if(on){
+      if(buzzer.o) return;
+      const o=AC.createOscillator(), g=AC.createGain();
+      o.type="square"; o.frequency.value=180; g.gain.value=0.045;
+      o.connect(g); g.connect(AC.destination); o.start();
+      buzzer.o=o; buzzer.g=g;
+    } else if(buzzer.o){
+      buzzer.o.stop(); buzzer.o.disconnect(); buzzer.o=null;
+    }
+  }catch(e){}
+}
+
+const HAND = {
+  RUNS:6, CH:26, SPEED:150,
+  start(){
+    this.run=1; this.log=[]; this.done_=false;
+    const box=el("div");
+    box.appendChild(el("p","sub","Left pad moves it left and right. Right pad moves it up and down. You need both at once. The buzzer sounds whenever it leaves the channel — keep it quiet."));
+    const wrap=el("div","cvswrap");
+    this.cv=document.createElement("canvas"); wrap.appendChild(this.cv);
+    box.appendChild(wrap);
+    this.stat=el("p","sub",""); box.appendChild(this.stat);
+
+    const pads=el("div","pads");
+    this.padH=el("div","pad h","<span>LEFT — sideways</span>"); this.knobH=el("b"); this.padH.appendChild(this.knobH);
+    this.padV=el("div","pad v","<span>RIGHT — up and down</span>"); this.knobV=el("b"); this.padV.appendChild(this.knobV);
+    pads.appendChild(this.padH); pads.appendChild(this.padV);
+    box.appendChild(pads);
+    box.appendChild(el("p","sub","On a laptop you can use A and D for sideways, and the up and down arrow keys."));
+
+    App.open("2-Hand co-ordination", box);
+    App.active=this;
+
+    this.vx=0; this.vy=0;
+    this.bindPad(this.padH,this.knobH,true);
+    this.bindPad(this.padV,this.knobV,false);
+    this.keys={};
+    this.kd=e=>{const k=e.key.toLowerCase();
+      if(["a","d","arrowup","arrowdown","arrowleft","arrowright"].includes(k)){e.preventDefault();this.keys[k]=1;}};
+    this.ku=e=>{this.keys[e.key.toLowerCase()]=0;};
+    window.addEventListener("keydown",this.kd); window.addEventListener("keyup",this.ku);
+
+    this.size(); this.makePath(); this.reset();
+    this.last=performance.now(); this.tOut=0; this.t0=performance.now();
+    this.raf=requestAnimationFrame(()=>this.loop());
+  },
+  size(){
+    const w=this.cv.parentElement.clientWidth-12;
+    this.W=Math.max(280,w); this.H=Math.round(Math.min(300,Math.max(200,this.W*0.52)));
+    const r=window.devicePixelRatio||1;
+    this.cv.width=this.W*r; this.cv.height=this.H*r;
+    this.cv.style.height=this.H+"px";
+    this.ctx=this.cv.getContext("2d"); this.ctx.setTransform(r,0,0,r,0,0);
+  },
+  makePath(){
+    const m=26, n=160, amp=(this.H/2-m-this.CH/2);
+    const a=[0.9,-0.7,0.5,0.35];
+    this.path=[];
+    for(let i=0;i<=n;i++){
+      const t=i/n, x=m+t*(this.W-2*m);
+      let y=0; a.forEach((k,j)=>{ y+=k*Math.sin((j+1)*Math.PI*t+k); });
+      y=Math.max(-1,Math.min(1,y/1.9));
+      this.path.push({x, y:this.H/2+y*amp});
+    }
+  },
+  reset(){
+    this.ball={x:this.path[0].x, y:this.path[0].y};
+    this.vx=0; this.vy=0; this.tOut=0; this.t0=performance.now();
+  },
+  bindPad(pad,knob,horiz){
+    const set=(e)=>{
+      const r=pad.getBoundingClientRect();
+      if(horiz){
+        const dx=(e.clientX-r.left-r.width/2)/(r.width/2);
+        this.vx=Math.max(-1,Math.min(1,dx));
+        knob.style.left=(50+this.vx*34)+"%";
+      } else {
+        const dy=(e.clientY-r.top-r.height/2)/(r.height/2);
+        this.vy=Math.max(-1,Math.min(1,dy));
+        knob.style.top=(50+this.vy*34)+"%";
+      }
+    };
+    pad.addEventListener("pointerdown",e=>{pad.setPointerCapture(e.pointerId);set(e);});
+    pad.addEventListener("pointermove",e=>{if(e.buttons||e.pointerType==="touch")set(e);});
+    const end=()=>{ if(horiz){this.vx=0;knob.style.left="50%";} else {this.vy=0;knob.style.top="50%";} };
+    pad.addEventListener("pointerup",end); pad.addEventListener("pointercancel",end);
+    pad.addEventListener("pointerleave",e=>{ if(!e.buttons) end(); });
+  },
+  distToPath(x,y){
+    let best=1e9;
+    for(let i=0;i<this.path.length-1;i++){
+      const a=this.path[i], b=this.path[i+1];
+      const dx=b.x-a.x, dy=b.y-a.y, L=dx*dx+dy*dy;
+      let t=L?((x-a.x)*dx+(y-a.y)*dy)/L:0; t=Math.max(0,Math.min(1,t));
+      const px=a.x+t*dx, py=a.y+t*dy;
+      const d=Math.hypot(x-px,y-py); if(d<best)best=d;
+    }
+    return best;
+  },
+  loop(){
+    if(this.done_) return;
+    const now=performance.now(), dt=Math.min(0.05,(now-this.last)/1000); this.last=now;
+    let kx=0, ky=0;
+    if(this.keys["a"]||this.keys["arrowleft"])kx-=1;
+    if(this.keys["d"]||this.keys["arrowright"])kx+=1;
+    if(this.keys["arrowup"])ky-=1;
+    if(this.keys["arrowdown"])ky+=1;
+    const vx=this.vx||kx, vy=this.vy||ky;
+    this.ball.x=Math.max(4,Math.min(this.W-4,this.ball.x+vx*this.SPEED*dt));
+    this.ball.y=Math.max(4,Math.min(this.H-4,this.ball.y+vy*this.SPEED*dt));
+
+    const out=this.distToPath(this.ball.x,this.ball.y)>this.CH/2;
+    if(out) this.tOut+=dt;
+    buzzer(out);
+
+    this.draw(out);
+    const endx=this.path[this.path.length-1].x;
+    if(this.ball.x>=endx-3 && !out){ this.finishRun(); return; }
+    this.raf=requestAnimationFrame(()=>this.loop());
+  },
+  draw(out){
+    const c=this.ctx;
+    c.clearRect(0,0,this.W,this.H);
+    c.lineCap="round"; c.lineJoin="round";
+    c.beginPath(); c.moveTo(this.path[0].x,this.path[0].y);
+    this.path.forEach(p=>c.lineTo(p.x,p.y));
+    c.strokeStyle="#222"; c.lineWidth=this.CH+3; c.stroke();
+    c.strokeStyle="#fff"; c.lineWidth=this.CH; c.stroke();
+    // start / finish
+    const s=this.path[0], f=this.path[this.path.length-1];
+    c.fillStyle="#2E8B57"; c.fillRect(s.x-2,s.y-this.CH/2,3,this.CH);
+    c.fillStyle="#C6321E"; c.fillRect(f.x-1,f.y-this.CH/2,3,this.CH);
+    // ball
+    c.beginPath(); c.arc(this.ball.x,this.ball.y,6.5,0,7);
+    c.fillStyle=out?"#C6321E":"#1A3C5E"; c.fill();
+    const el_=(performance.now()-this.t0)/1000;
+    this.stat.innerHTML="Run "+this.run+" of "+this.RUNS+" &nbsp;·&nbsp; "+el_.toFixed(1)+
+      "s &nbsp;·&nbsp; outside <span class='"+(this.tOut>0?"outside":"")+"'>"+this.tOut.toFixed(1)+"s</span>";
+  },
+  finishRun(){
+    buzzer(false);
+    this.log.push({t:(performance.now()-this.t0)/1000, out:this.tOut});
+    if(this.run>=this.RUNS){ this.finish(); return; }
+    this.run++; this.reset();
+    this.last=performance.now();
+    this.raf=requestAnimationFrame(()=>this.loop());
+  },
+  finish(){
+    this.done_=true; buzzer(false);
+    cancelAnimationFrame(this.raf);
+    window.removeEventListener("keydown",this.kd); window.removeEventListener("keyup",this.ku);
+    const tot=this.log.reduce((a,b)=>a+b.t,0), out=this.log.reduce((a,b)=>a+b.out,0);
+    App.done("hand", tot? out/tot*100 : null, true, "% out");
+    const first=this.log.slice(0,3).reduce((a,b)=>a+b.out,0);
+    const last=this.log.slice(3).reduce((a,b)=>a+b.out,0);
+    const coach = out/tot>0.25
+      ? "You are outside the channel a quarter of the time. Slow right down — halve your speed until the buzzer stops, then build back up. On the day the time outside is what is counted, and going slowly is not penalised the way straying is."
+      : last<first*0.7
+      ? "Clear improvement across the six runs, which is what practice on this looks like. Keep going: the real test is ten runs of the same shape and the later ones are where control tells."
+      : "Reasonably controlled. Most people find one hand leads and the other lags — watch the hand that is lagging rather than the one that is working, because that is the one costing you the corners.";
+    $("#t-body").appendChild(App.results("Scores",[
+      ["Runs", this.RUNS],
+      ["Total time", tot.toFixed(1)+" s"],
+      ["Time outside the channel", out.toFixed(1)+" s"],
+      ["Proportion outside", Math.round(out/tot*100)+"%"],
+      ["First three runs, outside", first.toFixed(1)+" s"],
+      ["Last three runs, outside", last.toFixed(1)+" s"]
+    ], coach, Math.round(out/tot*100)+"% out"));
+  },
+  stop(){ this.done_=true; buzzer(false); cancelAnimationFrame(this.raf);
+          window.removeEventListener("keydown",this.kd); window.removeEventListener("keyup",this.ku); }
+};
+
+/* ---------------------------------------------------------------- SJT data */
+const SJT_Q = [
+ ["A friend's ladder has a cracked side rail. You are nearly finished clearing their gutter and the light is going.",
+  ["Come down, show them the crack, stop using it, and offer to finish another day with a different ladder.",
+   "Tell them about the crack but finish the last section carefully since you are nearly done.",
+   "Finish quickly keeping your weight to the good side, then mention it.",
+   "Say nothing — it is their ladder and it has held so far."],
+  [0,1,2,3],
+  "Every option notices the crack. What separates them is what you give up once you have."],
+
+ ["Unpacking your shopping you find an item worth about four pounds that was never scanned.",
+  ["Ring the shop, explain, and pay for it.",
+   "Take it back on your next visit and explain at the till.",
+   "Keep it, but check the trolley more carefully next time.",
+   "Keep it — it is their mistake and it is nothing to them."],
+  [0,1,2,3],
+  "Small on purpose. These tests use minor honesty items because they predict what you do about an error nobody would ever find."],
+
+ ["Driving home after a long day you realise you cannot remember the last mile.",
+  ["Pull off somewhere safe, stop, and rest properly before going on.",
+   "Pull into services, coffee and a walk for fifteen minutes, then continue.",
+   "Windows down, radio up, press on — you are nearly home.",
+   "Carry on but slow down and leave a bigger gap."],
+  [0,1,3,2],
+  "You cannot mitigate your way out of being asleep. Fatigue is a first-order safety issue in this industry."],
+
+ ["A fire door at work has been wedged open on a hot day. The building is not your responsibility.",
+  ["Remove the wedge and tell whoever manages the building so the ventilation problem gets fixed.",
+   "Remove the wedge and say nothing further.",
+   "Leave it, but mention it to the building manager when you next see them.",
+   "Leave it — not your area, and people will be annoyed."],
+  [0,1,2,3],
+  "With a fire door the state of the door outranks the conversation about why it was wedged. Hazard first, then cause."],
+
+ ["Partway through a task you realise you skipped a required check at the start. Nothing seems wrong. Redoing it makes you an hour late and your manager is under schedule pressure.",
+  ["Stop, tell your manager what you missed, and redo it properly.",
+   "Go back and do the check now without telling anyone.",
+   "Finish, then mention afterwards that you may have missed a step.",
+   "Carry on — nothing went wrong and raising it only creates a problem."],
+  [0,1,2,3],
+  "Quietly putting it right is tempting and still wrong: the check exists to catch what you cannot see, and nobody learns the step is easy to skip."],
+
+ ["A colleague you have known for years arrives smelling of alcohol. They seem normal and say they are fine.",
+  ["Tell them you cannot ignore it and that you are raising it with the supervisor now — then do.",
+   "Tell them privately not to start the shift and to go and speak to the supervisor themselves.",
+   "Keep an eye on them and say something if they seem impaired.",
+   "Say nothing — they are good at their job and an accusation could end their career."],
+  [0,1,2,3],
+  "Loyalty is the pressure being tested. Note the best answer is not the most aggressive: you tell them first, to their face, then act."],
+
+ ["A supervisor tells you to do something that conflicts with the written procedure. They are experienced, in a hurry, and say the written version is out of date.",
+  ["Say you cannot do it that way and ask them to get the change confirmed by someone who can authorise it first.",
+   "Ask them to explain the discrepancy, and follow the written procedure until you have a clear answer.",
+   "Do it their way this once since they know more, and check afterwards.",
+   "Refuse outright and report them for asking."],
+  [0,1,2,3],
+  "The top two are interchangeable. Note that the bottom option is the aggressive one, not the compliant one."],
+
+ ["Reversing a van you clip a bollard. Small dent, nobody saw, no CCTV, and the van already has marks.",
+  ["Report it to your manager as soon as you get back.",
+   "Note it and report it with your paperwork at the end of the week.",
+   "Mention it to a colleague but not formally — the damage is trivial.",
+   "Say nothing."],
+  [0,1,2,3],
+  "Every detail — no witness, no camera, existing damage — is there to make silence attractive. It is measuring whether your reporting depends on the chance of being caught."]
+];
+
+const SJT = {
+  LIMIT:45,
+  start(){
+    this.i=0; this.answers=[];
+    App.open("M7-SJT ranking", el("div"));
+    App.active=this;
+    this.show();
+  },
+  show(){
+    const [txt,opts]=SJT_Q[this.i];
+    this.picked=[];
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Situation "+(this.i+1)+" of "+SJT_Q.length+
+      " — tap the responses in order, best first. Auto-advances after 45 seconds."));
+    box.appendChild(el("div","scenbox",txt));
+    const g=el("div","ranks");
+    this.nodes=[];
+    opts.forEach((o,j)=>{
+      const n=el("div","rankopt");
+      const b=el("span","badge",""); n.appendChild(b);
+      n.appendChild(el("span",null,o));
+      n.onclick=()=>this.tap(j,n,b);
+      g.appendChild(n); this.nodes.push({n,b});
+    });
+    box.appendChild(g);
+    box.appendChild(el("p","hintline","Tap a response again to clear it and re-order."));
+    const nb=el("button","go", this.i===SJT_Q.length-1?"Finish":"Next situation");
+    nb.onclick=()=>this.next();
+    const r=el("div","row"); r.style.marginTop="14px"; r.appendChild(nb); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    this.t0=Date.now();
+    clearInterval(App.tick);
+    App.tick=setInterval(()=>{
+      const left=this.LIMIT-(Date.now()-this.t0)/1000;
+      App.clock(left>0?Math.ceil(left)+"s":"0s");
+      if(left<=0){ this.next(); }
+    },200);
+  },
+  tap(j,n,b){
+    const at=this.picked.indexOf(j);
+    if(at>=0){ this.picked.splice(at,1); }
+    else if(this.picked.length<4){ this.picked.push(j); }
+    this.nodes.forEach((o,k)=>{
+      const p=this.picked.indexOf(k);
+      o.b.textContent = p>=0 ? (p+1) : "";
+      o.n.classList.toggle("set", p>=0);
+    });
+  },
+  next(){
+    clearInterval(App.tick);
+    this.answers.push(this.picked.slice());
+    this.i++;
+    if(this.i>=SJT_Q.length) this.finish(); else this.show();
+  },
+  finish(){
+    App.clock("");
+    let disp=0, maxd=0, tops=0, bots=0, answered=0;
+    SJT_Q.forEach((qq,i)=>{
+      const sug=qq[2], got=this.answers[i];
+      if(got.length!==4) return;
+      answered++;
+      sug.forEach((optIdx,rank)=>{
+        disp+=Math.abs(got.indexOf(optIdx)-rank);
+      });
+      maxd+=8;
+      if(got[0]===sug[0])tops++;
+      if(got[3]===sug[3])bots++;
+    });
+    const acc = maxd? Math.round((1-disp/maxd)*100):0;
+    App.done("sjt", answered? acc : null, false, "%");
+    const w=App.results("Scores",[
+      ["Situations completed", answered+" / "+SJT_Q.length],
+      ["Best response identified", tops+" / "+answered],
+      ["Worst response identified", bots+" / "+answered],
+      ["Overall agreement", acc+"%"]
+    ], answered<SJT_Q.length
+      ? "You ran out of time on "+(SJT_Q.length-answered)+". That is the real failure mode on this test — decide best and worst quickly, split the middle two, and move on."
+      : bots<answered*0.7
+      ? "You are identifying the best response more reliably than the worst. The worst option is usually the one that leaves a risk in place or relies on nobody finding out — spot that first, then rank upward."
+      : "Strong agreement. Read the notes below on anything you ranked differently and work out which principle you were weighing.",
+      acc+"%");
+    SJT_Q.forEach((qq,i)=>{
+      const got=this.answers[i]; if(got.length!==4) return;
+      const sug=qq[2];
+      const mine=got.map(x=>"abcd"[x]).join(" ");
+      const theirs=sug.map(x=>"abcd"[x]).join(" ");
+      const same=mine===theirs;
+      const r=el("div","rev");
+      r.appendChild(el("h4","Situation "+(i+1)+(same?" — matched":"")));
+      r.appendChild(el("p",null,"Yours <b class='"+(same?"ok":"bad")+"'>"+mine+"</b> &nbsp; suggested <b>"+theirs+"</b>"));
+      r.appendChild(el("p",null,qq[3]));
+      w.appendChild(r);
+    });
+    $("#t-body").appendChild(w);
+  },
+  stop(){ clearInterval(App.tick); }
+};
+
+/* ---------------------------------------------------------------- SJE data */
+// tag: dir 'hi' = should rate high, 'lo' = should rate low
+const SJE_Q = [
+ ["You are working alone on a task that must be finished before you leave. Halfway through you get a call with upsetting personal news. Nobody else is on site.",
+  [["Carry on immediately so it is finished on time, and deal with the news afterwards.",2,"fitness","lo"],
+   ["Stop, take twenty minutes, and decide honestly whether you are fit to finish.",5,"fitness","hi"],
+   ["Ring your manager, explain, and ask how they want to handle it.",5,"escalate","hi"],
+   ["Finish but skip the final checks, since you are not in a state to do them well.",1,"conceal","lo"]]],
+
+ ["You have reported the same intermittent fault three times in two months. Nothing has been done and it has just happened again.",
+  [["Report it again through the same route, noting it is the fourth report.",4,"report","hi"],
+   ["Report it again and raise it with your manager directly, explaining the history.",5,"escalate","hi"],
+   ["Stop using the equipment until it has been looked at.",4,"riskfirst","hi"],
+   ["Work around it, since clearly nobody thinks it matters.",1,"convenience","lo"]]],
+
+ ["A new starter you are showing round is skipping a checking step. They say the person who trained them said it was unnecessary.",
+  [["Show them the step, explain why it exists, and check they are doing it.",5,"riskfirst","hi"],
+   ["Report the trainer for teaching it wrongly.",2,"aggressive","lo"],
+   ["Let it go — they were told by someone senior and it is not your place.",1,"convenience","lo"],
+   ["Show them the step, and raise the discrepancy so the training gets corrected.",5,"escalate","hi"]]],
+
+ ["You are asked to work an extra shift at short notice. You have worked six days and you are tired, but the team is short.",
+  [["Agree — the team needs it and you can manage one more.",2,"fitness","lo"],
+   ["Say honestly that you are too tired to do it safely, and decline.",5,"fitness","hi"],
+   ["Agree, but tell the manager you are on your seventh day and tired.",4,"report","hi"],
+   ["Agree, and plan on strong coffee and taking it easy.",1,"conceal","lo"]]],
+
+ ["A member of the public becomes angry because you will not do something outside what you are allowed to do. Others are watching.",
+  [["Explain calmly what you can and cannot do, and offer the alternative within your remit.",5,"riskfirst","hi"],
+   ["Make an exception this once to defuse it — no real harm done.",1,"convenience","lo"],
+   ["Stay calm, repeat yourself, and get a supervisor if it continues.",5,"escalate","hi"],
+   ["Walk away and leave them to it.",2,"convenience","lo"]]],
+
+ ["Near the end of a long monotonous task you notice your attention has drifted and you are not sure the last portion was done properly.",
+  [["Go back and recheck the portion you are unsure about.",5,"riskfirst","hi"],
+   ["Assume it was fine — you have done this many times.",1,"convenience","lo"],
+   ["Finish the remaining work, then recheck before signing off.",4,"report","hi"],
+   ["Tell whoever is signing off that you are not certain about that section.",5,"report","hi"]]]
+];
+
+const SJE = {
+  start(){
+    this.i=0; this.ratings=[];
+    App.open("SJE rating", el("div"));
+    App.active=this;
+    this.show();
+  },
+  show(){
+    const [txt,opts]=SJE_Q[this.i];
+    this.cur=new Array(opts.length).fill(0);
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Scenario "+(this.i+1)+" of "+SJE_Q.length+
+      " — rate every response on its own. Several can be helpful, or none."));
+    box.appendChild(el("div","scenbox",txt));
+    const g=el("div","ratewrap");
+    opts.forEach((o,j)=>{
+      const n=el("div","rateopt");
+      n.appendChild(el("p",null,o[0]));
+      const sc=el("div","scale");
+      const btns=[];
+      for(let v=1;v<=5;v++){
+        const b=el("button",null,String(v));
+        b.onclick=()=>{ this.cur[j]=v; btns.forEach((x,k)=>x.classList.toggle("sel",k===v-1)); };
+        sc.appendChild(b); btns.push(b);
+      }
+      n.appendChild(sc);
+      const k=el("div","scalekey"); k.appendChild(el("span",null,"very unhelpful"));
+      k.appendChild(el("span",null,"very helpful")); n.appendChild(k);
+      g.appendChild(n);
+    });
+    box.appendChild(g);
+    const nb=el("button","go", this.i===SJE_Q.length-1?"Finish":"Next scenario");
+    nb.onclick=()=>{
+      this.ratings.push(this.cur.slice()); this.i++;
+      if(this.i>=SJE_Q.length) this.finish(); else this.show();
+    };
+    const r=el("div","row"); r.style.marginTop="14px"; r.appendChild(nb); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    App.clock((this.i+1)+" / "+SJE_Q.length);
+  },
+  finish(){
+    App.clock("");
+    let dev=0, n=0, unrated=0;
+    const byTag={};
+    SJE_Q.forEach((qq,i)=>{
+      qq[1].forEach((o,j)=>{
+        const got=this.ratings[i][j];
+        if(!got){ unrated++; return; }
+        dev+=Math.abs(got-o[1]); n++;
+        (byTag[o[2]]=byTag[o[2]]||[]).push({got, dir:o[3], s:i+1});
+      });
+    });
+    const mad = n? (dev/n):0;
+    // contradictions
+    const flags=[];
+    Object.keys(byTag).forEach(tag=>{
+      const items=byTag[tag];
+      const his=items.filter(x=>x.dir==="hi").map(x=>x.got);
+      const los=items.filter(x=>x.dir==="lo").map(x=>x.got);
+      if(his.length>1 && Math.max(...his)-Math.min(...his)>=3)
+        flags.push("You rated similar <b>"+tag+"</b> responses inconsistently — from "+Math.min(...his)+" to "+Math.max(...his)+". Same principle, different scores.");
+      if(los.length>1 && Math.max(...los)-Math.min(...los)>=3)
+        flags.push("Your ratings of <b>"+tag+"</b> responses ranged from "+Math.min(...los)+" to "+Math.max(...los)+", which suggests the principle is not settled yet.");
+      his.forEach(v=>{ if(v<=2) flags.push("You rated a <b>"+tag+"</b> response "+v+" — worth revisiting why."); });
+      los.forEach(v=>{ if(v>=4) flags.push("You rated a <b>"+tag+"</b> response "+v+", which sits against the pattern of your other answers."); });
+    });
+    App.done("sje", n? mad : null, true, " pts off");
+    const coach = flags.length
+      ? "Consistency matters more than any single answer, because the interview is built on these responses. See the flags below."
+      : "Consistent across the board, which is the thing this checks. Your answers would give an interviewer a coherent picture to probe.";
+    const w=App.results("Scores",[
+      ["Responses rated", n+" / "+(n+unrated)],
+      ["Average distance from suggested", mad.toFixed(2)+" points"],
+      ["Contradictions flagged", flags.length]
+    ], coach, mad<0.8?"consistent":"review");
+    if(flags.length){
+      const r=el("div","rev");
+      r.appendChild(el("h4","Consistency check"));
+      flags.slice(0,8).forEach(f=>r.appendChild(el("p",null,f)));
+      w.appendChild(r);
+    }
+    const r2=el("div","rev");
+    r2.appendChild(el("h4","Where you differed most"));
+    SJE_Q.forEach((qq,i)=>{
+      qq[1].forEach((o,j)=>{
+        const got=this.ratings[i][j];
+        if(got && Math.abs(got-o[1])>=2)
+          r2.appendChild(el("p",null,"Scenario "+(i+1)+", response "+"ABCD"[j]+": you "+got+", suggested "+o[1]+"."));
+      });
+    });
+    if(r2.children.length>1) w.appendChild(r2);
+    $("#t-body").appendChild(w);
+  },
+  stop(){}
+};
+
+/* ---------------------------------------------------------------- DAY MODE */
+const DAY = {
+  start(){
+    const box=el("div");
+    box.appendChild(el("p","sub","Every drill back to back, at full length, with no gaps. It takes about an hour and a quarter. The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
+    box.appendChild(el("div","note","Do this twice before the 22nd. Start it in the morning, because that is when you will be sitting the real one."));
+    const order=[
+      ["VSE task 1",()=>VSE1.start()],
+      ["VSE task 2",()=>VSE2.start()],
+      ["VSE task 3",()=>VSE3.start()],
+      ["M7-SJT",()=>SJT.start()],
+      ["WAFV, 30 minutes",()=>WAFV.start(30)],
+      ["ATAVT",()=>ATAVT.start()],
+      ["SJE",()=>SJE.start()],
+      ["2-Hand",()=>HAND.start()]
+    ];
+    const ol=el("div"); ol.style.margin="14px 0";
+    order.forEach(([n],i)=>{
+      const d_=el("div","stat");
+      d_.appendChild(el("span",null,(i+1)+". "+n));
+      ol.appendChild(d_);
+    });
+    box.appendChild(ol);
+    const b=el("button","go","Begin");
+    b.onclick=()=>{
+      App.chain=order.slice(1).map(([name,run])=>({name,run}));
+      App.done("day", null, false, null);
+      order[0][1]();
+    };
+    const bb=el("button","ghost","Back");
+    bb.onclick=()=>App.quit();
+    const r=el("div","row"); r.appendChild(b); r.appendChild(bb); box.appendChild(r);
+    App.open("Day mode", box);
+  }
+};
+
+/* ---- boot */
+paintMenu(); paintCountdown(); buildFooter();
+setInterval(paintCountdown, 60*60*1000);
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("/sw.js").catch(function () {});
+  });
+}
+</script>
