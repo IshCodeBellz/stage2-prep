@@ -181,8 +181,8 @@
     <span class="lamp" id="l-vse1"></span>
     <div class="body">
       <h2>VSE task 1 — dot sequence</h2>
-      <p>The dot moves clockwise around the corners. Mark every square where the sequence breaks.</p>
-      <div class="meta">180 squares · target 3 min</div>
+      <p>The dot steps round the corners one at a time. Mark every square where the sequence breaks — a skipped corner, a step back, or no move at all. Alternate runs go the other way round.</p>
+      <div class="meta">180 squares · 2 papers · target 3 min</div>
     </div>
     <button class="go" onclick="VSE1.start()">Start</button>
   </div>
@@ -191,8 +191,8 @@
     <span class="lamp" id="l-vse2"></span>
     <div class="body">
       <h2>VSE task 2 — letter columns</h2>
-      <p>Mark each box where the two columns hold different letters. Order does not matter.</p>
-      <div class="meta">96 boxes · target 3 min 12 s</div>
+      <p>Mark each box where the two columns hold different letters. Order does not matter, and a letter can appear twice. Alternate runs use lookalike letters.</p>
+      <div class="meta">96 boxes · 2 papers · target 3 min 12 s</div>
     </div>
     <button class="go" onclick="VSE2.start()">Start</button>
   </div>
@@ -202,7 +202,7 @@
     <div class="body">
       <h2>VSE task 3 — both at once</h2>
       <p>Four seconds a pair, auto-advancing. The dot sequence is the primary task.</p>
-      <div class="meta">45 pairs · 3 min</div>
+      <div class="meta">45 pairs · 4 papers · 3 min</div>
     </div>
     <button class="go" onclick="VSE3.start()">Start</button>
   </div>
@@ -225,8 +225,8 @@
     <span class="lamp" id="l-atavt"></span>
     <div class="body">
       <h2>ATAVT — perception</h2>
-      <p>A traffic scene flashes for one second. Report which objects you saw.</p>
-      <div class="meta">20 scenes · about 6 min</div>
+      <p>A traffic scene flashes for one second. Report which objects you saw. Street, junction, country road and after dark, mixed through the run.</p>
+      <div class="meta">20 scenes · 4 settings · about 6 min</div>
     </div>
     <button class="go" onclick="ATAVT.start()">Start</button>
   </div>
@@ -235,8 +235,8 @@
     <span class="lamp" id="l-hand"></span>
     <div class="body">
       <h2>2-Hand — co-ordination</h2>
-      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel.</p>
-      <div class="meta">6 runs · buzzer on contact</div>
+      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel. A different channel shape each attempt.</p>
+      <div class="meta">6 runs · 5 tracks · buzzer on contact</div>
     </div>
     <button class="go" onclick="HAND.start()">Start</button>
   </div>
@@ -245,8 +245,8 @@
     <span class="lamp" id="l-sjt"></span>
     <div class="body">
       <h2>M7-SJT — ranking</h2>
-      <p>Put four responses in order of preference. 45 seconds a situation, auto-advancing.</p>
-      <div class="meta">8 situations · 6 min</div>
+      <p>Put four responses in order of preference. 45 seconds a situation, auto-advancing. Four different sets, rotating, so a second run is never the same paper.</p>
+      <div class="meta">8 situations · 4 sets · 6 min</div>
     </div>
     <button class="go" onclick="SJT.start()">Start</button>
   </div>
@@ -255,8 +255,8 @@
     <span class="lamp" id="l-sje"></span>
     <div class="body">
       <h2>SJE — rating</h2>
-      <p>Rate each response 1 to 5. Checks your answers against each other for contradictions.</p>
-      <div class="meta">6 scenarios · untimed</div>
+      <p>Rate each response 1 to 5. Checks your answers against each other for contradictions. Four different sets, rotating.</p>
+      <div class="meta">6 scenarios · 4 sets · untimed</div>
     </div>
     <button class="go" onclick="SJE.start()">Start</button>
   </div>
@@ -300,6 +300,7 @@ const $ = s => document.querySelector(s);
 const el = (t,c,h) => { const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; };
 const rnd = n => Math.floor(Math.random()*n);
 const pick = a => a[rnd(a.length)];
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const k=rnd(i+1); const t=a[i]; a[i]=a[k]; a[k]=t; } return a; };
 const mmss = s => Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
 
 /* ---- progress, saved on this device only. Degrades to memory if storage is blocked. */
@@ -328,6 +329,22 @@ const Store = (()=>{
       mem[id]=r; save();
     },
     clear(){ mem={}; try{ localStorage.removeItem(KEY); }catch(e){} }
+  };
+})();
+
+/* ---- which question set you get next. Rotates so a second attempt is never the same paper. */
+const Rot = (()=>{
+  const KEY="stage2.sets.v1";
+  let mem={};
+  try{ mem = JSON.parse(localStorage.getItem(KEY)||"{}") || {}; }catch(e){ mem={}; }
+  const save=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(mem)); }catch(e){} };
+  return {
+    next(id, n){
+      const i = (mem[id]|0) % n;
+      mem[id] = (i+1) % n;
+      save();
+      return i;
+    }
   };
 })();
 
@@ -445,26 +462,37 @@ const App = {
 };
 
 /* ---------------------------------------------------------------- VSE 1 */
+/* Dot stream, shared with VSE 3. Corners 0=TL 1=TR 2=BR 3=BL.
+   dir +1 steps clockwise, -1 anticlockwise. Three ways the sequence can break:
+   skip a corner, go back one, or stay where it is. */
+const DOT_ERR = [2,-1,0];
+function dotStream(n, p, dir){
+  const seq=[], err=[];
+  let c=rnd(4);
+  seq.push(c); err.push(false);
+  for(let i=1;i<n;i++){
+    const bad = Math.random()<p;
+    const step = bad ? pick(DOT_ERR)*dir : dir;
+    c = ((c+step)%4+4)%4;
+    seq.push(c); err.push(bad);
+  }
+  return {seq,err};
+}
+const DOT_DIRS = [[1,"clockwise"],[-1,"anticlockwise"]];
+
 const VSE1 = {
   N:180,
   start(){
-    // corner order 0=TL 1=TR 2=BR 3=BL, normal step +1
-    const seq=[], err=[];
-    let c=rnd(4);
-    seq.push(c); err.push(false);
-    for(let i=1;i<this.N;i++){
-      let bad = Math.random()<0.085;
-      if(bad){ c = (c + (Math.random()<0.5 ? 2 : 3)) % 4; }  // skip a corner, or go backwards
-      else { c = (c+1)%4; }
-      seq.push(c); err.push(bad);
-    }
-    this.seq=seq; this.err=err; this.marked=new Array(this.N).fill(false);
+    const v=Rot.next("vse1", DOT_DIRS.length);
+    this.dir=DOT_DIRS[v][0]; this.way=DOT_DIRS[v][1];
+    const s=dotStream(this.N, 0.085, this.dir);
+    this.seq=s.seq; this.err=s.err; this.marked=new Array(this.N).fill(false);
 
     const box=el("div");
-    box.appendChild(el("p","sub","Work left to right, line after line. Tap a square where the dot has skipped a corner or gone backwards. About one second a square."));
+    box.appendChild(el("p","sub","On this paper the dot should step <b>"+this.way+"</b> round the corners, one corner at a time. Work left to right, line after line, and tap any square where it has skipped a corner, gone back, or stayed put. About one second a square."));
     const paper=el("div","paper");
     const g=el("div","grid1");
-    seq.forEach((corner,i)=>{
+    this.seq.forEach((corner,i)=>{
       const s=el("div","sq"); s.appendChild(el("i","c"+corner));
       s.onclick=()=>{ this.marked[i]=!this.marked[i]; s.classList.toggle("mk"); };
       g.appendChild(s);
@@ -477,7 +505,7 @@ const VSE1 = {
     const r=el("div","row"); r.style.marginTop="16px"; r.appendChild(b);
     box.appendChild(r);
 
-    App.open("VSE task 1", box);
+    App.open("VSE task 1 — "+this.way, box);
     this.getT = App.countUp();
     App.active=this;
   },
@@ -496,9 +524,10 @@ const VSE1 = {
     const coach = fa>hit*0.25
       ? "Your false marks are high relative to your hits. You are marking on suspicion rather than on a confirmed break in the sequence. Hold the previous corner in mind and compare — do not mark because a square merely looks wrong."
       : miss>total*0.3
-      ? "You are missing more than you are catching. The usual cause is reading each square in isolation. The error only exists in the transition, so keep the previous corner live in your head as you move."
-      : "Solid. Now work on holding this accuracy while speeding up — the real test paces you at about a second a square.";
+      ? "You are missing more than you are catching. The usual cause is reading each square in isolation. The error only exists in the transition, so keep the previous corner live in your head as you move. The dot that has not moved at all is the one people sail straight past."
+      : "Solid. Now work on holding this accuracy while speeding up — the real test paces you at about a second a square. Your next run comes the other way round, which is where a trained thumb rhythm stops helping you.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Paper", this.way],
       ["Errors present", total],
       ["Caught", hit],
       ["Missed", miss],
@@ -513,18 +542,32 @@ const VSE1 = {
 
 /* ---------------------------------------------------------------- VSE 2 */
 const LETTERS="ABCDEFGHJKLMNPQRSTUVWXYZ".split("");
-function makeBox(isErr){
-  const left=[0,0,0,0].map(()=>pick(LETTERS));
-  let right=left.slice();
-  // shuffle
-  for(let i=3;i>0;i--){const j=rnd(i+1);[right[i],right[j]]=[right[j],right[i]];}
+/* families that are hard to tell apart at a glance, used by the second paper */
+const LOOKALIKE=["BDPR","EFHK","MNVW","CGQS","TUVY","JLZX"].map(s=>s.split(""));
+const bag = a => a.slice().sort().join("");
+/* isErr: the two columns should hold different letters.
+   pool: the letters this box is built from, defaults to the whole alphabet. */
+function makeBox(isErr, pool){
+  const src = pool || LETTERS;
+  const left=[0,0,0,0].map(()=>pick(src));
+  const right=shuffle(left.slice());
   if(isErr){
     const i=rnd(4);
-    let n=pick(LETTERS); while(n===right[i]) n=pick(LETTERS);
-    right[i]=n;
-    // guard: ensure multisets really differ
-    const s=a=>a.slice().sort().join("");
-    if(s(left)===s(right)){ right[i] = right[i]==="A"?"B":"A"; }
+    if(Math.random()<0.4){
+      // a letter turns up twice and another one goes missing
+      let j=rnd(4); while(j===i) j=rnd(4);
+      right[i]=right[j];
+    } else {
+      let n=pick(src); while(n===right[i]) n=pick(src);
+      right[i]=n;
+    }
+    // guard: the edit may have landed on a duplicate and changed nothing
+    let guard=0;
+    while(bag(left)===bag(right) && guard++<20){
+      const k=rnd(4);
+      let n=pick(src); while(n===right[k]) n=pick(src);
+      right[k]=n;
+    }
   }
   return {left,right};
 }
@@ -536,13 +579,21 @@ function boxNode(b, big){
   }
   return n;
 }
+const VSE2_PAPERS = [["mixed letters",null],["lookalike letters",LOOKALIKE]];
 const VSE2 = {
   N:96,
   start(){
+    const v=Rot.next("vse2", VSE2_PAPERS.length);
+    this.paper=VSE2_PAPERS[v][0];
+    const fams=VSE2_PAPERS[v][1];
     this.items=[]; this.marked=new Array(this.N).fill(false);
-    for(let i=0;i<this.N;i++){ const e=Math.random()<0.26; this.items.push({...makeBox(e), err:e}); }
+    for(let i=0;i<this.N;i++){
+      const e=Math.random()<0.26;
+      this.items.push({...makeBox(e, fams?pick(fams):null), err:e});
+    }
     const box=el("div");
-    box.appendChild(el("p","sub","Tap every box where the two columns hold different letters. The same letters in a different order still match. No more than two seconds a box."));
+    box.appendChild(el("p","sub","Tap every box where the two columns hold different letters. The same letters in a different order still match, and a letter can turn up twice. No more than two seconds a box."
+      + (fams?" This paper is built from lookalike letters, so it is slower going than the last one.":"")));
     const paper=el("div","paper"); const g=el("div","grid2");
     this.items.forEach((it,i)=>{
       const n=boxNode(it);
@@ -552,7 +603,7 @@ const VSE2 = {
     paper.appendChild(g); box.appendChild(paper); this.grid=g;
     const b=el("button","go","Finish and score"); b.onclick=()=>this.finish();
     const r=el("div","row"); r.style.marginTop="16px"; r.appendChild(b); box.appendChild(r);
-    App.open("VSE task 2", box);
+    App.open("VSE task 2 — "+this.paper, box);
     this.getT=App.countUp(); App.active=this;
   },
   finish(){
@@ -568,8 +619,9 @@ const VSE2 = {
     App.done("vse2", total? hit/total*100 : null, false, "%");
     const coach = fa>3
       ? "Most of your false marks will be boxes where the letters matched but sat in a different order. Compare the sets, not the rows — read the left column, then check each letter off against the right."
-      : "Read the left column as a whole rather than letter by letter, then sweep the right for anything that is not in that set. It is faster than four separate comparisons.";
+      : "Read the left column as a whole rather than letter by letter, then sweep the right for anything that is not in that set. It is faster than four separate comparisons. The box that slips through is the doubled one, where every letter on the right does appear on the left, but one of them twice.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Paper", this.paper],
       ["Mismatched boxes", total],["Caught", hit],["Missed", miss],
       ["Marked in error", fa],["Time", mmss(t)],["Seconds per box",(t/this.N).toFixed(2)]
     ], coach, hit+"/"+total));
@@ -579,23 +631,30 @@ const VSE2 = {
 };
 
 /* ---------------------------------------------------------------- VSE 3 (dual, paced) */
+/* four papers: each direction of the dot stream against each letter pool */
+const VSE3_PAPERS = [[0,0],[1,0],[0,1],[1,1]];
 const VSE3 = {
   N:45, PACE:4000,
   start(){
-    // dot stream
-    let c=rnd(4); this.dots=[]; this.dotErr=[];
-    this.dots.push(c); this.dotErr.push(false);
-    for(let i=1;i<this.N;i++){
-      const bad=Math.random()<0.11;
-      c = bad ? (c+(Math.random()<0.5?2:3))%4 : (c+1)%4;
-      this.dots.push(c); this.dotErr.push(bad);
+    const v=Rot.next("vse3", VSE3_PAPERS.length);
+    const combo=VSE3_PAPERS[v];
+    this.dir=DOT_DIRS[combo[0]][0]; this.way=DOT_DIRS[combo[0]][1];
+    this.paper=VSE2_PAPERS[combo[1]][0];
+    const fams=VSE2_PAPERS[combo[1]][1];
+
+    const s=dotStream(this.N, 0.11, this.dir);
+    this.dots=s.seq; this.dotErr=s.err;
+    this.boxes=[];
+    for(let i=0;i<this.N;i++){
+      const e=Math.random()<0.28;
+      this.boxes.push({...makeBox(e, fams?pick(fams):null), err:e});
     }
-    this.boxes=[]; for(let i=0;i<this.N;i++){const e=Math.random()<0.28; this.boxes.push({...makeBox(e),err:e});}
     this.i=0; this.aDot=false; this.aBox=false;
     this.repDot=new Array(this.N).fill(false); this.repBox=new Array(this.N).fill(false);
 
     const box=el("div");
-    box.appendChild(el("p","sub","Four seconds a pair, advancing on its own. The dot sequence is the primary task — protect it."));
+    box.appendChild(el("p","sub","Four seconds a pair, advancing on its own. The dot should step <b>"+this.way+
+      "</b> — skipping a corner, going back, or staying put all count as errors. The dot sequence is the primary task; protect it."));
     const stage=el("div","paper");
     const d=el("div","dual");
     this.sqEl=el("div","sq bigsq"); this.sqEl.appendChild(el("i","c0"));
@@ -610,7 +669,7 @@ const VSE3 = {
     f.appendChild(this.bD); f.appendChild(this.bB); box.appendChild(f);
     const p=el("div","prog"); this.pb=el("b"); p.appendChild(this.pb); box.appendChild(p);
 
-    App.open("VSE task 3", box);
+    App.open("VSE task 3 — "+this.way+", "+this.paper, box);
     App.active=this;
     this.render(); this.loop();
   },
@@ -643,6 +702,7 @@ const VSE3 = {
       ? "You protected the letters at the expense of the dots. That is the wrong trade: the dot sequence is the primary task, and it is also the one you cannot recover, because each judgement depends on the square before it. Let the letters slip first."
       : "Right priority — the dots held up. Now close the gap on the letters without letting the dot accuracy fall.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Paper", this.way+", "+this.paper],
       ["Dot errors present", D.h+D.m],["Dots caught", D.h],["Dots missed", D.m],["Dots marked in error", D.f],
       ["Letter errors present", B.h+B.m],["Letters caught", B.h],["Letters missed", B.m],["Letters marked in error", B.f]
     ], coach, D.h+"/"+(D.h+D.m)+" · "+B.h+"/"+(B.h+B.m)));
@@ -724,53 +784,186 @@ const WAFV = {
 /* ---------------------------------------------------------------- ATAVT */
 const CATS=[["ped","Pedestrians"],["veh","Motor vehicles"],["bike","Bikes, motorcycles or scooters"],
             ["sign","Road signs"],["light","Traffic lights"]];
-function scene(has){
-  const P=[];
-  P.push(`<rect width="400" height="300" fill="#CBD9E6"/>`);                    // sky
-  P.push(`<rect y="150" width="400" height="150" fill="#8A8A8A"/>`);            // road
-  P.push(`<rect y="150" width="400" height="18" fill="#B9B4AA"/>`);             // kerb strip
-  for(let x=10;x<400;x+=46) P.push(`<rect x="${x}" y="228" width="26" height="4" fill="#EEE"/>`);
-  // buildings
+/* ---- the objects, drawn the same way whichever scene they land in ---- */
+const CAR_BODY=["#2F4A63","#7A2E2E","#2E5A3A","#5A4A2E","#3B3B4C","#6B5A2E"];
+const CAR_TOP =["#3C5C78","#93463F","#3E6E4E","#6E6244","#4C4C60","#83714A"];
+const SHIRTS  =["#B8442E","#2F5FA0","#3E6E4E","#7A4E96","#B58A2B","#3B3B3B"];
+
+function oVeh(x,y,s,night){
+  const k=rnd(CAR_BODY.length);
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <rect width="76" height="24" rx="5" fill="${CAR_BODY[k]}"/>
+    <path d="M14 0 L26 -16 L54 -16 L64 0 Z" fill="${CAR_TOP[k]}"/>
+    <circle cx="19" cy="26" r="8" fill="#1A1A1A"/><circle cx="59" cy="26" r="8" fill="#1A1A1A"/>
+    ${night?`<circle cx="74" cy="9" r="6" fill="#F5E6A8" opacity=".85"/>`:``}</g>`;
+}
+function oPed(x,y,s,night){
+  const skin=night?"#C9C4B6":"#2B2B2B", leg=night?"#9A968B":"#2B2B2B";
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <circle cy="-26" r="5" fill="${skin}"/>
+    <rect x="-4" y="-21" width="8" height="15" rx="3" fill="${night?"#D8D3C6":pick(SHIRTS)}"/>
+    <rect x="-4" y="-6" width="3" height="10" fill="${leg}"/>
+    <rect x="1" y="-6" width="3" height="10" fill="${leg}"/></g>`;
+}
+function oBike(x,y,s,night){
+  const c=night?"#CFCABC":"#1F1F1F";
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <circle r="11" fill="none" stroke="${c}" stroke-width="2.5"/>
+    <circle cx="30" r="11" fill="none" stroke="${c}" stroke-width="2.5"/>
+    <path d="M0 0 L12 -14 L30 0 M12 -14 L18 0" stroke="${night?"#7FBF9B":"#1F7A4C"}" stroke-width="2.5" fill="none"/>
+    <circle cx="14" cy="-26" r="5" fill="${night?"#C9C4B6":"#2B2B2B"}"/></g>`;
+}
+function oSign(x,y,s){
+  return `<g transform="translate(${x},${y}) scale(${s})"><rect x="-2" width="4" height="42" fill="#777"/>` +
+    (Math.random()<0.5
+      ? `<circle cy="-12" r="14" fill="#fff" stroke="#C6321E" stroke-width="5"/>`
+      : `<path d="M0 -28 L15 0 L-15 0 Z" fill="#fff" stroke="#C6321E" stroke-width="4"/>`) + `</g>`;
+}
+function oLight(x,y,s){
+  const on=rnd(3);
+  return `<g transform="translate(${x},${y}) scale(${s})"><rect x="-2" y="18" width="4" height="52" fill="#666"/>
+    <rect x="-11" y="-18" width="22" height="40" rx="4" fill="#2B2B2B"/>
+    <circle cy="-9" r="5.5" fill="${on===0?"#E8412A":"#5A2A24"}"/>
+    <circle cy="2" r="5.5" fill="${on===1?"#E8B62A":"#5A5A2E"}"/>
+    <circle cy="13" r="5.5" fill="${on===2?"#3FA85F":"#2E5A3A"}"/></g>`;
+}
+const OBJ={veh:oVeh, ped:oPed, bike:oBike, sign:oSign, light:oLight};
+const DRAW_ORDER=["veh","bike","ped","sign","light"];
+
+/* ---- four backgrounds, so the same object has to be found in different surroundings ---- */
+function panes(x,y,w,h,lit,dim){
+  let s="";
+  for(let r=0;r<Math.floor(h/22);r++) for(let c=0;c<Math.floor(w/22);c++)
+    s+=`<rect x="${x+6+c*22}" y="${y+7+r*22}" width="9" height="11" fill="${dim&&Math.random()<0.55?dim:lit}"/>`;
+  return s;
+}
+function bgStreet(){
+  let P=`<rect width="400" height="300" fill="#CBD9E6"/>
+    <rect y="150" width="400" height="150" fill="#8A8A8A"/>
+    <rect y="150" width="400" height="18" fill="#B9B4AA"/>`;
+  for(let x=10;x<400;x+=46) P+=`<rect x="${x}" y="228" width="26" height="4" fill="#EEE"/>`;
   for(let i=0;i<4;i++){
     const w=50+rnd(40), h=50+rnd(70), x=i*100+rnd(20);
-    P.push(`<rect x="${x}" y="${150-h}" width="${w}" height="${h}" fill="#6F7C88"/>`);
-    for(let r=0;r<Math.floor(h/22);r++) for(let cc=0;cc<Math.floor(w/22);cc++)
-      P.push(`<rect x="${x+6+cc*22}" y="${150-h+7+r*22}" width="9" height="11" fill="#93A3B0"/>`);
+    P+=`<rect x="${x}" y="${150-h}" width="${w}" height="${h}" fill="#6F7C88"/>`+panes(x,150-h,w,h,"#93A3B0");
   }
-  if(has.veh){ const n=1+rnd(2); for(let k=0;k<n;k++){ const x=20+rnd(280), y=195+rnd(55), s=.8+Math.random()*.5;
-    P.push(`<g transform="translate(${x},${y}) scale(${s})"><rect width="76" height="24" rx="5" fill="#2F4A63"/>
-      <path d="M14 0 L26 -16 L54 -16 L64 0 Z" fill="#3C5C78"/>
-      <circle cx="19" cy="26" r="8" fill="#1A1A1A"/><circle cx="59" cy="26" r="8" fill="#1A1A1A"/></g>`); } }
-  if(has.ped){ const n=1+rnd(2); for(let k=0;k<n;k++){ const x=15+rnd(360), y=155+rnd(14);
-    P.push(`<g transform="translate(${x},${y})"><circle cy="-26" r="5" fill="#2B2B2B"/>
-      <rect x="-4" y="-21" width="8" height="15" rx="3" fill="#B8442E"/>
-      <rect x="-4" y="-6" width="3" height="10" fill="#2B2B2B"/><rect x="1" y="-6" width="3" height="10" fill="#2B2B2B"/></g>`); } }
-  if(has.bike){ const x=30+rnd(300), y=205+rnd(45);
-    P.push(`<g transform="translate(${x},${y})"><circle r="11" fill="none" stroke="#1F1F1F" stroke-width="2.5"/>
-      <circle cx="30" r="11" fill="none" stroke="#1F1F1F" stroke-width="2.5"/>
-      <path d="M0 0 L12 -14 L30 0 M12 -14 L18 0" stroke="#1F7A4C" stroke-width="2.5" fill="none"/>
-      <circle cx="14" cy="-26" r="5" fill="#2B2B2B"/></g>`); }
-  if(has.sign){ const x=25+rnd(340);
-    P.push(`<g transform="translate(${x},120)"><rect x="-2" width="4" height="42" fill="#777"/>` +
-      (Math.random()<0.5
-        ? `<circle cy="-12" r="14" fill="#fff" stroke="#C6321E" stroke-width="5"/>`
-        : `<path d="M0 -28 L15 0 L-15 0 Z" fill="#fff" stroke="#C6321E" stroke-width="4"/>`) + `</g>`); }
-  if(has.light){ const x=30+rnd(330);
-    P.push(`<g transform="translate(${x},96)"><rect x="-2" y="18" width="4" height="52" fill="#666"/>
-      <rect x="-11" y="-18" width="22" height="40" rx="4" fill="#2B2B2B"/>
-      <circle cy="-9" r="5.5" fill="#C6321E"/><circle cy="2" r="5.5" fill="#5A5A2E"/><circle cy="13" r="5.5" fill="#2E5A3A"/></g>`); }
-  return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${P.join("")}</svg>`;
+  return P;
 }
+function bgJunction(){
+  let P=`<rect width="400" height="300" fill="#C6D6E4"/>
+    <rect x="20" y="84" width="112" height="78" fill="#77828C"/>`+panes(20,84,112,78,"#9BA9B4")+
+   `<rect x="258" y="68" width="120" height="94" fill="#69747E"/>`+panes(258,68,120,94,"#8E9CA8")+
+   `<path d="M170 100 L220 100 L238 176 L152 176 Z" fill="#8A8A8A"/>
+    <rect y="170" width="400" height="130" fill="#8A8A8A"/>
+    <rect y="162" width="152" height="9" fill="#B9B4AA"/>
+    <rect x="238" y="162" width="162" height="9" fill="#B9B4AA"/>`;
+  for(let x=156;x<234;x+=13) P+=`<rect x="${x}" y="180" width="8" height="26" fill="#EFEFEF"/>`;
+  for(let x=6;x<400;x+=46) P+=`<rect x="${x}" y="262" width="26" height="4" fill="#EEE"/>`;
+  return P;
+}
+function bgCountry(){
+  let P=`<rect width="400" height="300" fill="#D6E4EE"/>
+    <rect y="132" width="400" height="168" fill="#7E9A5C"/>
+    <path d="M178 132 L222 132 L392 300 L28 300 Z" fill="#8A8A8A"/>`;
+  for(let i=0;i<6;i++){
+    const t=i/6, w=3+t*9, y=142+t*145, h=6+t*11;
+    P+=`<rect x="${(200-w/2).toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="#EEE"/>`;
+  }
+  for(let x=-10;x<400;x+=28) P+=`<circle cx="${x+rnd(12)}" cy="${130+rnd(8)}" r="${10+rnd(6)}" fill="#5E7A44"/>`;
+  for(let i=0;i<3;i++){ const x=26+i*132+rnd(40);
+    P+=`<rect x="${x}" y="84" width="7" height="50" fill="#6B563A"/><circle cx="${x+3}" cy="78" r="26" fill="#4E6B39"/>`; }
+  return P;
+}
+function bgNight(){
+  let P=`<rect width="400" height="300" fill="#16202B"/>
+    <rect y="150" width="400" height="150" fill="#33383D"/>
+    <rect y="150" width="400" height="18" fill="#40444A"/>`;
+  for(let x=10;x<400;x+=46) P+=`<rect x="${x}" y="228" width="26" height="4" fill="#8A8F94"/>`;
+  for(let i=0;i<4;i++){
+    const w=50+rnd(40), h=50+rnd(70), x=i*100+rnd(20);
+    P+=`<rect x="${x}" y="${150-h}" width="${w}" height="${h}" fill="#232C36"/>`+panes(x,150-h,w,h,"#E8C86A","#2D3742");
+  }
+  for(let i=0;i<2;i++){ const x=88+i*182;
+    P+=`<ellipse cx="${x+2}" cy="178" rx="54" ry="19" fill="#F3E3A8" opacity=".12"/>
+        <rect x="${x}" y="58" width="4" height="94" fill="#4A5058"/>
+        <circle cx="${x+2}" cy="56" r="7" fill="#F3E3A8"/>`; }
+  return P;
+}
+
+/* zones say where each kind of object can sit in that particular scene */
+const SCENES=[
+ {key:"town street", night:false, bg:bgStreet, z:{
+   veh:{x:[20,300],y:[195,250],s:[.8,1.3],n:2},
+   ped:{x:[15,375],y:[155,169],n:2},
+   bike:{x:[30,330],y:[205,250],n:1},
+   sign:{x:[25,365],y:[118,124],n:1},
+   light:{x:[30,360],y:[94,100],n:1}}},
+
+ {key:"junction", night:false, bg:bgJunction, z:{
+   veh:{x:[20,300],y:[212,256],s:[.85,1.2],n:2},
+   ped:{x:[154,226],y:[182,204],n:2},
+   bike:{x:[30,320],y:[216,254],n:1},
+   sign:{xs:[[26,116],[262,374]],y:[120,134],n:2},
+   light:{x:[134,168],y:[92,110],n:1}}},
+
+ {key:"country road", night:false, bg:bgCountry, z:{
+   veh:{x:[110,240],y:[204,246],s:[.7,1.1],n:1},
+   ped:{x:[40,350],y:[182,232],n:1},
+   bike:{x:[118,250],y:[212,250],n:1},
+   sign:{x:[30,360],y:[116,132],n:1},
+   light:{x:[120,268],y:[90,104],n:1}}},
+
+ {key:"after dark", night:true, bg:bgNight, z:{
+   veh:{x:[20,300],y:[195,250],s:[.8,1.3],n:2},
+   ped:{x:[15,375],y:[155,169],n:2},
+   bike:{x:[30,330],y:[205,250],n:1},
+   sign:{x:[25,365],y:[118,124],n:1},
+   light:{x:[30,360],y:[94,100],n:1}}}
+];
+
+/* roughly what each object covers, relative to the point it is drawn from.
+   Used to keep objects from landing on top of one another, which would hide them. */
+const FOOT={veh:[0,-16,76,50], bike:[-11,-31,52,44], ped:[-6,-31,14,37],
+            sign:[-15,-28,30,70], light:[-11,-18,22,88]};
+const hits=(a,b)=> a[0]<b[0]+b[2] && b[0]<a[0]+a[2] && a[1]<b[1]+b[3] && b[1]<a[1]+a[3];
+
+function place(k, z, night, taken){
+  const n = 1 + (z.n>1 ? rnd(z.n) : 0);
+  const f = FOOT[k];
+  let out="";
+  for(let i=0;i<n;i++){
+    let x,y,s,r,tries=0;
+    do{
+      const xr = z.xs ? pick(z.xs) : z.x;
+      x = xr[0]+rnd(xr[1]-xr[0]+1);
+      y = z.y[0]+rnd(z.y[1]-z.y[0]+1);
+      s = z.s ? +(z.s[0]+Math.random()*(z.s[1]-z.s[0])).toFixed(2) : 1;
+      r = [x+f[0]*s, y+f[1]*s, f[2]*s, f[3]*s];
+      tries++;
+    } while(tries<16 && taken.some(t=>hits(r,t)));
+    taken.push(r);
+    out+=OBJ[k](x,y,s,night);
+  }
+  return out;
+}
+function scene(has, t){
+  let P=t.bg();
+  const taken=[];
+  DRAW_ORDER.forEach(k=>{ if(has[k]) P+=place(k, t.z[k], t.night, taken); });
+  return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${P}</svg>`;
+}
+
 const ATAVT = {
   N:20, FLASH:1000,
   start(){
     this.i=0; this.log=[];
     this.trials=[];
+    let deck=[];
     for(let i=0;i<this.N;i++){
       let h={}; let any=false;
       CATS.forEach(([k])=>{ h[k]=Math.random()<0.5; if(h[k])any=true; });
       if(!any) h[pick(CATS)[0]]=true;
-      this.trials.push(h);
+      if(!deck.length) deck=shuffle(SCENES.map((_,k)=>k));   // all four scenes come round evenly
+      this.trials.push({has:h, t:SCENES[deck.pop()]});
     }
     App.open("ATAVT perception", el("div"));
     App.active=this;
@@ -779,8 +972,8 @@ const ATAVT = {
   show(){
     App.clock((this.i+1)+" / "+this.N);
     const box=el("div");
-    box.appendChild(el("p","sub","Watch closely. The scene appears for one second."));
-    const s=el("div","scene"); s.innerHTML=scene(this.trials[this.i]);
+    box.appendChild(el("p","sub","Watch closely. The scene appears for one second. It may be a street, a junction, a country road, or the same street after dark."));
+    const s=el("div","scene"); s.innerHTML=scene(this.trials[this.i].has, this.trials[this.i].t);
     box.appendChild(s);
     $("#t-body").replaceChildren(box);
     App.timer=setTimeout(()=>this.ask(), this.FLASH);
@@ -807,16 +1000,18 @@ const ATAVT = {
   finish(){
     App.clock("");
     let exact=0, hit=0, miss=0, fa=0;
-    const perCat={};
+    const perCat={}, perScene={};
     CATS.forEach(([k])=>perCat[k]={m:0,f:0});
-    this.trials.forEach((t,i)=>{
-      const g=this.log[i]; let ok=true;
+    SCENES.forEach(s=>perScene[s.key]={n:0,ok:0});
+    this.trials.forEach((tr,i)=>{
+      const t=tr.has, g=this.log[i]; let ok=true;
       CATS.forEach(([k])=>{
         if(t[k]&&g[k])hit++;
         else if(t[k]&&!g[k]){miss++;perCat[k].m++;ok=false;}
         else if(!t[k]&&g[k]){fa++;perCat[k].f++;ok=false;}
       });
-      if(ok)exact++;
+      perScene[tr.t.key].n++;
+      if(ok){exact++; perScene[tr.t.key].ok++;}
     });
     App.done("atavt", exact/this.N*100, false, "%");
     let worst=null; CATS.forEach(([k,l])=>{ if(perCat[k].m>0 && (!worst||perCat[k].m>perCat[worst[0]].m)) worst=[k,l]; });
@@ -827,12 +1022,17 @@ const ATAVT = {
       : worst
       ? "Most missed: "+worst[1].toLowerCase()+". Take the whole frame in at once rather than scanning it; at one second there is no time to move your eyes, so let the scene land as a single impression and read it back afterwards."
       : "Your misses are spread evenly rather than concentrated in one type. Let the scene land as a single impression and read it back afterwards, rather than hunting for one object at a time.";
-    $("#t-body").appendChild(App.results("Scores",[
+    const rows=[
       ["Scenes exactly right", exact+" / "+this.N],
       ["Objects present and reported", hit],
       ["Objects present and missed", miss],
       ["Objects reported but absent", fa]
-    ], coach, exact+"/"+this.N));
+    ];
+    SCENES.forEach(s=>{
+      const p=perScene[s.key];
+      if(p.n) rows.push([s.key.charAt(0).toUpperCase()+s.key.slice(1)+" scenes", p.ok+" / "+p.n]);
+    });
+    $("#t-body").appendChild(App.results("Scores", rows, coach, exact+"/"+this.N));
   },
   stop(){ clearTimeout(App.timer); }
 };
@@ -854,10 +1054,22 @@ function buzzer(on){
   }catch(e){}
 }
 
+/* Five channel shapes. One is picked per attempt and held for all six runs,
+   because the real test is repeated runs of one shape — what changes is which shape. */
+const HAND_TRACKS = [
+  ["long swell",   [0.9,-0.7,0.5,0.35]],
+  ["tight weave",  [0.45,0.85,-0.6,0.5]],
+  ["late climb",   [1.0,0.3,-0.4,0.25]],
+  ["double bend",  [-0.8,0.65,0.7,-0.3]],
+  ["short steps",  [0.5,-0.5,0.6,0.45,0.4]]
+];
+
 const HAND = {
   RUNS:6, CH:26, SPEED:150,
   start(){
     this.run=1; this.log=[]; this.done_=false;
+    const t=Rot.next("hand", HAND_TRACKS.length);
+    this.trackName=HAND_TRACKS[t][0]; this.coef=HAND_TRACKS[t][1];
     const box=el("div");
     box.appendChild(el("p","sub","Left pad moves it left and right. Right pad moves it up and down. You need both at once. The buzzer sounds whenever it leaves the channel — keep it quiet."));
     const wrap=el("div","cvswrap");
@@ -872,7 +1084,7 @@ const HAND = {
     box.appendChild(pads);
     box.appendChild(el("p","sub","On a laptop you can use A and D for sideways, and the up and down arrow keys."));
 
-    App.open("2-Hand co-ordination", box);
+    App.open("2-Hand co-ordination — "+this.trackName, box);
     App.active=this;
 
     this.vx=0; this.vy=0;
@@ -898,7 +1110,7 @@ const HAND = {
   },
   makePath(){
     const m=26, n=160, amp=(this.H/2-m-this.CH/2);
-    const a=[0.9,-0.7,0.5,0.35];
+    const a=this.coef;
     this.path=[];
     for(let i=0;i<=n;i++){
       const t=i/n, x=m+t*(this.W-2*m);
@@ -1001,8 +1213,9 @@ const HAND = {
       ? "You are outside the channel a quarter of the time. Slow right down — halve your speed until the buzzer stops, then build back up. On the day the time outside is what is counted, and going slowly is not penalised the way straying is."
       : last<first*0.7
       ? "Clear improvement across the six runs, which is what practice on this looks like. Keep going: the real test is ten runs of the same shape and the later ones are where control tells."
-      : "Reasonably controlled. Most people find one hand leads and the other lags — watch the hand that is lagging rather than the one that is working, because that is the one costing you the corners.";
+      : "Reasonably controlled. Most people find one hand leads and the other lags — watch the hand that is lagging rather than the one that is working, because that is the one costing you the corners. Your next attempt runs a different channel shape, which is where a memorised route stops helping you.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Track", this.trackName],
       ["Runs", this.RUNS],
       ["Total time", tot.toFixed(1)+" s"],
       ["Time outside the channel", out.toFixed(1)+" s"],
@@ -1016,7 +1229,10 @@ const HAND = {
 };
 
 /* ---------------------------------------------------------------- SJT data */
-const SJT_Q = [
+const SJT_SETS = [
+
+/* ---- set 1 ---- */
+[
  ["A friend's ladder has a cracked side rail. You are nearly finished clearing their gutter and the light is going.",
   ["Come down, show them the crack, stop using it, and offer to finish another day with a different ladder.",
    "Tell them about the crack but finish the last section carefully since you are nearly done.",
@@ -1080,13 +1296,219 @@ const SJT_Q = [
    "Say nothing."],
   [0,1,2,3],
   "Every detail — no witness, no camera, existing damage — is there to make silence attractive. It is measuring whether your reporting depends on the chance of being caught."]
+],
+
+/* ---- set 2 ---- */
+[
+ ["Driving on a dual carriageway you notice the car ahead has a child's bike in the boot, the lid tied down, and the bike shifting each time they brake.",
+  ["Drop well back, and flag it to the driver at the next junction or services.",
+   "Drop well back and report the registration once you have stopped.",
+   "Overtake so that you are no longer the one behind it.",
+   "Stay where you are — people carry things badly all the time."],
+  [0,1,2,3],
+  "Two of these deal with the hazard and two only move you away from it. Getting yourself clear is not the same as sorting it out."],
+
+ ["You borrow a colleague's power tool and see the guard has been taken off. You need it for ten minutes.",
+  ["Stop, tell them it is not safe as it stands, and find another tool.",
+   "Put it down and use a hand tool instead, then mention the guard later.",
+   "Use it carefully for the ten minutes and mention the guard afterwards.",
+   "Use it — the guard gets in the way and half of them get removed anyway."],
+  [0,1,2,3],
+  "'Carefully, just this once' is the option that always sounds reasonable in the moment and never survives being written down afterwards."],
+
+ ["You start a new prescription. The leaflet says it may cause drowsiness. You feel fine and you are due at work in the morning.",
+  ["Check with your GP or pharmacist that it is compatible with the work, then tell your manager before you start.",
+   "Tell your manager before the shift and follow whatever they decide.",
+   "Go in as normal and say something only if you start to feel drowsy.",
+   "Say nothing — declaring it would only get you stood down for nothing."],
+  [0,1,2,3],
+  "Both top answers declare it; their order is arguable. What is not arguable is that a decision about your own fitness is not one you take quietly on your own."],
+
+ ["You overhear two people on your team agreeing to sign off a check they have not actually done.",
+  ["Tell them you heard, and that you expect the check to be done or the sign-off pulled.",
+   "Report it to your supervisor straight away.",
+   "Say nothing now, but watch whether it happens again.",
+   "Stay out of it — they are not on your job and it is not your name on the sheet."],
+  [0,1,2,3],
+  "Speaking to them first is not the soft option. It is the fast one, and it still leaves you free to report if nothing changes."],
+
+ ["You are running late for something that matters and the road ahead is empty.",
+  ["Accept you will be late, drive normally, and ring ahead to say so.",
+   "Drive normally and make the time up by dropping the stop you had planned.",
+   "Push the speed up a little, but only on the empty stretches.",
+   "Make the time up wherever you can — being late will cost you more than the risk."],
+  [0,1,2,3],
+  "The pressure here is entirely self-imposed, and the question is whether a deadline moves your standards. It should not."],
+
+ ["A delivery arrives with two of an item when you paid for one. The courier has gone.",
+  ["Contact the company, tell them, and arrange to return it or pay for it.",
+   "Put it to one side and contact them when you next get a chance.",
+   "Keep it, but leave an honest review mentioning the error.",
+   "Keep it — their system, their problem."],
+  [0,1,2,3],
+  "Another deliberately small one. Nobody is watching and nobody is harmed, and it still separates people cleanly."],
+
+ ["Someone steps backwards off a kerb into the road, a car brakes hard, and nothing happens. They laugh it off.",
+  ["Check they are alright, and say plainly how close that was.",
+   "Check they are alright and leave it there.",
+   "Say nothing — no harm done and they will only be embarrassed.",
+   "Laugh along with it."],
+  [0,1,2,3],
+  "A near miss is information. The urge to smooth the moment over is the same urge that stops near misses being reported at work."],
+
+ ["You are given an instruction you do not fully understand. Everyone else has started and asking will hold things up.",
+  ["Ask now and get it clear before you start.",
+   "Ask the person next to you quietly, then start.",
+   "Start, copy what the others are doing, and ask if you get stuck.",
+   "Start and work it out as you go — you will look incapable otherwise."],
+  [0,1,2,3],
+  "Everything below the first option trades a small embarrassment now for an error you may not notice later. Assessors read that trade as your tolerance for risk."]
+],
+
+/* ---- set 3 ---- */
+[
+ ["A smoke alarm in your block has been beeping for a fortnight. It is not in your flat.",
+  ["Report it to the managing agent, and knock to check whether the occupant knows.",
+   "Report it to the managing agent and leave it with them.",
+   "Mention it to a neighbour to see whether anyone has dealt with it.",
+   "Ignore it — someone else will sort it out."],
+  [0,1,2,3],
+  "Diffusion of responsibility. The more people who could act, the less likely anyone does, which is why 'someone else will' scores as the worst answer rather than a neutral one."],
+
+ ["Your friend, who is driving you both home, has had two pints and insists they are under the limit.",
+  ["Say you are not getting in, and sort a taxi for the two of you.",
+   "Say you would rather not, and offer to drive instead.",
+   "Get in, but ask them to take it slowly and stick to the back roads.",
+   "Get in — they know their own limit and it is a short drive."],
+  [0,1,2,3],
+  "Whether they are under the limit is not the question being asked. Notice that both acceptable answers cost you something socially."],
+
+ ["You make a mistake that costs your team an hour. Nobody has worked out that it was you.",
+  ["Say it was you, explain what happened, and suggest what would stop it recurring.",
+   "Say it was you, and apologise.",
+   "Say nothing, but be more careful in future.",
+   "Let it lie — owning it now only makes you the person it happened to."],
+  [0,1,2,3],
+  "The gap between the top two is what an interviewer digs into. An error you can explain is worth more to a team than an error you merely confess."],
+
+ ["A recurring alarm on a machine you use has been silenced by someone because it 'goes off for nothing'.",
+  ["Do not use it, report the silenced alarm, and say why it matters.",
+   "Restore the alarm yourself and report that it had been silenced.",
+   "Use it, but check manually for whatever the alarm would have caught.",
+   "Carry on — everyone knows that alarm is unreliable."],
+  [0,1,2,3],
+  "A nuisance alarm is a fault to fix, not a fault to work around. Manual vigilance is the answer that sounds diligent and fails at hour six."],
+
+ ["You are asked at interview about a gap in your work history. The real reason is that you were dismissed.",
+  ["Say so plainly and briefly, and what you took from it.",
+   "Say the role came to an end, and give the detail if they ask.",
+   "Describe it as a mutual parting so as not to sink your chances.",
+   "Say you were made redundant — it is close enough and nobody checks."],
+  [0,1,2,3],
+  "Integrity items turn up in the interview too, and this one is checkable. The cost of the honest answer is almost always smaller than the cost of being caught."],
+
+ ["Halfway through a long shift you realise you have not eaten or had a drink since the morning.",
+  ["Take your break properly now, even though it puts you behind.",
+   "Take ten minutes now and make the rest of it up later.",
+   "Push on to the end and eat afterwards — it is only a few hours.",
+   "Skip it and keep going; stopping now would look like you cannot cope."],
+  [0,1,2,3],
+  "Self-management is scored on this test. Running yourself down and calling it commitment is a failure mode, not a strength."],
+
+ ["Someone in your team keeps making the same small error and it is starting to affect the work.",
+  ["Speak to them directly and privately, and be specific about what you have seen.",
+   "Offer to work alongside them for a bit and show them how you do it.",
+   "Raise it with the supervisor without speaking to them first.",
+   "Say nothing — managing people is not your job."],
+  [0,1,2,3],
+  "The direct conversation ranks first here because nothing has gone wrong yet. Compare the alcohol and sign-off items, where a risk is live and escalation moves up."],
+
+ ["You are on the last item of a long checklist and you cannot remember whether you completed item four.",
+  ["Go back and do item four again.",
+   "Go back, work out whether it was done, and redo it if you cannot tell.",
+   "Finish, then ask a colleague to verify item four for you.",
+   "Assume it was done — you have never missed one before."],
+  [0,1,2,3],
+  "'I have never missed one' is a statement about your memory, not about item four. The check is cheap; the assumption is what costs."]
+],
+
+/* ---- set 4 ---- */
+[
+ ["A visitor at your workplace walks past reception without signing in. You do not recognise them.",
+  ["Stop them politely, ask who they are here to see, and walk them back to reception.",
+   "Point them back towards reception and carry on.",
+   "Mention to reception afterwards that someone came through.",
+   "Leave it — challenging people is not your job and they clearly know where they are going."],
+  [0,1,2,3],
+  "Security items are scored like safety items. Note that the best answer is polite and firm rather than confrontational."],
+
+ ["Your train home is cancelled and you will now be late collecting your child. Someone you have just met offers you a lift.",
+  ["Ring whoever is with your child, explain, and arrange proper cover.",
+   "Take the lift, but tell someone where you are going and who with.",
+   "Take the lift — you will be on time and it is a short journey.",
+   "Say nothing to anyone and sort it out when you get there."],
+  [0,1,2,3],
+  "Time pressure again, in a domestic wrapper. The best answer costs you the deadline and keeps everything else intact."],
+
+ ["You spot that a set of figures you sent out last week was wrong. They have already been used.",
+  ["Tell the recipient now, send the corrected figures, and say what was affected.",
+   "Send the corrected figures with a short note.",
+   "Correct your own copy, and mention it if it ever comes up.",
+   "Leave it — raising it now would undermine everything else you have sent."],
+  [0,1,2,3],
+  "The consequence is already out in the world. What is being measured is how fast you make it visible, not how bad the error was."],
+
+ ["A workmate asks you to sign as a witness on a form for work you did not see done.",
+  ["Say no, explain why, and offer to witness it properly if it is redone in front of you.",
+   "Say no, and leave it there.",
+   "Sign it, but write on the form that you did not observe the work.",
+   "Sign it — they are reliable and it is only paperwork."],
+  [0,1,2,3],
+  "A signature is a statement of fact about you, not a favour to someone else. The annotated signature is a fudge — your name still sits on a record you cannot support."],
+
+ ["Working outdoors, the weather turns worse than forecast. You could be finished in another forty minutes.",
+  ["Stop, secure what you can, and come back when conditions improve.",
+   "Stop, and ring whoever is expecting the work to explain the delay.",
+   "Press on, but cut the last stage short.",
+   "Press on — forty minutes is nothing and you would rather not come back."],
+  [0,1,2,3],
+  "Sunk cost. The time already spent is doing all the arguing here, and it has no bearing at all on whether it is safe to carry on."],
+
+ ["You are asked to cover a task you were trained on, but have not done for two years.",
+  ["Say it has been two years, and ask for a refresher or someone alongside you.",
+   "Agree, but read the procedure through fully before you start.",
+   "Agree, and ask a colleague questions as you go.",
+   "Agree — it will come back to you once you start."],
+  [0,1,2,3],
+  "Currency is not the same as competence. Saying so out loud costs you the most and scores the highest."],
+
+ ["A neighbour asks you to keep quiet about an insurance claim they are exaggerating.",
+  ["Tell them you will not be part of it, and that they should correct it.",
+   "Tell them you would rather not be involved, and leave it at that.",
+   "Say nothing to them or anyone else — it is not your business.",
+   "Back them up if you are asked — it is a big company and nobody is really hurt."],
+  [0,1,2,3],
+  "The 'victimless' framing is the pressure. Being asked to lie for someone else is the same integrity item as lying for yourself."],
+
+ ["You disagree with a decision your manager has just announced in front of the team.",
+  ["Raise it with them afterwards, privately, with your reasoning.",
+   "Ask a clarifying question there and then, and follow it up privately if you need to.",
+   "Say straight away, in front of everyone, that it is the wrong call.",
+   "Say nothing and get on with it."],
+  [0,1,3,2],
+  "Look at the bottom two. Silence and a public challenge are both failures, but on this kind of test the aggressive answer usually scores below the passive one."]
+]
+
 ];
+let SJT_Q = SJT_SETS[0];
 
 const SJT = {
   LIMIT:45,
   start(){
     this.i=0; this.answers=[];
-    App.open("M7-SJT ranking", el("div"));
+    this.set=Rot.next("sjt", SJT_SETS.length);
+    SJT_Q = SJT_SETS[this.set];
+    App.open("M7-SJT ranking — set "+(this.set+1)+" of "+SJT_SETS.length, el("div"));
     App.active=this;
     this.show();
   },
@@ -1094,17 +1516,18 @@ const SJT = {
     const [txt,opts]=SJT_Q[this.i];
     this.picked=[];
     const box=el("div");
-    box.appendChild(el("div","chainbar","Situation "+(this.i+1)+" of "+SJT_Q.length+
+    box.appendChild(el("div","chainbar","Set "+(this.set+1)+" of "+SJT_SETS.length+
+      " · situation "+(this.i+1)+" of "+SJT_Q.length+
       " — tap the responses in order, best first. Auto-advances after 45 seconds."));
     box.appendChild(el("div","scenbox",txt));
     const g=el("div","ranks");
     this.nodes=[];
-    opts.forEach((o,j)=>{
+    shuffle(opts.map((_,j)=>j)).forEach(j=>{
       const n=el("div","rankopt");
       const b=el("span","badge",""); n.appendChild(b);
-      n.appendChild(el("span",null,o));
+      n.appendChild(el("span",null,opts[j]));
       n.onclick=()=>this.tap(j,n,b);
-      g.appendChild(n); this.nodes.push({n,b});
+      g.appendChild(n); this.nodes.push({n,b,j});
     });
     box.appendChild(g);
     box.appendChild(el("p","hintline","Tap a response again to clear it and re-order."));
@@ -1125,8 +1548,8 @@ const SJT = {
     const at=this.picked.indexOf(j);
     if(at>=0){ this.picked.splice(at,1); }
     else if(this.picked.length<4){ this.picked.push(j); }
-    this.nodes.forEach((o,k)=>{
-      const p=this.picked.indexOf(k);
+    this.nodes.forEach(o=>{
+      const p=this.picked.indexOf(o.j);
       o.b.textContent = p>=0 ? (p+1) : "";
       o.n.classList.toggle("set", p>=0);
     });
@@ -1166,13 +1589,16 @@ const SJT = {
       acc+"%");
     SJT_Q.forEach((qq,i)=>{
       const got=this.answers[i]; if(got.length!==4) return;
-      const sug=qq[2];
-      const mine=got.map(x=>"abcd"[x]).join(" ");
-      const theirs=sug.map(x=>"abcd"[x]).join(" ");
-      const same=mine===theirs;
+      const sug=qq[2], opts=qq[1];
+      const same=got.join()===sug.join();
       const r=el("div","rev");
       r.appendChild(el("h4","Situation "+(i+1)+(same?" — matched":"")));
-      r.appendChild(el("p",null,"Yours <b class='"+(same?"ok":"bad")+"'>"+mine+"</b> &nbsp; suggested <b>"+theirs+"</b>"));
+      sug.forEach((optIdx,rank)=>{
+        const mine=got.indexOf(optIdx)+1;
+        const ok=mine===rank+1;
+        r.appendChild(el("p",null,"<b>"+(rank+1)+".</b> "+opts[optIdx]+
+          " <b class='"+(ok?"ok":"bad")+"'>— you put it "+mine+"</b>"));
+      });
       r.appendChild(el("p",null,qq[3]));
       w.appendChild(r);
     });
@@ -1183,7 +1609,10 @@ const SJT = {
 
 /* ---------------------------------------------------------------- SJE data */
 // tag: dir 'hi' = should rate high, 'lo' = should rate low
-const SJE_Q = [
+const SJE_SETS = [
+
+/* ---- set 1 ---- */
+[
  ["You are working alone on a task that must be finished before you leave. Halfway through you get a call with upsetting personal news. Nobody else is on site.",
   [["Carry on immediately so it is finished on time, and deal with the news afterwards.",2,"fitness","lo"],
    ["Stop, take twenty minutes, and decide honestly whether you are fit to finish.",5,"fitness","hi"],
@@ -1219,12 +1648,134 @@ const SJE_Q = [
    ["Assume it was fine — you have done this many times.",1,"convenience","lo"],
    ["Finish the remaining work, then recheck before signing off.",4,"report","hi"],
    ["Tell whoever is signing off that you are not certain about that section.",5,"report","hi"]]]
+],
+
+/* ---- set 2 ---- */
+[
+ ["You are due to start a shift after four hours' sleep, because of a family emergency overnight.",
+  [["Start the shift and see how you feel as you go.",2,"fitness","lo"],
+   ["Tell your manager how much sleep you have had and let them decide whether you start.",5,"escalate","hi"],
+   ["Say you are not fit to work today, and explain why.",5,"fitness","hi"],
+   ["Start, and keep it to yourself so nobody thinks you are unreliable.",1,"conceal","lo"]]],
+
+ ["You notice a guard rail on a walkway is loose. It is not part of your job and you are already late.",
+  [["Make it safe if you can, then report it.",5,"riskfirst","hi"],
+   ["Report it now, even though it makes you later still.",5,"report","hi"],
+   ["Report it at the end of the day, when you have time.",2,"convenience","lo"],
+   ["Leave it — someone whose job it is will pick it up.",1,"convenience","lo"]]],
+
+ ["A colleague rings and asks you to log them in so they start on time. They are five minutes away.",
+  [["Refuse, and tell them to log in themselves when they arrive.",5,"riskfirst","hi"],
+   ["Refuse, and explain why the record has to be accurate.",5,"report","hi"],
+   ["Refuse, and tell them you will report it if they ask again.",2,"aggressive","lo"],
+   ["Do it — it is five minutes and it saves them a warning.",1,"convenience","lo"]]],
+
+ ["You are given a job with a deadline you do not think is achievable without cutting corners.",
+  [["Say so before you start, and agree what will be dropped.",5,"report","hi"],
+   ["Ask your manager to reprioritise it or extend the deadline now.",5,"escalate","hi"],
+   ["Start it, and raise it if you fall behind.",2,"convenience","lo"],
+   ["Take it on, and cut the checks rather than miss the deadline.",1,"conceal","lo"]]],
+
+ ["Halfway through a task you realise the method you were shown is not the one in the procedure.",
+  [["Stop and check the procedure before going any further.",5,"riskfirst","hi"],
+   ["Stop, check, and raise the difference so the training or the procedure gets fixed.",5,"escalate","hi"],
+   ["Finish this one the way you were shown, then raise the difference.",2,"convenience","lo"],
+   ["Carry on as shown — the person who trained you does it every day.",1,"convenience","lo"]]],
+
+ ["An incident you were involved in is being investigated, and a colleague asks you to keep your account vague.",
+  [["Give a full, accurate account regardless.",5,"report","hi"],
+   ["Give a full account, and tell them plainly you will not shade it.",5,"riskfirst","hi"],
+   ["Keep your account brief so as not to drop them in it.",1,"conceal","lo"],
+   ["Say you cannot remember the details clearly.",1,"conceal","lo"]]]
+],
+
+/* ---- set 3 ---- */
+[
+ ["You are getting over a heavy cold. You are not ill enough to be off, but you are not sharp either.",
+  [["Go in, and ask not to be put on the task that needs the most concentration.",5,"fitness","hi"],
+   ["Go in, and tell your manager you are below par.",5,"report","hi"],
+   ["Go in and say nothing — everybody works through a cold.",2,"conceal","lo"],
+   ["Take the day off without telling anyone why.",2,"conceal","lo"]]],
+
+ ["A piece of equipment you rely on has an out-of-date calibration sticker.",
+  [["Do not use it, and report it.",5,"riskfirst","hi"],
+   ["Check with whoever manages calibration before you use it.",5,"escalate","hi"],
+   ["Use it, but cross-check the readings against something else.",2,"convenience","lo"],
+   ["Use it — the sticker is admin, the equipment is fine.",1,"convenience","lo"]]],
+
+ ["You see a colleague take a shortcut that is against the rules, but that everyone on the team uses.",
+  [["Say something to them at the time.",5,"riskfirst","hi"],
+   ["Raise it as a team issue, since it is clearly not just one person.",5,"escalate","hi"],
+   ["Report the individual, without mentioning that it is the whole team.",2,"aggressive","lo"],
+   ["Do it their way too — you will be the odd one out otherwise.",1,"convenience","lo"]]],
+
+ ["Someone much more senior than you asks you to do something you believe is unsafe.",
+  [["Say clearly that you are not willing to do it, and why.",5,"riskfirst","hi"],
+   ["Ask for the decision to go to someone who can authorise the change.",5,"escalate","hi"],
+   ["Ask them to confirm the instruction in writing.",4,"report","hi"],
+   ["Do it, and raise a concern afterwards.",1,"conceal","lo"]]],
+
+ ["Your workload has been climbing for weeks and you are now making small errors you would not normally make.",
+  [["Tell your manager what is slipping and ask to reprioritise.",5,"escalate","hi"],
+   ["Keep a note of the errors and raise them along with the work you cannot complete.",4,"report","hi"],
+   ["Work later until you are back on top of it.",2,"fitness","lo"],
+   ["Say nothing — it will settle down, and raising it looks like you cannot cope.",1,"conceal","lo"]]],
+
+ ["A member of the public tells you something is wrong in an area you are responsible for. You looked an hour ago and it was fine.",
+  [["Go and look again now.",5,"riskfirst","hi"],
+   ["Thank them, go and look, and report it if it has changed.",5,"report","hi"],
+   ["Explain that you checked it an hour ago and it was fine.",2,"convenience","lo"],
+   ["Note it, and check on your next round.",2,"convenience","lo"]]]
+],
+
+/* ---- set 4 ---- */
+[
+ ["You are asked to sign off work that was done by someone else while you were not there.",
+  [["Refuse to sign for what you did not see, and say why.",5,"riskfirst","hi"],
+   ["Ask the person who did observe it to sign instead.",5,"escalate","hi"],
+   ["Inspect what you can now, and sign only for that.",4,"report","hi"],
+   ["Sign it — they are experienced and you trust them.",1,"convenience","lo"]]],
+
+ ["Two hours into a task the conditions change and the method you agreed is no longer the safest one.",
+  [["Stop and re-plan before you continue.",5,"riskfirst","hi"],
+   ["Ring your supervisor and agree a revised method.",5,"escalate","hi"],
+   ["Carry on, but go slower and be more careful.",2,"convenience","lo"],
+   ["Carry on — you are two hours in and nearly done.",1,"convenience","lo"]]],
+
+ ["A colleague tells you in confidence that they have made a mistake and have not reported it.",
+  [["Help them work out how to report it, and go with them.",5,"report","hi"],
+   ["Encourage them to report it, and be clear that you will if they do not.",5,"escalate","hi"],
+   ["Report it yourself straight away without telling them.",2,"aggressive","lo"],
+   ["Keep it to yourself — they trusted you.",1,"conceal","lo"]]],
+
+ ["You are asked to work through your break to keep a job moving.",
+  [["Say you will take your break, and explain why it matters for the rest of the shift.",5,"fitness","hi"],
+   ["Take a shorter break, and agree what will slip as a result.",4,"report","hi"],
+   ["Work through it — the job matters more than a break.",2,"fitness","lo"],
+   ["Work through it, and say nothing about it afterwards.",1,"conceal","lo"]]],
+
+ ["You realise you have been doing a routine part of your job slightly wrong for months. No harm has come of it.",
+  [["Raise it, explain what you have been doing, and check whether anything needs revisiting.",5,"report","hi"],
+   ["Raise it, and offer to go back over the work you have already done.",5,"escalate","hi"],
+   ["Correct yourself quietly from now on.",2,"conceal","lo"],
+   ["Leave it — no harm done, and it would only cause trouble.",1,"conceal","lo"]]],
+
+ ["Near the end of a night shift you notice something that will take an hour to deal with properly.",
+  [["Make it safe, hand it over in full to the next shift, and record it.",5,"report","hi"],
+   ["Deal with it properly, even though it takes you past the end of the shift.",4,"riskfirst","hi"],
+   ["Leave a note for the next shift and go.",2,"convenience","lo"],
+   ["Leave it — it will keep until tomorrow.",1,"convenience","lo"]]]
+]
+
 ];
+let SJE_Q = SJE_SETS[0];
 
 const SJE = {
   start(){
     this.i=0; this.ratings=[];
-    App.open("SJE rating", el("div"));
+    this.set=Rot.next("sje", SJE_SETS.length);
+    SJE_Q = SJE_SETS[this.set];
+    App.open("SJE rating — set "+(this.set+1)+" of "+SJE_SETS.length, el("div"));
     App.active=this;
     this.show();
   },
@@ -1232,11 +1783,13 @@ const SJE = {
     const [txt,opts]=SJE_Q[this.i];
     this.cur=new Array(opts.length).fill(0);
     const box=el("div");
-    box.appendChild(el("div","chainbar","Scenario "+(this.i+1)+" of "+SJE_Q.length+
+    box.appendChild(el("div","chainbar","Set "+(this.set+1)+" of "+SJE_SETS.length+
+      " · scenario "+(this.i+1)+" of "+SJE_Q.length+
       " — rate every response on its own. Several can be helpful, or none."));
     box.appendChild(el("div","scenbox",txt));
     const g=el("div","ratewrap");
-    opts.forEach((o,j)=>{
+    shuffle(opts.map((_,j)=>j)).forEach(j=>{
+      const o=opts[j];
       const n=el("div","rateopt");
       n.appendChild(el("p",null,o[0]));
       const sc=el("div","scale");
@@ -1309,7 +1862,7 @@ const SJE = {
       qq[1].forEach((o,j)=>{
         const got=this.ratings[i][j];
         if(got && Math.abs(got-o[1])>=2)
-          r2.appendChild(el("p",null,"Scenario "+(i+1)+", response "+"ABCD"[j]+": you "+got+", suggested "+o[1]+"."));
+          r2.appendChild(el("p",null,"Scenario "+(i+1)+" — “"+o[0]+"” you rated "+got+", suggested "+o[1]+"."));
       });
     });
     if(r2.children.length>1) w.appendChild(r2);
