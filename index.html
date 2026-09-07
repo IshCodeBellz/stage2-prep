@@ -245,8 +245,8 @@
     <span class="lamp" id="l-sjt"></span>
     <div class="body">
       <h2>M7-SJT — ranking</h2>
-      <p>Put four responses in order of preference. 45 seconds a situation, auto-advancing.</p>
-      <div class="meta">8 situations · 6 min</div>
+      <p>Put four responses in order of preference. 45 seconds a situation, auto-advancing. Four different sets, rotating, so a second run is never the same paper.</p>
+      <div class="meta">8 situations · 4 sets · 6 min</div>
     </div>
     <button class="go" onclick="SJT.start()">Start</button>
   </div>
@@ -255,8 +255,8 @@
     <span class="lamp" id="l-sje"></span>
     <div class="body">
       <h2>SJE — rating</h2>
-      <p>Rate each response 1 to 5. Checks your answers against each other for contradictions.</p>
-      <div class="meta">6 scenarios · untimed</div>
+      <p>Rate each response 1 to 5. Checks your answers against each other for contradictions. Four different sets, rotating.</p>
+      <div class="meta">6 scenarios · 4 sets · untimed</div>
     </div>
     <button class="go" onclick="SJE.start()">Start</button>
   </div>
@@ -300,6 +300,7 @@ const $ = s => document.querySelector(s);
 const el = (t,c,h) => { const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e; };
 const rnd = n => Math.floor(Math.random()*n);
 const pick = a => a[rnd(a.length)];
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const k=rnd(i+1); const t=a[i]; a[i]=a[k]; a[k]=t; } return a; };
 const mmss = s => Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
 
 /* ---- progress, saved on this device only. Degrades to memory if storage is blocked. */
@@ -328,6 +329,22 @@ const Store = (()=>{
       mem[id]=r; save();
     },
     clear(){ mem={}; try{ localStorage.removeItem(KEY); }catch(e){} }
+  };
+})();
+
+/* ---- which question set you get next. Rotates so a second attempt is never the same paper. */
+const Rot = (()=>{
+  const KEY="stage2.sets.v1";
+  let mem={};
+  try{ mem = JSON.parse(localStorage.getItem(KEY)||"{}") || {}; }catch(e){ mem={}; }
+  const save=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(mem)); }catch(e){} };
+  return {
+    next(id, n){
+      const i = (mem[id]|0) % n;
+      mem[id] = (i+1) % n;
+      save();
+      return i;
+    }
   };
 })();
 
@@ -1016,7 +1033,10 @@ const HAND = {
 };
 
 /* ---------------------------------------------------------------- SJT data */
-const SJT_Q = [
+const SJT_SETS = [
+
+/* ---- set 1 ---- */
+[
  ["A friend's ladder has a cracked side rail. You are nearly finished clearing their gutter and the light is going.",
   ["Come down, show them the crack, stop using it, and offer to finish another day with a different ladder.",
    "Tell them about the crack but finish the last section carefully since you are nearly done.",
@@ -1080,13 +1100,219 @@ const SJT_Q = [
    "Say nothing."],
   [0,1,2,3],
   "Every detail — no witness, no camera, existing damage — is there to make silence attractive. It is measuring whether your reporting depends on the chance of being caught."]
+],
+
+/* ---- set 2 ---- */
+[
+ ["Driving on a dual carriageway you notice the car ahead has a child's bike in the boot, the lid tied down, and the bike shifting each time they brake.",
+  ["Drop well back, and flag it to the driver at the next junction or services.",
+   "Drop well back and report the registration once you have stopped.",
+   "Overtake so that you are no longer the one behind it.",
+   "Stay where you are — people carry things badly all the time."],
+  [0,1,2,3],
+  "Two of these deal with the hazard and two only move you away from it. Getting yourself clear is not the same as sorting it out."],
+
+ ["You borrow a colleague's power tool and see the guard has been taken off. You need it for ten minutes.",
+  ["Stop, tell them it is not safe as it stands, and find another tool.",
+   "Put it down and use a hand tool instead, then mention the guard later.",
+   "Use it carefully for the ten minutes and mention the guard afterwards.",
+   "Use it — the guard gets in the way and half of them get removed anyway."],
+  [0,1,2,3],
+  "'Carefully, just this once' is the option that always sounds reasonable in the moment and never survives being written down afterwards."],
+
+ ["You start a new prescription. The leaflet says it may cause drowsiness. You feel fine and you are due at work in the morning.",
+  ["Check with your GP or pharmacist that it is compatible with the work, then tell your manager before you start.",
+   "Tell your manager before the shift and follow whatever they decide.",
+   "Go in as normal and say something only if you start to feel drowsy.",
+   "Say nothing — declaring it would only get you stood down for nothing."],
+  [0,1,2,3],
+  "Both top answers declare it; their order is arguable. What is not arguable is that a decision about your own fitness is not one you take quietly on your own."],
+
+ ["You overhear two people on your team agreeing to sign off a check they have not actually done.",
+  ["Tell them you heard, and that you expect the check to be done or the sign-off pulled.",
+   "Report it to your supervisor straight away.",
+   "Say nothing now, but watch whether it happens again.",
+   "Stay out of it — they are not on your job and it is not your name on the sheet."],
+  [0,1,2,3],
+  "Speaking to them first is not the soft option. It is the fast one, and it still leaves you free to report if nothing changes."],
+
+ ["You are running late for something that matters and the road ahead is empty.",
+  ["Accept you will be late, drive normally, and ring ahead to say so.",
+   "Drive normally and make the time up by dropping the stop you had planned.",
+   "Push the speed up a little, but only on the empty stretches.",
+   "Make the time up wherever you can — being late will cost you more than the risk."],
+  [0,1,2,3],
+  "The pressure here is entirely self-imposed, and the question is whether a deadline moves your standards. It should not."],
+
+ ["A delivery arrives with two of an item when you paid for one. The courier has gone.",
+  ["Contact the company, tell them, and arrange to return it or pay for it.",
+   "Put it to one side and contact them when you next get a chance.",
+   "Keep it, but leave an honest review mentioning the error.",
+   "Keep it — their system, their problem."],
+  [0,1,2,3],
+  "Another deliberately small one. Nobody is watching and nobody is harmed, and it still separates people cleanly."],
+
+ ["Someone steps backwards off a kerb into the road, a car brakes hard, and nothing happens. They laugh it off.",
+  ["Check they are alright, and say plainly how close that was.",
+   "Check they are alright and leave it there.",
+   "Say nothing — no harm done and they will only be embarrassed.",
+   "Laugh along with it."],
+  [0,1,2,3],
+  "A near miss is information. The urge to smooth the moment over is the same urge that stops near misses being reported at work."],
+
+ ["You are given an instruction you do not fully understand. Everyone else has started and asking will hold things up.",
+  ["Ask now and get it clear before you start.",
+   "Ask the person next to you quietly, then start.",
+   "Start, copy what the others are doing, and ask if you get stuck.",
+   "Start and work it out as you go — you will look incapable otherwise."],
+  [0,1,2,3],
+  "Everything below the first option trades a small embarrassment now for an error you may not notice later. Assessors read that trade as your tolerance for risk."]
+],
+
+/* ---- set 3 ---- */
+[
+ ["A smoke alarm in your block has been beeping for a fortnight. It is not in your flat.",
+  ["Report it to the managing agent, and knock to check whether the occupant knows.",
+   "Report it to the managing agent and leave it with them.",
+   "Mention it to a neighbour to see whether anyone has dealt with it.",
+   "Ignore it — someone else will sort it out."],
+  [0,1,2,3],
+  "Diffusion of responsibility. The more people who could act, the less likely anyone does, which is why 'someone else will' scores as the worst answer rather than a neutral one."],
+
+ ["Your friend, who is driving you both home, has had two pints and insists they are under the limit.",
+  ["Say you are not getting in, and sort a taxi for the two of you.",
+   "Say you would rather not, and offer to drive instead.",
+   "Get in, but ask them to take it slowly and stick to the back roads.",
+   "Get in — they know their own limit and it is a short drive."],
+  [0,1,2,3],
+  "Whether they are under the limit is not the question being asked. Notice that both acceptable answers cost you something socially."],
+
+ ["You make a mistake that costs your team an hour. Nobody has worked out that it was you.",
+  ["Say it was you, explain what happened, and suggest what would stop it recurring.",
+   "Say it was you, and apologise.",
+   "Say nothing, but be more careful in future.",
+   "Let it lie — owning it now only makes you the person it happened to."],
+  [0,1,2,3],
+  "The gap between the top two is what an interviewer digs into. An error you can explain is worth more to a team than an error you merely confess."],
+
+ ["A recurring alarm on a machine you use has been silenced by someone because it 'goes off for nothing'.",
+  ["Do not use it, report the silenced alarm, and say why it matters.",
+   "Restore the alarm yourself and report that it had been silenced.",
+   "Use it, but check manually for whatever the alarm would have caught.",
+   "Carry on — everyone knows that alarm is unreliable."],
+  [0,1,2,3],
+  "A nuisance alarm is a fault to fix, not a fault to work around. Manual vigilance is the answer that sounds diligent and fails at hour six."],
+
+ ["You are asked at interview about a gap in your work history. The real reason is that you were dismissed.",
+  ["Say so plainly and briefly, and what you took from it.",
+   "Say the role came to an end, and give the detail if they ask.",
+   "Describe it as a mutual parting so as not to sink your chances.",
+   "Say you were made redundant — it is close enough and nobody checks."],
+  [0,1,2,3],
+  "Integrity items turn up in the interview too, and this one is checkable. The cost of the honest answer is almost always smaller than the cost of being caught."],
+
+ ["Halfway through a long shift you realise you have not eaten or had a drink since the morning.",
+  ["Take your break properly now, even though it puts you behind.",
+   "Take ten minutes now and make the rest of it up later.",
+   "Push on to the end and eat afterwards — it is only a few hours.",
+   "Skip it and keep going; stopping now would look like you cannot cope."],
+  [0,1,2,3],
+  "Self-management is scored on this test. Running yourself down and calling it commitment is a failure mode, not a strength."],
+
+ ["Someone in your team keeps making the same small error and it is starting to affect the work.",
+  ["Speak to them directly and privately, and be specific about what you have seen.",
+   "Offer to work alongside them for a bit and show them how you do it.",
+   "Raise it with the supervisor without speaking to them first.",
+   "Say nothing — managing people is not your job."],
+  [0,1,2,3],
+  "The direct conversation ranks first here because nothing has gone wrong yet. Compare the alcohol and sign-off items, where a risk is live and escalation moves up."],
+
+ ["You are on the last item of a long checklist and you cannot remember whether you completed item four.",
+  ["Go back and do item four again.",
+   "Go back, work out whether it was done, and redo it if you cannot tell.",
+   "Finish, then ask a colleague to verify item four for you.",
+   "Assume it was done — you have never missed one before."],
+  [0,1,2,3],
+  "'I have never missed one' is a statement about your memory, not about item four. The check is cheap; the assumption is what costs."]
+],
+
+/* ---- set 4 ---- */
+[
+ ["A visitor at your workplace walks past reception without signing in. You do not recognise them.",
+  ["Stop them politely, ask who they are here to see, and walk them back to reception.",
+   "Point them back towards reception and carry on.",
+   "Mention to reception afterwards that someone came through.",
+   "Leave it — challenging people is not your job and they clearly know where they are going."],
+  [0,1,2,3],
+  "Security items are scored like safety items. Note that the best answer is polite and firm rather than confrontational."],
+
+ ["Your train home is cancelled and you will now be late collecting your child. Someone you have just met offers you a lift.",
+  ["Ring whoever is with your child, explain, and arrange proper cover.",
+   "Take the lift, but tell someone where you are going and who with.",
+   "Take the lift — you will be on time and it is a short journey.",
+   "Say nothing to anyone and sort it out when you get there."],
+  [0,1,2,3],
+  "Time pressure again, in a domestic wrapper. The best answer costs you the deadline and keeps everything else intact."],
+
+ ["You spot that a set of figures you sent out last week was wrong. They have already been used.",
+  ["Tell the recipient now, send the corrected figures, and say what was affected.",
+   "Send the corrected figures with a short note.",
+   "Correct your own copy, and mention it if it ever comes up.",
+   "Leave it — raising it now would undermine everything else you have sent."],
+  [0,1,2,3],
+  "The consequence is already out in the world. What is being measured is how fast you make it visible, not how bad the error was."],
+
+ ["A workmate asks you to sign as a witness on a form for work you did not see done.",
+  ["Say no, explain why, and offer to witness it properly if it is redone in front of you.",
+   "Say no, and leave it there.",
+   "Sign it, but write on the form that you did not observe the work.",
+   "Sign it — they are reliable and it is only paperwork."],
+  [0,1,2,3],
+  "A signature is a statement of fact about you, not a favour to someone else. The annotated signature is a fudge — your name still sits on a record you cannot support."],
+
+ ["Working outdoors, the weather turns worse than forecast. You could be finished in another forty minutes.",
+  ["Stop, secure what you can, and come back when conditions improve.",
+   "Stop, and ring whoever is expecting the work to explain the delay.",
+   "Press on, but cut the last stage short.",
+   "Press on — forty minutes is nothing and you would rather not come back."],
+  [0,1,2,3],
+  "Sunk cost. The time already spent is doing all the arguing here, and it has no bearing at all on whether it is safe to carry on."],
+
+ ["You are asked to cover a task you were trained on, but have not done for two years.",
+  ["Say it has been two years, and ask for a refresher or someone alongside you.",
+   "Agree, but read the procedure through fully before you start.",
+   "Agree, and ask a colleague questions as you go.",
+   "Agree — it will come back to you once you start."],
+  [0,1,2,3],
+  "Currency is not the same as competence. Saying so out loud costs you the most and scores the highest."],
+
+ ["A neighbour asks you to keep quiet about an insurance claim they are exaggerating.",
+  ["Tell them you will not be part of it, and that they should correct it.",
+   "Tell them you would rather not be involved, and leave it at that.",
+   "Say nothing to them or anyone else — it is not your business.",
+   "Back them up if you are asked — it is a big company and nobody is really hurt."],
+  [0,1,2,3],
+  "The 'victimless' framing is the pressure. Being asked to lie for someone else is the same integrity item as lying for yourself."],
+
+ ["You disagree with a decision your manager has just announced in front of the team.",
+  ["Raise it with them afterwards, privately, with your reasoning.",
+   "Ask a clarifying question there and then, and follow it up privately if you need to.",
+   "Say straight away, in front of everyone, that it is the wrong call.",
+   "Say nothing and get on with it."],
+  [0,1,3,2],
+  "Look at the bottom two. Silence and a public challenge are both failures, but on this kind of test the aggressive answer usually scores below the passive one."]
+]
+
 ];
+let SJT_Q = SJT_SETS[0];
 
 const SJT = {
   LIMIT:45,
   start(){
     this.i=0; this.answers=[];
-    App.open("M7-SJT ranking", el("div"));
+    this.set=Rot.next("sjt", SJT_SETS.length);
+    SJT_Q = SJT_SETS[this.set];
+    App.open("M7-SJT ranking — set "+(this.set+1)+" of "+SJT_SETS.length, el("div"));
     App.active=this;
     this.show();
   },
@@ -1094,17 +1320,18 @@ const SJT = {
     const [txt,opts]=SJT_Q[this.i];
     this.picked=[];
     const box=el("div");
-    box.appendChild(el("div","chainbar","Situation "+(this.i+1)+" of "+SJT_Q.length+
+    box.appendChild(el("div","chainbar","Set "+(this.set+1)+" of "+SJT_SETS.length+
+      " · situation "+(this.i+1)+" of "+SJT_Q.length+
       " — tap the responses in order, best first. Auto-advances after 45 seconds."));
     box.appendChild(el("div","scenbox",txt));
     const g=el("div","ranks");
     this.nodes=[];
-    opts.forEach((o,j)=>{
+    shuffle(opts.map((_,j)=>j)).forEach(j=>{
       const n=el("div","rankopt");
       const b=el("span","badge",""); n.appendChild(b);
-      n.appendChild(el("span",null,o));
+      n.appendChild(el("span",null,opts[j]));
       n.onclick=()=>this.tap(j,n,b);
-      g.appendChild(n); this.nodes.push({n,b});
+      g.appendChild(n); this.nodes.push({n,b,j});
     });
     box.appendChild(g);
     box.appendChild(el("p","hintline","Tap a response again to clear it and re-order."));
@@ -1125,8 +1352,8 @@ const SJT = {
     const at=this.picked.indexOf(j);
     if(at>=0){ this.picked.splice(at,1); }
     else if(this.picked.length<4){ this.picked.push(j); }
-    this.nodes.forEach((o,k)=>{
-      const p=this.picked.indexOf(k);
+    this.nodes.forEach(o=>{
+      const p=this.picked.indexOf(o.j);
       o.b.textContent = p>=0 ? (p+1) : "";
       o.n.classList.toggle("set", p>=0);
     });
@@ -1166,13 +1393,16 @@ const SJT = {
       acc+"%");
     SJT_Q.forEach((qq,i)=>{
       const got=this.answers[i]; if(got.length!==4) return;
-      const sug=qq[2];
-      const mine=got.map(x=>"abcd"[x]).join(" ");
-      const theirs=sug.map(x=>"abcd"[x]).join(" ");
-      const same=mine===theirs;
+      const sug=qq[2], opts=qq[1];
+      const same=got.join()===sug.join();
       const r=el("div","rev");
       r.appendChild(el("h4","Situation "+(i+1)+(same?" — matched":"")));
-      r.appendChild(el("p",null,"Yours <b class='"+(same?"ok":"bad")+"'>"+mine+"</b> &nbsp; suggested <b>"+theirs+"</b>"));
+      sug.forEach((optIdx,rank)=>{
+        const mine=got.indexOf(optIdx)+1;
+        const ok=mine===rank+1;
+        r.appendChild(el("p",null,"<b>"+(rank+1)+".</b> "+opts[optIdx]+
+          " <b class='"+(ok?"ok":"bad")+"'>— you put it "+mine+"</b>"));
+      });
       r.appendChild(el("p",null,qq[3]));
       w.appendChild(r);
     });
@@ -1183,7 +1413,10 @@ const SJT = {
 
 /* ---------------------------------------------------------------- SJE data */
 // tag: dir 'hi' = should rate high, 'lo' = should rate low
-const SJE_Q = [
+const SJE_SETS = [
+
+/* ---- set 1 ---- */
+[
  ["You are working alone on a task that must be finished before you leave. Halfway through you get a call with upsetting personal news. Nobody else is on site.",
   [["Carry on immediately so it is finished on time, and deal with the news afterwards.",2,"fitness","lo"],
    ["Stop, take twenty minutes, and decide honestly whether you are fit to finish.",5,"fitness","hi"],
@@ -1219,12 +1452,134 @@ const SJE_Q = [
    ["Assume it was fine — you have done this many times.",1,"convenience","lo"],
    ["Finish the remaining work, then recheck before signing off.",4,"report","hi"],
    ["Tell whoever is signing off that you are not certain about that section.",5,"report","hi"]]]
+],
+
+/* ---- set 2 ---- */
+[
+ ["You are due to start a shift after four hours' sleep, because of a family emergency overnight.",
+  [["Start the shift and see how you feel as you go.",2,"fitness","lo"],
+   ["Tell your manager how much sleep you have had and let them decide whether you start.",5,"escalate","hi"],
+   ["Say you are not fit to work today, and explain why.",5,"fitness","hi"],
+   ["Start, and keep it to yourself so nobody thinks you are unreliable.",1,"conceal","lo"]]],
+
+ ["You notice a guard rail on a walkway is loose. It is not part of your job and you are already late.",
+  [["Make it safe if you can, then report it.",5,"riskfirst","hi"],
+   ["Report it now, even though it makes you later still.",5,"report","hi"],
+   ["Report it at the end of the day, when you have time.",2,"convenience","lo"],
+   ["Leave it — someone whose job it is will pick it up.",1,"convenience","lo"]]],
+
+ ["A colleague rings and asks you to log them in so they start on time. They are five minutes away.",
+  [["Refuse, and tell them to log in themselves when they arrive.",5,"riskfirst","hi"],
+   ["Refuse, and explain why the record has to be accurate.",5,"report","hi"],
+   ["Refuse, and tell them you will report it if they ask again.",2,"aggressive","lo"],
+   ["Do it — it is five minutes and it saves them a warning.",1,"convenience","lo"]]],
+
+ ["You are given a job with a deadline you do not think is achievable without cutting corners.",
+  [["Say so before you start, and agree what will be dropped.",5,"report","hi"],
+   ["Ask your manager to reprioritise it or extend the deadline now.",5,"escalate","hi"],
+   ["Start it, and raise it if you fall behind.",2,"convenience","lo"],
+   ["Take it on, and cut the checks rather than miss the deadline.",1,"conceal","lo"]]],
+
+ ["Halfway through a task you realise the method you were shown is not the one in the procedure.",
+  [["Stop and check the procedure before going any further.",5,"riskfirst","hi"],
+   ["Stop, check, and raise the difference so the training or the procedure gets fixed.",5,"escalate","hi"],
+   ["Finish this one the way you were shown, then raise the difference.",2,"convenience","lo"],
+   ["Carry on as shown — the person who trained you does it every day.",1,"convenience","lo"]]],
+
+ ["An incident you were involved in is being investigated, and a colleague asks you to keep your account vague.",
+  [["Give a full, accurate account regardless.",5,"report","hi"],
+   ["Give a full account, and tell them plainly you will not shade it.",5,"riskfirst","hi"],
+   ["Keep your account brief so as not to drop them in it.",1,"conceal","lo"],
+   ["Say you cannot remember the details clearly.",1,"conceal","lo"]]]
+],
+
+/* ---- set 3 ---- */
+[
+ ["You are getting over a heavy cold. You are not ill enough to be off, but you are not sharp either.",
+  [["Go in, and ask not to be put on the task that needs the most concentration.",5,"fitness","hi"],
+   ["Go in, and tell your manager you are below par.",5,"report","hi"],
+   ["Go in and say nothing — everybody works through a cold.",2,"conceal","lo"],
+   ["Take the day off without telling anyone why.",2,"conceal","lo"]]],
+
+ ["A piece of equipment you rely on has an out-of-date calibration sticker.",
+  [["Do not use it, and report it.",5,"riskfirst","hi"],
+   ["Check with whoever manages calibration before you use it.",5,"escalate","hi"],
+   ["Use it, but cross-check the readings against something else.",2,"convenience","lo"],
+   ["Use it — the sticker is admin, the equipment is fine.",1,"convenience","lo"]]],
+
+ ["You see a colleague take a shortcut that is against the rules, but that everyone on the team uses.",
+  [["Say something to them at the time.",5,"riskfirst","hi"],
+   ["Raise it as a team issue, since it is clearly not just one person.",5,"escalate","hi"],
+   ["Report the individual, without mentioning that it is the whole team.",2,"aggressive","lo"],
+   ["Do it their way too — you will be the odd one out otherwise.",1,"convenience","lo"]]],
+
+ ["Someone much more senior than you asks you to do something you believe is unsafe.",
+  [["Say clearly that you are not willing to do it, and why.",5,"riskfirst","hi"],
+   ["Ask for the decision to go to someone who can authorise the change.",5,"escalate","hi"],
+   ["Ask them to confirm the instruction in writing.",4,"report","hi"],
+   ["Do it, and raise a concern afterwards.",1,"conceal","lo"]]],
+
+ ["Your workload has been climbing for weeks and you are now making small errors you would not normally make.",
+  [["Tell your manager what is slipping and ask to reprioritise.",5,"escalate","hi"],
+   ["Keep a note of the errors and raise them along with the work you cannot complete.",4,"report","hi"],
+   ["Work later until you are back on top of it.",2,"fitness","lo"],
+   ["Say nothing — it will settle down, and raising it looks like you cannot cope.",1,"conceal","lo"]]],
+
+ ["A member of the public tells you something is wrong in an area you are responsible for. You looked an hour ago and it was fine.",
+  [["Go and look again now.",5,"riskfirst","hi"],
+   ["Thank them, go and look, and report it if it has changed.",5,"report","hi"],
+   ["Explain that you checked it an hour ago and it was fine.",2,"convenience","lo"],
+   ["Note it, and check on your next round.",2,"convenience","lo"]]]
+],
+
+/* ---- set 4 ---- */
+[
+ ["You are asked to sign off work that was done by someone else while you were not there.",
+  [["Refuse to sign for what you did not see, and say why.",5,"riskfirst","hi"],
+   ["Ask the person who did observe it to sign instead.",5,"escalate","hi"],
+   ["Inspect what you can now, and sign only for that.",4,"report","hi"],
+   ["Sign it — they are experienced and you trust them.",1,"convenience","lo"]]],
+
+ ["Two hours into a task the conditions change and the method you agreed is no longer the safest one.",
+  [["Stop and re-plan before you continue.",5,"riskfirst","hi"],
+   ["Ring your supervisor and agree a revised method.",5,"escalate","hi"],
+   ["Carry on, but go slower and be more careful.",2,"convenience","lo"],
+   ["Carry on — you are two hours in and nearly done.",1,"convenience","lo"]]],
+
+ ["A colleague tells you in confidence that they have made a mistake and have not reported it.",
+  [["Help them work out how to report it, and go with them.",5,"report","hi"],
+   ["Encourage them to report it, and be clear that you will if they do not.",5,"escalate","hi"],
+   ["Report it yourself straight away without telling them.",2,"aggressive","lo"],
+   ["Keep it to yourself — they trusted you.",1,"conceal","lo"]]],
+
+ ["You are asked to work through your break to keep a job moving.",
+  [["Say you will take your break, and explain why it matters for the rest of the shift.",5,"fitness","hi"],
+   ["Take a shorter break, and agree what will slip as a result.",4,"report","hi"],
+   ["Work through it — the job matters more than a break.",2,"fitness","lo"],
+   ["Work through it, and say nothing about it afterwards.",1,"conceal","lo"]]],
+
+ ["You realise you have been doing a routine part of your job slightly wrong for months. No harm has come of it.",
+  [["Raise it, explain what you have been doing, and check whether anything needs revisiting.",5,"report","hi"],
+   ["Raise it, and offer to go back over the work you have already done.",5,"escalate","hi"],
+   ["Correct yourself quietly from now on.",2,"conceal","lo"],
+   ["Leave it — no harm done, and it would only cause trouble.",1,"conceal","lo"]]],
+
+ ["Near the end of a night shift you notice something that will take an hour to deal with properly.",
+  [["Make it safe, hand it over in full to the next shift, and record it.",5,"report","hi"],
+   ["Deal with it properly, even though it takes you past the end of the shift.",4,"riskfirst","hi"],
+   ["Leave a note for the next shift and go.",2,"convenience","lo"],
+   ["Leave it — it will keep until tomorrow.",1,"convenience","lo"]]]
+]
+
 ];
+let SJE_Q = SJE_SETS[0];
 
 const SJE = {
   start(){
     this.i=0; this.ratings=[];
-    App.open("SJE rating", el("div"));
+    this.set=Rot.next("sje", SJE_SETS.length);
+    SJE_Q = SJE_SETS[this.set];
+    App.open("SJE rating — set "+(this.set+1)+" of "+SJE_SETS.length, el("div"));
     App.active=this;
     this.show();
   },
@@ -1232,11 +1587,13 @@ const SJE = {
     const [txt,opts]=SJE_Q[this.i];
     this.cur=new Array(opts.length).fill(0);
     const box=el("div");
-    box.appendChild(el("div","chainbar","Scenario "+(this.i+1)+" of "+SJE_Q.length+
+    box.appendChild(el("div","chainbar","Set "+(this.set+1)+" of "+SJE_SETS.length+
+      " · scenario "+(this.i+1)+" of "+SJE_Q.length+
       " — rate every response on its own. Several can be helpful, or none."));
     box.appendChild(el("div","scenbox",txt));
     const g=el("div","ratewrap");
-    opts.forEach((o,j)=>{
+    shuffle(opts.map((_,j)=>j)).forEach(j=>{
+      const o=opts[j];
       const n=el("div","rateopt");
       n.appendChild(el("p",null,o[0]));
       const sc=el("div","scale");
@@ -1309,7 +1666,7 @@ const SJE = {
       qq[1].forEach((o,j)=>{
         const got=this.ratings[i][j];
         if(got && Math.abs(got-o[1])>=2)
-          r2.appendChild(el("p",null,"Scenario "+(i+1)+", response "+"ABCD"[j]+": you "+got+", suggested "+o[1]+"."));
+          r2.appendChild(el("p",null,"Scenario "+(i+1)+" — “"+o[0]+"” you rated "+got+", suggested "+o[1]+"."));
       });
     });
     if(r2.children.length>1) w.appendChild(r2);
