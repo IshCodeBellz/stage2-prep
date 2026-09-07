@@ -181,8 +181,8 @@
     <span class="lamp" id="l-vse1"></span>
     <div class="body">
       <h2>VSE task 1 — dot sequence</h2>
-      <p>The dot moves clockwise around the corners. Mark every square where the sequence breaks.</p>
-      <div class="meta">180 squares · target 3 min</div>
+      <p>The dot steps round the corners one at a time. Mark every square where the sequence breaks — a skipped corner, a step back, or no move at all. Alternate runs go the other way round.</p>
+      <div class="meta">180 squares · 2 papers · target 3 min</div>
     </div>
     <button class="go" onclick="VSE1.start()">Start</button>
   </div>
@@ -191,8 +191,8 @@
     <span class="lamp" id="l-vse2"></span>
     <div class="body">
       <h2>VSE task 2 — letter columns</h2>
-      <p>Mark each box where the two columns hold different letters. Order does not matter.</p>
-      <div class="meta">96 boxes · target 3 min 12 s</div>
+      <p>Mark each box where the two columns hold different letters. Order does not matter, and a letter can appear twice. Alternate runs use lookalike letters.</p>
+      <div class="meta">96 boxes · 2 papers · target 3 min 12 s</div>
     </div>
     <button class="go" onclick="VSE2.start()">Start</button>
   </div>
@@ -202,7 +202,7 @@
     <div class="body">
       <h2>VSE task 3 — both at once</h2>
       <p>Four seconds a pair, auto-advancing. The dot sequence is the primary task.</p>
-      <div class="meta">45 pairs · 3 min</div>
+      <div class="meta">45 pairs · 4 papers · 3 min</div>
     </div>
     <button class="go" onclick="VSE3.start()">Start</button>
   </div>
@@ -225,8 +225,8 @@
     <span class="lamp" id="l-atavt"></span>
     <div class="body">
       <h2>ATAVT — perception</h2>
-      <p>A traffic scene flashes for one second. Report which objects you saw.</p>
-      <div class="meta">20 scenes · about 6 min</div>
+      <p>A traffic scene flashes for one second. Report which objects you saw. Street, junction, country road and after dark, mixed through the run.</p>
+      <div class="meta">20 scenes · 4 settings · about 6 min</div>
     </div>
     <button class="go" onclick="ATAVT.start()">Start</button>
   </div>
@@ -235,8 +235,8 @@
     <span class="lamp" id="l-hand"></span>
     <div class="body">
       <h2>2-Hand — co-ordination</h2>
-      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel.</p>
-      <div class="meta">6 runs · buzzer on contact</div>
+      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel. A different channel shape each attempt.</p>
+      <div class="meta">6 runs · 5 tracks · buzzer on contact</div>
     </div>
     <button class="go" onclick="HAND.start()">Start</button>
   </div>
@@ -462,26 +462,37 @@ const App = {
 };
 
 /* ---------------------------------------------------------------- VSE 1 */
+/* Dot stream, shared with VSE 3. Corners 0=TL 1=TR 2=BR 3=BL.
+   dir +1 steps clockwise, -1 anticlockwise. Three ways the sequence can break:
+   skip a corner, go back one, or stay where it is. */
+const DOT_ERR = [2,-1,0];
+function dotStream(n, p, dir){
+  const seq=[], err=[];
+  let c=rnd(4);
+  seq.push(c); err.push(false);
+  for(let i=1;i<n;i++){
+    const bad = Math.random()<p;
+    const step = bad ? pick(DOT_ERR)*dir : dir;
+    c = ((c+step)%4+4)%4;
+    seq.push(c); err.push(bad);
+  }
+  return {seq,err};
+}
+const DOT_DIRS = [[1,"clockwise"],[-1,"anticlockwise"]];
+
 const VSE1 = {
   N:180,
   start(){
-    // corner order 0=TL 1=TR 2=BR 3=BL, normal step +1
-    const seq=[], err=[];
-    let c=rnd(4);
-    seq.push(c); err.push(false);
-    for(let i=1;i<this.N;i++){
-      let bad = Math.random()<0.085;
-      if(bad){ c = (c + (Math.random()<0.5 ? 2 : 3)) % 4; }  // skip a corner, or go backwards
-      else { c = (c+1)%4; }
-      seq.push(c); err.push(bad);
-    }
-    this.seq=seq; this.err=err; this.marked=new Array(this.N).fill(false);
+    const v=Rot.next("vse1", DOT_DIRS.length);
+    this.dir=DOT_DIRS[v][0]; this.way=DOT_DIRS[v][1];
+    const s=dotStream(this.N, 0.085, this.dir);
+    this.seq=s.seq; this.err=s.err; this.marked=new Array(this.N).fill(false);
 
     const box=el("div");
-    box.appendChild(el("p","sub","Work left to right, line after line. Tap a square where the dot has skipped a corner or gone backwards. About one second a square."));
+    box.appendChild(el("p","sub","On this paper the dot should step <b>"+this.way+"</b> round the corners, one corner at a time. Work left to right, line after line, and tap any square where it has skipped a corner, gone back, or stayed put. About one second a square."));
     const paper=el("div","paper");
     const g=el("div","grid1");
-    seq.forEach((corner,i)=>{
+    this.seq.forEach((corner,i)=>{
       const s=el("div","sq"); s.appendChild(el("i","c"+corner));
       s.onclick=()=>{ this.marked[i]=!this.marked[i]; s.classList.toggle("mk"); };
       g.appendChild(s);
@@ -494,7 +505,7 @@ const VSE1 = {
     const r=el("div","row"); r.style.marginTop="16px"; r.appendChild(b);
     box.appendChild(r);
 
-    App.open("VSE task 1", box);
+    App.open("VSE task 1 — "+this.way, box);
     this.getT = App.countUp();
     App.active=this;
   },
@@ -513,9 +524,10 @@ const VSE1 = {
     const coach = fa>hit*0.25
       ? "Your false marks are high relative to your hits. You are marking on suspicion rather than on a confirmed break in the sequence. Hold the previous corner in mind and compare — do not mark because a square merely looks wrong."
       : miss>total*0.3
-      ? "You are missing more than you are catching. The usual cause is reading each square in isolation. The error only exists in the transition, so keep the previous corner live in your head as you move."
-      : "Solid. Now work on holding this accuracy while speeding up — the real test paces you at about a second a square.";
+      ? "You are missing more than you are catching. The usual cause is reading each square in isolation. The error only exists in the transition, so keep the previous corner live in your head as you move. The dot that has not moved at all is the one people sail straight past."
+      : "Solid. Now work on holding this accuracy while speeding up — the real test paces you at about a second a square. Your next run comes the other way round, which is where a trained thumb rhythm stops helping you.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Paper", this.way],
       ["Errors present", total],
       ["Caught", hit],
       ["Missed", miss],
@@ -530,18 +542,32 @@ const VSE1 = {
 
 /* ---------------------------------------------------------------- VSE 2 */
 const LETTERS="ABCDEFGHJKLMNPQRSTUVWXYZ".split("");
-function makeBox(isErr){
-  const left=[0,0,0,0].map(()=>pick(LETTERS));
-  let right=left.slice();
-  // shuffle
-  for(let i=3;i>0;i--){const j=rnd(i+1);[right[i],right[j]]=[right[j],right[i]];}
+/* families that are hard to tell apart at a glance, used by the second paper */
+const LOOKALIKE=["BDPR","EFHK","MNVW","CGQS","TUVY","JLZX"].map(s=>s.split(""));
+const bag = a => a.slice().sort().join("");
+/* isErr: the two columns should hold different letters.
+   pool: the letters this box is built from, defaults to the whole alphabet. */
+function makeBox(isErr, pool){
+  const src = pool || LETTERS;
+  const left=[0,0,0,0].map(()=>pick(src));
+  const right=shuffle(left.slice());
   if(isErr){
     const i=rnd(4);
-    let n=pick(LETTERS); while(n===right[i]) n=pick(LETTERS);
-    right[i]=n;
-    // guard: ensure multisets really differ
-    const s=a=>a.slice().sort().join("");
-    if(s(left)===s(right)){ right[i] = right[i]==="A"?"B":"A"; }
+    if(Math.random()<0.4){
+      // a letter turns up twice and another one goes missing
+      let j=rnd(4); while(j===i) j=rnd(4);
+      right[i]=right[j];
+    } else {
+      let n=pick(src); while(n===right[i]) n=pick(src);
+      right[i]=n;
+    }
+    // guard: the edit may have landed on a duplicate and changed nothing
+    let guard=0;
+    while(bag(left)===bag(right) && guard++<20){
+      const k=rnd(4);
+      let n=pick(src); while(n===right[k]) n=pick(src);
+      right[k]=n;
+    }
   }
   return {left,right};
 }
@@ -553,13 +579,21 @@ function boxNode(b, big){
   }
   return n;
 }
+const VSE2_PAPERS = [["mixed letters",null],["lookalike letters",LOOKALIKE]];
 const VSE2 = {
   N:96,
   start(){
+    const v=Rot.next("vse2", VSE2_PAPERS.length);
+    this.paper=VSE2_PAPERS[v][0];
+    const fams=VSE2_PAPERS[v][1];
     this.items=[]; this.marked=new Array(this.N).fill(false);
-    for(let i=0;i<this.N;i++){ const e=Math.random()<0.26; this.items.push({...makeBox(e), err:e}); }
+    for(let i=0;i<this.N;i++){
+      const e=Math.random()<0.26;
+      this.items.push({...makeBox(e, fams?pick(fams):null), err:e});
+    }
     const box=el("div");
-    box.appendChild(el("p","sub","Tap every box where the two columns hold different letters. The same letters in a different order still match. No more than two seconds a box."));
+    box.appendChild(el("p","sub","Tap every box where the two columns hold different letters. The same letters in a different order still match, and a letter can turn up twice. No more than two seconds a box."
+      + (fams?" This paper is built from lookalike letters, so it is slower going than the last one.":"")));
     const paper=el("div","paper"); const g=el("div","grid2");
     this.items.forEach((it,i)=>{
       const n=boxNode(it);
@@ -569,7 +603,7 @@ const VSE2 = {
     paper.appendChild(g); box.appendChild(paper); this.grid=g;
     const b=el("button","go","Finish and score"); b.onclick=()=>this.finish();
     const r=el("div","row"); r.style.marginTop="16px"; r.appendChild(b); box.appendChild(r);
-    App.open("VSE task 2", box);
+    App.open("VSE task 2 — "+this.paper, box);
     this.getT=App.countUp(); App.active=this;
   },
   finish(){
@@ -585,8 +619,9 @@ const VSE2 = {
     App.done("vse2", total? hit/total*100 : null, false, "%");
     const coach = fa>3
       ? "Most of your false marks will be boxes where the letters matched but sat in a different order. Compare the sets, not the rows — read the left column, then check each letter off against the right."
-      : "Read the left column as a whole rather than letter by letter, then sweep the right for anything that is not in that set. It is faster than four separate comparisons.";
+      : "Read the left column as a whole rather than letter by letter, then sweep the right for anything that is not in that set. It is faster than four separate comparisons. The box that slips through is the doubled one, where every letter on the right does appear on the left, but one of them twice.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Paper", this.paper],
       ["Mismatched boxes", total],["Caught", hit],["Missed", miss],
       ["Marked in error", fa],["Time", mmss(t)],["Seconds per box",(t/this.N).toFixed(2)]
     ], coach, hit+"/"+total));
@@ -596,23 +631,30 @@ const VSE2 = {
 };
 
 /* ---------------------------------------------------------------- VSE 3 (dual, paced) */
+/* four papers: each direction of the dot stream against each letter pool */
+const VSE3_PAPERS = [[0,0],[1,0],[0,1],[1,1]];
 const VSE3 = {
   N:45, PACE:4000,
   start(){
-    // dot stream
-    let c=rnd(4); this.dots=[]; this.dotErr=[];
-    this.dots.push(c); this.dotErr.push(false);
-    for(let i=1;i<this.N;i++){
-      const bad=Math.random()<0.11;
-      c = bad ? (c+(Math.random()<0.5?2:3))%4 : (c+1)%4;
-      this.dots.push(c); this.dotErr.push(bad);
+    const v=Rot.next("vse3", VSE3_PAPERS.length);
+    const combo=VSE3_PAPERS[v];
+    this.dir=DOT_DIRS[combo[0]][0]; this.way=DOT_DIRS[combo[0]][1];
+    this.paper=VSE2_PAPERS[combo[1]][0];
+    const fams=VSE2_PAPERS[combo[1]][1];
+
+    const s=dotStream(this.N, 0.11, this.dir);
+    this.dots=s.seq; this.dotErr=s.err;
+    this.boxes=[];
+    for(let i=0;i<this.N;i++){
+      const e=Math.random()<0.28;
+      this.boxes.push({...makeBox(e, fams?pick(fams):null), err:e});
     }
-    this.boxes=[]; for(let i=0;i<this.N;i++){const e=Math.random()<0.28; this.boxes.push({...makeBox(e),err:e});}
     this.i=0; this.aDot=false; this.aBox=false;
     this.repDot=new Array(this.N).fill(false); this.repBox=new Array(this.N).fill(false);
 
     const box=el("div");
-    box.appendChild(el("p","sub","Four seconds a pair, advancing on its own. The dot sequence is the primary task — protect it."));
+    box.appendChild(el("p","sub","Four seconds a pair, advancing on its own. The dot should step <b>"+this.way+
+      "</b> — skipping a corner, going back, or staying put all count as errors. The dot sequence is the primary task; protect it."));
     const stage=el("div","paper");
     const d=el("div","dual");
     this.sqEl=el("div","sq bigsq"); this.sqEl.appendChild(el("i","c0"));
@@ -627,7 +669,7 @@ const VSE3 = {
     f.appendChild(this.bD); f.appendChild(this.bB); box.appendChild(f);
     const p=el("div","prog"); this.pb=el("b"); p.appendChild(this.pb); box.appendChild(p);
 
-    App.open("VSE task 3", box);
+    App.open("VSE task 3 — "+this.way+", "+this.paper, box);
     App.active=this;
     this.render(); this.loop();
   },
@@ -660,6 +702,7 @@ const VSE3 = {
       ? "You protected the letters at the expense of the dots. That is the wrong trade: the dot sequence is the primary task, and it is also the one you cannot recover, because each judgement depends on the square before it. Let the letters slip first."
       : "Right priority — the dots held up. Now close the gap on the letters without letting the dot accuracy fall.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Paper", this.way+", "+this.paper],
       ["Dot errors present", D.h+D.m],["Dots caught", D.h],["Dots missed", D.m],["Dots marked in error", D.f],
       ["Letter errors present", B.h+B.m],["Letters caught", B.h],["Letters missed", B.m],["Letters marked in error", B.f]
     ], coach, D.h+"/"+(D.h+D.m)+" · "+B.h+"/"+(B.h+B.m)));
@@ -741,53 +784,186 @@ const WAFV = {
 /* ---------------------------------------------------------------- ATAVT */
 const CATS=[["ped","Pedestrians"],["veh","Motor vehicles"],["bike","Bikes, motorcycles or scooters"],
             ["sign","Road signs"],["light","Traffic lights"]];
-function scene(has){
-  const P=[];
-  P.push(`<rect width="400" height="300" fill="#CBD9E6"/>`);                    // sky
-  P.push(`<rect y="150" width="400" height="150" fill="#8A8A8A"/>`);            // road
-  P.push(`<rect y="150" width="400" height="18" fill="#B9B4AA"/>`);             // kerb strip
-  for(let x=10;x<400;x+=46) P.push(`<rect x="${x}" y="228" width="26" height="4" fill="#EEE"/>`);
-  // buildings
+/* ---- the objects, drawn the same way whichever scene they land in ---- */
+const CAR_BODY=["#2F4A63","#7A2E2E","#2E5A3A","#5A4A2E","#3B3B4C","#6B5A2E"];
+const CAR_TOP =["#3C5C78","#93463F","#3E6E4E","#6E6244","#4C4C60","#83714A"];
+const SHIRTS  =["#B8442E","#2F5FA0","#3E6E4E","#7A4E96","#B58A2B","#3B3B3B"];
+
+function oVeh(x,y,s,night){
+  const k=rnd(CAR_BODY.length);
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <rect width="76" height="24" rx="5" fill="${CAR_BODY[k]}"/>
+    <path d="M14 0 L26 -16 L54 -16 L64 0 Z" fill="${CAR_TOP[k]}"/>
+    <circle cx="19" cy="26" r="8" fill="#1A1A1A"/><circle cx="59" cy="26" r="8" fill="#1A1A1A"/>
+    ${night?`<circle cx="74" cy="9" r="6" fill="#F5E6A8" opacity=".85"/>`:``}</g>`;
+}
+function oPed(x,y,s,night){
+  const skin=night?"#C9C4B6":"#2B2B2B", leg=night?"#9A968B":"#2B2B2B";
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <circle cy="-26" r="5" fill="${skin}"/>
+    <rect x="-4" y="-21" width="8" height="15" rx="3" fill="${night?"#D8D3C6":pick(SHIRTS)}"/>
+    <rect x="-4" y="-6" width="3" height="10" fill="${leg}"/>
+    <rect x="1" y="-6" width="3" height="10" fill="${leg}"/></g>`;
+}
+function oBike(x,y,s,night){
+  const c=night?"#CFCABC":"#1F1F1F";
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <circle r="11" fill="none" stroke="${c}" stroke-width="2.5"/>
+    <circle cx="30" r="11" fill="none" stroke="${c}" stroke-width="2.5"/>
+    <path d="M0 0 L12 -14 L30 0 M12 -14 L18 0" stroke="${night?"#7FBF9B":"#1F7A4C"}" stroke-width="2.5" fill="none"/>
+    <circle cx="14" cy="-26" r="5" fill="${night?"#C9C4B6":"#2B2B2B"}"/></g>`;
+}
+function oSign(x,y,s){
+  return `<g transform="translate(${x},${y}) scale(${s})"><rect x="-2" width="4" height="42" fill="#777"/>` +
+    (Math.random()<0.5
+      ? `<circle cy="-12" r="14" fill="#fff" stroke="#C6321E" stroke-width="5"/>`
+      : `<path d="M0 -28 L15 0 L-15 0 Z" fill="#fff" stroke="#C6321E" stroke-width="4"/>`) + `</g>`;
+}
+function oLight(x,y,s){
+  const on=rnd(3);
+  return `<g transform="translate(${x},${y}) scale(${s})"><rect x="-2" y="18" width="4" height="52" fill="#666"/>
+    <rect x="-11" y="-18" width="22" height="40" rx="4" fill="#2B2B2B"/>
+    <circle cy="-9" r="5.5" fill="${on===0?"#E8412A":"#5A2A24"}"/>
+    <circle cy="2" r="5.5" fill="${on===1?"#E8B62A":"#5A5A2E"}"/>
+    <circle cy="13" r="5.5" fill="${on===2?"#3FA85F":"#2E5A3A"}"/></g>`;
+}
+const OBJ={veh:oVeh, ped:oPed, bike:oBike, sign:oSign, light:oLight};
+const DRAW_ORDER=["veh","bike","ped","sign","light"];
+
+/* ---- four backgrounds, so the same object has to be found in different surroundings ---- */
+function panes(x,y,w,h,lit,dim){
+  let s="";
+  for(let r=0;r<Math.floor(h/22);r++) for(let c=0;c<Math.floor(w/22);c++)
+    s+=`<rect x="${x+6+c*22}" y="${y+7+r*22}" width="9" height="11" fill="${dim&&Math.random()<0.55?dim:lit}"/>`;
+  return s;
+}
+function bgStreet(){
+  let P=`<rect width="400" height="300" fill="#CBD9E6"/>
+    <rect y="150" width="400" height="150" fill="#8A8A8A"/>
+    <rect y="150" width="400" height="18" fill="#B9B4AA"/>`;
+  for(let x=10;x<400;x+=46) P+=`<rect x="${x}" y="228" width="26" height="4" fill="#EEE"/>`;
   for(let i=0;i<4;i++){
     const w=50+rnd(40), h=50+rnd(70), x=i*100+rnd(20);
-    P.push(`<rect x="${x}" y="${150-h}" width="${w}" height="${h}" fill="#6F7C88"/>`);
-    for(let r=0;r<Math.floor(h/22);r++) for(let cc=0;cc<Math.floor(w/22);cc++)
-      P.push(`<rect x="${x+6+cc*22}" y="${150-h+7+r*22}" width="9" height="11" fill="#93A3B0"/>`);
+    P+=`<rect x="${x}" y="${150-h}" width="${w}" height="${h}" fill="#6F7C88"/>`+panes(x,150-h,w,h,"#93A3B0");
   }
-  if(has.veh){ const n=1+rnd(2); for(let k=0;k<n;k++){ const x=20+rnd(280), y=195+rnd(55), s=.8+Math.random()*.5;
-    P.push(`<g transform="translate(${x},${y}) scale(${s})"><rect width="76" height="24" rx="5" fill="#2F4A63"/>
-      <path d="M14 0 L26 -16 L54 -16 L64 0 Z" fill="#3C5C78"/>
-      <circle cx="19" cy="26" r="8" fill="#1A1A1A"/><circle cx="59" cy="26" r="8" fill="#1A1A1A"/></g>`); } }
-  if(has.ped){ const n=1+rnd(2); for(let k=0;k<n;k++){ const x=15+rnd(360), y=155+rnd(14);
-    P.push(`<g transform="translate(${x},${y})"><circle cy="-26" r="5" fill="#2B2B2B"/>
-      <rect x="-4" y="-21" width="8" height="15" rx="3" fill="#B8442E"/>
-      <rect x="-4" y="-6" width="3" height="10" fill="#2B2B2B"/><rect x="1" y="-6" width="3" height="10" fill="#2B2B2B"/></g>`); } }
-  if(has.bike){ const x=30+rnd(300), y=205+rnd(45);
-    P.push(`<g transform="translate(${x},${y})"><circle r="11" fill="none" stroke="#1F1F1F" stroke-width="2.5"/>
-      <circle cx="30" r="11" fill="none" stroke="#1F1F1F" stroke-width="2.5"/>
-      <path d="M0 0 L12 -14 L30 0 M12 -14 L18 0" stroke="#1F7A4C" stroke-width="2.5" fill="none"/>
-      <circle cx="14" cy="-26" r="5" fill="#2B2B2B"/></g>`); }
-  if(has.sign){ const x=25+rnd(340);
-    P.push(`<g transform="translate(${x},120)"><rect x="-2" width="4" height="42" fill="#777"/>` +
-      (Math.random()<0.5
-        ? `<circle cy="-12" r="14" fill="#fff" stroke="#C6321E" stroke-width="5"/>`
-        : `<path d="M0 -28 L15 0 L-15 0 Z" fill="#fff" stroke="#C6321E" stroke-width="4"/>`) + `</g>`); }
-  if(has.light){ const x=30+rnd(330);
-    P.push(`<g transform="translate(${x},96)"><rect x="-2" y="18" width="4" height="52" fill="#666"/>
-      <rect x="-11" y="-18" width="22" height="40" rx="4" fill="#2B2B2B"/>
-      <circle cy="-9" r="5.5" fill="#C6321E"/><circle cy="2" r="5.5" fill="#5A5A2E"/><circle cy="13" r="5.5" fill="#2E5A3A"/></g>`); }
-  return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${P.join("")}</svg>`;
+  return P;
 }
+function bgJunction(){
+  let P=`<rect width="400" height="300" fill="#C6D6E4"/>
+    <rect x="20" y="84" width="112" height="78" fill="#77828C"/>`+panes(20,84,112,78,"#9BA9B4")+
+   `<rect x="258" y="68" width="120" height="94" fill="#69747E"/>`+panes(258,68,120,94,"#8E9CA8")+
+   `<path d="M170 100 L220 100 L238 176 L152 176 Z" fill="#8A8A8A"/>
+    <rect y="170" width="400" height="130" fill="#8A8A8A"/>
+    <rect y="162" width="152" height="9" fill="#B9B4AA"/>
+    <rect x="238" y="162" width="162" height="9" fill="#B9B4AA"/>`;
+  for(let x=156;x<234;x+=13) P+=`<rect x="${x}" y="180" width="8" height="26" fill="#EFEFEF"/>`;
+  for(let x=6;x<400;x+=46) P+=`<rect x="${x}" y="262" width="26" height="4" fill="#EEE"/>`;
+  return P;
+}
+function bgCountry(){
+  let P=`<rect width="400" height="300" fill="#D6E4EE"/>
+    <rect y="132" width="400" height="168" fill="#7E9A5C"/>
+    <path d="M178 132 L222 132 L392 300 L28 300 Z" fill="#8A8A8A"/>`;
+  for(let i=0;i<6;i++){
+    const t=i/6, w=3+t*9, y=142+t*145, h=6+t*11;
+    P+=`<rect x="${(200-w/2).toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="#EEE"/>`;
+  }
+  for(let x=-10;x<400;x+=28) P+=`<circle cx="${x+rnd(12)}" cy="${130+rnd(8)}" r="${10+rnd(6)}" fill="#5E7A44"/>`;
+  for(let i=0;i<3;i++){ const x=26+i*132+rnd(40);
+    P+=`<rect x="${x}" y="84" width="7" height="50" fill="#6B563A"/><circle cx="${x+3}" cy="78" r="26" fill="#4E6B39"/>`; }
+  return P;
+}
+function bgNight(){
+  let P=`<rect width="400" height="300" fill="#16202B"/>
+    <rect y="150" width="400" height="150" fill="#33383D"/>
+    <rect y="150" width="400" height="18" fill="#40444A"/>`;
+  for(let x=10;x<400;x+=46) P+=`<rect x="${x}" y="228" width="26" height="4" fill="#8A8F94"/>`;
+  for(let i=0;i<4;i++){
+    const w=50+rnd(40), h=50+rnd(70), x=i*100+rnd(20);
+    P+=`<rect x="${x}" y="${150-h}" width="${w}" height="${h}" fill="#232C36"/>`+panes(x,150-h,w,h,"#E8C86A","#2D3742");
+  }
+  for(let i=0;i<2;i++){ const x=88+i*182;
+    P+=`<ellipse cx="${x+2}" cy="178" rx="54" ry="19" fill="#F3E3A8" opacity=".12"/>
+        <rect x="${x}" y="58" width="4" height="94" fill="#4A5058"/>
+        <circle cx="${x+2}" cy="56" r="7" fill="#F3E3A8"/>`; }
+  return P;
+}
+
+/* zones say where each kind of object can sit in that particular scene */
+const SCENES=[
+ {key:"town street", night:false, bg:bgStreet, z:{
+   veh:{x:[20,300],y:[195,250],s:[.8,1.3],n:2},
+   ped:{x:[15,375],y:[155,169],n:2},
+   bike:{x:[30,330],y:[205,250],n:1},
+   sign:{x:[25,365],y:[118,124],n:1},
+   light:{x:[30,360],y:[94,100],n:1}}},
+
+ {key:"junction", night:false, bg:bgJunction, z:{
+   veh:{x:[20,300],y:[212,256],s:[.85,1.2],n:2},
+   ped:{x:[154,226],y:[182,204],n:2},
+   bike:{x:[30,320],y:[216,254],n:1},
+   sign:{xs:[[26,116],[262,374]],y:[120,134],n:2},
+   light:{x:[134,168],y:[92,110],n:1}}},
+
+ {key:"country road", night:false, bg:bgCountry, z:{
+   veh:{x:[110,240],y:[204,246],s:[.7,1.1],n:1},
+   ped:{x:[40,350],y:[182,232],n:1},
+   bike:{x:[118,250],y:[212,250],n:1},
+   sign:{x:[30,360],y:[116,132],n:1},
+   light:{x:[120,268],y:[90,104],n:1}}},
+
+ {key:"after dark", night:true, bg:bgNight, z:{
+   veh:{x:[20,300],y:[195,250],s:[.8,1.3],n:2},
+   ped:{x:[15,375],y:[155,169],n:2},
+   bike:{x:[30,330],y:[205,250],n:1},
+   sign:{x:[25,365],y:[118,124],n:1},
+   light:{x:[30,360],y:[94,100],n:1}}}
+];
+
+/* roughly what each object covers, relative to the point it is drawn from.
+   Used to keep objects from landing on top of one another, which would hide them. */
+const FOOT={veh:[0,-16,76,50], bike:[-11,-31,52,44], ped:[-6,-31,14,37],
+            sign:[-15,-28,30,70], light:[-11,-18,22,88]};
+const hits=(a,b)=> a[0]<b[0]+b[2] && b[0]<a[0]+a[2] && a[1]<b[1]+b[3] && b[1]<a[1]+a[3];
+
+function place(k, z, night, taken){
+  const n = 1 + (z.n>1 ? rnd(z.n) : 0);
+  const f = FOOT[k];
+  let out="";
+  for(let i=0;i<n;i++){
+    let x,y,s,r,tries=0;
+    do{
+      const xr = z.xs ? pick(z.xs) : z.x;
+      x = xr[0]+rnd(xr[1]-xr[0]+1);
+      y = z.y[0]+rnd(z.y[1]-z.y[0]+1);
+      s = z.s ? +(z.s[0]+Math.random()*(z.s[1]-z.s[0])).toFixed(2) : 1;
+      r = [x+f[0]*s, y+f[1]*s, f[2]*s, f[3]*s];
+      tries++;
+    } while(tries<16 && taken.some(t=>hits(r,t)));
+    taken.push(r);
+    out+=OBJ[k](x,y,s,night);
+  }
+  return out;
+}
+function scene(has, t){
+  let P=t.bg();
+  const taken=[];
+  DRAW_ORDER.forEach(k=>{ if(has[k]) P+=place(k, t.z[k], t.night, taken); });
+  return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${P}</svg>`;
+}
+
 const ATAVT = {
   N:20, FLASH:1000,
   start(){
     this.i=0; this.log=[];
     this.trials=[];
+    let deck=[];
     for(let i=0;i<this.N;i++){
       let h={}; let any=false;
       CATS.forEach(([k])=>{ h[k]=Math.random()<0.5; if(h[k])any=true; });
       if(!any) h[pick(CATS)[0]]=true;
-      this.trials.push(h);
+      if(!deck.length) deck=shuffle(SCENES.map((_,k)=>k));   // all four scenes come round evenly
+      this.trials.push({has:h, t:SCENES[deck.pop()]});
     }
     App.open("ATAVT perception", el("div"));
     App.active=this;
@@ -796,8 +972,8 @@ const ATAVT = {
   show(){
     App.clock((this.i+1)+" / "+this.N);
     const box=el("div");
-    box.appendChild(el("p","sub","Watch closely. The scene appears for one second."));
-    const s=el("div","scene"); s.innerHTML=scene(this.trials[this.i]);
+    box.appendChild(el("p","sub","Watch closely. The scene appears for one second. It may be a street, a junction, a country road, or the same street after dark."));
+    const s=el("div","scene"); s.innerHTML=scene(this.trials[this.i].has, this.trials[this.i].t);
     box.appendChild(s);
     $("#t-body").replaceChildren(box);
     App.timer=setTimeout(()=>this.ask(), this.FLASH);
@@ -824,16 +1000,18 @@ const ATAVT = {
   finish(){
     App.clock("");
     let exact=0, hit=0, miss=0, fa=0;
-    const perCat={};
+    const perCat={}, perScene={};
     CATS.forEach(([k])=>perCat[k]={m:0,f:0});
-    this.trials.forEach((t,i)=>{
-      const g=this.log[i]; let ok=true;
+    SCENES.forEach(s=>perScene[s.key]={n:0,ok:0});
+    this.trials.forEach((tr,i)=>{
+      const t=tr.has, g=this.log[i]; let ok=true;
       CATS.forEach(([k])=>{
         if(t[k]&&g[k])hit++;
         else if(t[k]&&!g[k]){miss++;perCat[k].m++;ok=false;}
         else if(!t[k]&&g[k]){fa++;perCat[k].f++;ok=false;}
       });
-      if(ok)exact++;
+      perScene[tr.t.key].n++;
+      if(ok){exact++; perScene[tr.t.key].ok++;}
     });
     App.done("atavt", exact/this.N*100, false, "%");
     let worst=null; CATS.forEach(([k,l])=>{ if(perCat[k].m>0 && (!worst||perCat[k].m>perCat[worst[0]].m)) worst=[k,l]; });
@@ -844,12 +1022,17 @@ const ATAVT = {
       : worst
       ? "Most missed: "+worst[1].toLowerCase()+". Take the whole frame in at once rather than scanning it; at one second there is no time to move your eyes, so let the scene land as a single impression and read it back afterwards."
       : "Your misses are spread evenly rather than concentrated in one type. Let the scene land as a single impression and read it back afterwards, rather than hunting for one object at a time.";
-    $("#t-body").appendChild(App.results("Scores",[
+    const rows=[
       ["Scenes exactly right", exact+" / "+this.N],
       ["Objects present and reported", hit],
       ["Objects present and missed", miss],
       ["Objects reported but absent", fa]
-    ], coach, exact+"/"+this.N));
+    ];
+    SCENES.forEach(s=>{
+      const p=perScene[s.key];
+      if(p.n) rows.push([s.key.charAt(0).toUpperCase()+s.key.slice(1)+" scenes", p.ok+" / "+p.n]);
+    });
+    $("#t-body").appendChild(App.results("Scores", rows, coach, exact+"/"+this.N));
   },
   stop(){ clearTimeout(App.timer); }
 };
@@ -871,10 +1054,22 @@ function buzzer(on){
   }catch(e){}
 }
 
+/* Five channel shapes. One is picked per attempt and held for all six runs,
+   because the real test is repeated runs of one shape — what changes is which shape. */
+const HAND_TRACKS = [
+  ["long swell",   [0.9,-0.7,0.5,0.35]],
+  ["tight weave",  [0.45,0.85,-0.6,0.5]],
+  ["late climb",   [1.0,0.3,-0.4,0.25]],
+  ["double bend",  [-0.8,0.65,0.7,-0.3]],
+  ["short steps",  [0.5,-0.5,0.6,0.45,0.4]]
+];
+
 const HAND = {
   RUNS:6, CH:26, SPEED:150,
   start(){
     this.run=1; this.log=[]; this.done_=false;
+    const t=Rot.next("hand", HAND_TRACKS.length);
+    this.trackName=HAND_TRACKS[t][0]; this.coef=HAND_TRACKS[t][1];
     const box=el("div");
     box.appendChild(el("p","sub","Left pad moves it left and right. Right pad moves it up and down. You need both at once. The buzzer sounds whenever it leaves the channel — keep it quiet."));
     const wrap=el("div","cvswrap");
@@ -889,7 +1084,7 @@ const HAND = {
     box.appendChild(pads);
     box.appendChild(el("p","sub","On a laptop you can use A and D for sideways, and the up and down arrow keys."));
 
-    App.open("2-Hand co-ordination", box);
+    App.open("2-Hand co-ordination — "+this.trackName, box);
     App.active=this;
 
     this.vx=0; this.vy=0;
@@ -915,7 +1110,7 @@ const HAND = {
   },
   makePath(){
     const m=26, n=160, amp=(this.H/2-m-this.CH/2);
-    const a=[0.9,-0.7,0.5,0.35];
+    const a=this.coef;
     this.path=[];
     for(let i=0;i<=n;i++){
       const t=i/n, x=m+t*(this.W-2*m);
@@ -1018,8 +1213,9 @@ const HAND = {
       ? "You are outside the channel a quarter of the time. Slow right down — halve your speed until the buzzer stops, then build back up. On the day the time outside is what is counted, and going slowly is not penalised the way straying is."
       : last<first*0.7
       ? "Clear improvement across the six runs, which is what practice on this looks like. Keep going: the real test is ten runs of the same shape and the later ones are where control tells."
-      : "Reasonably controlled. Most people find one hand leads and the other lags — watch the hand that is lagging rather than the one that is working, because that is the one costing you the corners.";
+      : "Reasonably controlled. Most people find one hand leads and the other lags — watch the hand that is lagging rather than the one that is working, because that is the one costing you the corners. Your next attempt runs a different channel shape, which is where a memorised route stops helping you.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Track", this.trackName],
       ["Runs", this.RUNS],
       ["Total time", tot.toFixed(1)+" s"],
       ["Time outside the channel", out.toFixed(1)+" s"],
