@@ -347,6 +347,15 @@ const Store = (()=>{
       if(r.h.length>80) r.h=r.h.slice(-80);   // keep the file small; 80 attempts is months of practice
       mem[id]=r; save();
     },
+    /* a day-mode sitting: how long it took and what every drill in it scored */
+    bumpDay(ms, runs){
+      const r = mem.day || {n:0};
+      r.n++; r.t=Date.now();
+      r.h = r.h || [];
+      r.h.push({t:r.t, ms, runs});
+      if(r.h.length>40) r.h=r.h.slice(-40);
+      mem.day=r; save();
+    },
     clearOne(id){ delete mem[id]; save(); },
     clear(){ mem={}; try{ localStorage.removeItem(KEY); }catch(e){} }
   };
@@ -382,10 +391,16 @@ function paintMenu(){
       lamp.classList.add("done");
       line.classList.remove("none");
       line.disabled=false;
-      const attempts = rec.n + (rec.n===1?" attempt":" attempts");
-      const head = rec.best!=null
+      const attempts = rec.n + (id==="day"
+        ? (rec.n===1?" sitting":" sittings")
+        : (rec.n===1?" attempt":" attempts"));
+      let head = rec.best!=null
         ? (rec.low?"Lowest ":"Best ") + rec.best + (rec.u||"") + " · " + attempts
         : attempts;
+      if(id==="day" && rec.h && rec.h.length){
+        const last=rec.h[rec.h.length-1];
+        head = attempts + " · last one " + last.runs.length + " of " + DAY_ORDER.length;
+      }
       line.replaceChildren(document.createTextNode(head+" "), el("span","chev","see all ›"));
       line.onclick=()=>HISTORY.open(id);
     } else {
@@ -407,8 +422,101 @@ const HISTORY = {
     const sameDay = d.toDateString()===now.toDateString();
     return (sameDay?"today":day)+", "+time;
   },
+  dur(ms){
+    const m=Math.round(ms/60000);
+    if(m<1) return "under a minute";
+    return m>=60 ? Math.floor(m/60)+" hr "+String(m%60).padStart(2,"0") : m+" min";
+  },
+  /* how a score compares with your usual standard on that drill, in that drill's own unit */
+  versusUsual(run){
+    if(run.s==null) return null;
+    const vals=((Store.get(run.id)||{}).h||[]).filter(x=>x.s!=null).map(x=>x.s);
+    const self=vals.lastIndexOf(run.s);        // compare against your other runs, not this one
+    if(self>=0) vals.splice(self,1);
+    if(!vals.length) return null;
+    const base=vals.reduce((a,b)=>a+b,0)/vals.length;
+    const better = run.low ? base-run.s : run.s-base;
+    return {d:Math.round(better*10)/10, better:better>=0, base:Math.round(base*10)/10};
+  },
+  day(rec){
+    const sittings=(rec.h||[]).slice();
+    const box=el("div");
+    const full=sittings.filter(s=>s.runs.length===DAY_ORDER.length);
+
+    if(!sittings.length){
+      box.appendChild(el("div","note","Day mode was run "+rec.n+(rec.n===1?" time":" times")+
+        " before sittings were recorded, so there is nothing itemised. From now on each sitting keeps its length and every drill's score."));
+    } else {
+      const st=el("div");
+      [["Sittings", rec.n],
+       ["Finished end to end", full.length+" of "+sittings.length],
+       ["Last sitting", this.when(sittings[sittings.length-1].t)],
+       ["Last length", this.dur(sittings[sittings.length-1].ms)]
+      ].forEach(([k,v])=>{
+        const r=el("div","stat"); r.appendChild(el("span",null,k)); r.appendChild(el("b",null,String(v))); st.appendChild(r);
+      });
+      box.appendChild(st);
+
+      const h=el("h2",null,"Every sitting"); h.style.margin="22px 0 4px";
+      box.appendChild(h);
+
+      sittings.slice().reverse().forEach((s,i)=>{
+        const card=el("div","rev");
+        card.appendChild(el("h4",null,(sittings.length-i)+". "+this.when(s.t)+" · "+this.dur(s.ms)+
+          " · "+s.runs.length+" of "+DAY_ORDER.length+" drills"));
+        let earlyDown=0, lateDown=0, earlyN=0, lateN=0;
+        const half=Math.ceil(s.runs.length/2);
+        s.runs.forEach((run,j)=>{
+          const row=el("div","hrow");
+          const lhs=el("div");
+          lhs.appendChild(el("div",null,(DRILL_NAMES[run.id]||run.id).split(" — ")[0]));
+          if(run.p) lhs.appendChild(el("div","paper-name",run.p));
+          row.appendChild(lhs);
+          const rhs=el("div"); rhs.style.textAlign="right";
+          rhs.appendChild(el("b",null, run.s!=null ? run.s+run.u : "done"));
+          const v=this.versusUsual(run);
+          if(v){
+            // said as better or worse, because on some drills a lower number is the good one
+            rhs.appendChild(el("div","paper-name", v.d===0
+              ? "level with your usual "+v.base+run.u
+              : Math.abs(v.d)+run.u+(v.better?" better":" worse")+" than your usual "+v.base+run.u));
+            if(j<half){ earlyN++; if(!v.better) earlyDown++; }
+            else { lateN++; if(!v.better) lateDown++; }
+          }
+          row.appendChild(rhs);
+          card.appendChild(row);
+        });
+        if(earlyN>=2 && lateN>=2){
+          const worse = lateDown/lateN > earlyDown/earlyN;
+          card.appendChild(el("p",null,
+            "Below your usual on "+earlyDown+" of the first "+earlyN+
+            " and "+lateDown+" of the last "+lateN+". "+
+            (worse
+              ? "That is the drop this sitting exists to find — the tiredness is real and it arrives late."
+              : "No drop-off across the sitting, which is the point of doing it at full length.")));
+        }
+        box.appendChild(card);
+      });
+    }
+
+    const back=el("button","go","Back to the list"); back.onclick=()=>App.quit();
+    const wipe=el("button","ghost","Clear day mode");
+    wipe.onclick=()=>{
+      if(confirm("Clear every saved day-mode sitting? This cannot be undone.")){
+        Store.clearOne("day"); App.quit();
+      }
+    };
+    const row=el("div","row"); row.style.marginTop="20px";
+    row.appendChild(back); row.appendChild(wipe);
+    box.appendChild(row);
+
+    App.active=null;
+    App.open("Day mode — your sittings", box);
+    App.clock(rec.n+(rec.n===1?" sitting":" sittings"));
+  },
   open(id){
     const rec=Store.get(id)||{n:0};
+    if(id==="day") return this.day(rec);
     const runs=(rec.h||[]).slice();
     const unit=rec.u||"", low=!!rec.low;
     const box=el("div");
@@ -523,7 +631,7 @@ function buildFooter(){
 }
 
 const App = {
-  timer:null, tick:null, active:null, chain:[],
+  timer:null, tick:null, active:null, chain:[], day:null,
   open(title, node){
     $("#menu").classList.remove("on");
     $("#test").classList.add("on");
@@ -533,6 +641,7 @@ const App = {
   },
   clock(txt){ $("#t-clock").textContent = txt || ""; },
   quit(){
+    this.endDay();
     paintMenu();
     clearInterval(this.tick); clearTimeout(this.timer);
     if(this.active && this.active.stop) this.active.stop();
@@ -542,7 +651,17 @@ const App = {
   },
   done(id, score, low, unit, paper){
     Store.bump(id, score, low, unit, paper);
+    if(this.day && id!=="day"){
+      this.day.runs.push({id, s:(score!=null && isFinite(score))?Math.round(score*10)/10:null,
+                          u:unit||"", low:low?1:0, p:paper||null});
+    }
     paintMenu();
+  },
+  /* a day-mode sitting is written when it ends, whether you finished it or stopped partway */
+  endDay(){
+    const d=this.day; this.day=null;
+    if(!d || !d.runs.length) return;
+    Store.bumpDay(Date.now()-d.t0, d.runs);
   },
   countUp(onTick){
     const t0=Date.now();
@@ -575,6 +694,8 @@ const App = {
       sb.onclick=()=>{ App.chain=[]; App.quit(); };
       row.appendChild(sb);
     } else {
+      App.endDay();                       // nothing left in the chain: the sitting is over
+      paintMenu();
       const b=el("button","go","Back to the list"); b.onclick=()=>App.quit();
       row.appendChild(b);
     }
@@ -1715,7 +1836,7 @@ const SJT = {
       const sug=qq[2], opts=qq[1];
       const same=got.join()===sug.join();
       const r=el("div","rev");
-      r.appendChild(el("h4","Situation "+(i+1)+(same?" — matched":"")));
+      r.appendChild(el("h4",null,"Situation "+(i+1)+(same?" — matched":"")));
       sug.forEach((optIdx,rank)=>{
         const mine=got.indexOf(optIdx)+1;
         const ok=mine===rank+1;
@@ -1975,12 +2096,12 @@ const SJE = {
     ], coach, mad<0.8?"consistent":"review");
     if(flags.length){
       const r=el("div","rev");
-      r.appendChild(el("h4","Consistency check"));
+      r.appendChild(el("h4",null,"Consistency check"));
       flags.slice(0,8).forEach(f=>r.appendChild(el("p",null,f)));
       w.appendChild(r);
     }
     const r2=el("div","rev");
-    r2.appendChild(el("h4","Where you differed most"));
+    r2.appendChild(el("h4",null,"Where you differed most"));
     SJE_Q.forEach((qq,i)=>{
       qq[1].forEach((o,j)=>{
         const got=this.ratings[i][j];
@@ -1995,21 +2116,22 @@ const SJE = {
 };
 
 /* ---------------------------------------------------------------- DAY MODE */
+const DAY_ORDER=[
+  ["VSE task 1",()=>VSE1.start()],
+  ["VSE task 2",()=>VSE2.start()],
+  ["VSE task 3",()=>VSE3.start()],
+  ["M7-SJT",()=>SJT.start()],
+  ["WAFV, 30 minutes",()=>WAFV.start(30)],
+  ["ATAVT",()=>ATAVT.start()],
+  ["SJE",()=>SJE.start()],
+  ["2-Hand",()=>HAND.start()]
+];
 const DAY = {
   start(){
     const box=el("div");
     box.appendChild(el("p","sub","Every drill back to back, at full length, with no gaps. It takes about an hour and a quarter. The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
     box.appendChild(el("div","note","Do this twice before the 22nd. Start it in the morning, because that is when you will be sitting the real one."));
-    const order=[
-      ["VSE task 1",()=>VSE1.start()],
-      ["VSE task 2",()=>VSE2.start()],
-      ["VSE task 3",()=>VSE3.start()],
-      ["M7-SJT",()=>SJT.start()],
-      ["WAFV, 30 minutes",()=>WAFV.start(30)],
-      ["ATAVT",()=>ATAVT.start()],
-      ["SJE",()=>SJE.start()],
-      ["2-Hand",()=>HAND.start()]
-    ];
+    const order=DAY_ORDER;
     const ol=el("div"); ol.style.margin="14px 0";
     order.forEach(([n],i)=>{
       const d_=el("div","stat");
@@ -2020,7 +2142,7 @@ const DAY = {
     const b=el("button","go","Begin");
     b.onclick=()=>{
       App.chain=order.slice(1).map(([name,run])=>({name,run}));
-      App.done("day", null, false, null);
+      App.day={t0:Date.now(), runs:[]};
       order[0][1]();
     };
     const bb=el("button","ghost","Back");
