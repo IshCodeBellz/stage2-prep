@@ -167,6 +167,24 @@
         font-variant-numeric:tabular-nums}
   .stat b{font-weight:620}
   .big{font-size:2.1rem;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:6px 0}
+
+  /* the attempts line under each drill, and the history screen behind it */
+  .best{margin-top:6px;padding:0;border:0;background:none;text-align:left;cursor:pointer;
+        color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+  .best .chev{color:var(--amber);margin-left:5px}
+  .best:hover .chev{text-decoration:underline}
+  .best.none{cursor:default}
+  .foot{margin-top:26px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+  .warn{color:var(--amber);font-size:.82rem}
+  .hchart{display:flex;align-items:flex-end;gap:4px;height:148px;margin-top:6px;padding-top:10px;
+          border-bottom:1px solid var(--line);overflow-x:auto}
+  .hbar{flex:1 0 13px;min-width:13px;background:#33434F;border-radius:3px 3px 0 0}
+  .hbar.top{background:var(--green)} .hbar.last{background:var(--amber)}
+  .hkey{display:flex;justify-content:space-between;color:var(--muted);font-size:.75rem;margin-top:7px}
+  .hrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);
+        font-size:.87rem;font-variant-numeric:tabular-nums}
+  .hrow .when{color:var(--muted)}
+  .hrow .paper-name{color:var(--muted);font-size:.8rem}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -316,18 +334,20 @@ const Store = (()=>{
   return {
     ok:()=>ok,
     get:id=>mem[id],
-    bump(id, score, low, unit){
+    bump(id, score, low, unit, paper){
       const r = mem[id] || {n:0};
       r.n++;
-      if(score!=null && isFinite(score)){
-        const v = Math.round(score*10)/10;
-        if(r.best==null || (low ? v<r.best : v>r.best)) r.best=v;
-      }
+      const v = (score!=null && isFinite(score)) ? Math.round(score*10)/10 : null;
+      if(v!=null && (r.best==null || (low ? v<r.best : v>r.best))) r.best=v;
       if(unit!=null) r.u=unit;
       if(low) r.low=1;
       r.t=Date.now();
+      r.h = r.h || [];
+      r.h.push({s:v, t:r.t, p:paper||null});
+      if(r.h.length>80) r.h=r.h.slice(-80);   // keep the file small; 80 attempts is months of practice
       mem[id]=r; save();
     },
+    clearOne(id){ delete mem[id]; save(); },
     clear(){ mem={}; try{ localStorage.removeItem(KEY); }catch(e){} }
   };
 })();
@@ -348,27 +368,129 @@ const Rot = (()=>{
   };
 })();
 
+const DRILL_NAMES={};
 function paintMenu(){
   document.querySelectorAll("#menu .drill").forEach(dv=>{
     const lamp=dv.querySelector(".lamp"); if(!lamp) return;
     const id=lamp.id.replace("l-","");
+    const h2=dv.querySelector("h2");
+    if(h2) DRILL_NAMES[id]=h2.textContent.trim();
     const rec=Store.get(id);
     let line=dv.querySelector(".best");
-    if(!line){ line=el("div","best"); dv.querySelector(".body").appendChild(line); }
+    if(!line){ line=el("button","best"); dv.querySelector(".body").appendChild(line); }
     if(rec && rec.n){
       lamp.classList.add("done");
       line.classList.remove("none");
+      line.disabled=false;
       const attempts = rec.n + (rec.n===1?" attempt":" attempts");
-      line.textContent = rec.best!=null
+      const head = rec.best!=null
         ? (rec.low?"Lowest ":"Best ") + rec.best + (rec.u||"") + " · " + attempts
         : attempts;
+      line.replaceChildren(document.createTextNode(head+" "), el("span","chev","see all ›"));
+      line.onclick=()=>HISTORY.open(id);
     } else {
       lamp.classList.remove("done");
       line.classList.add("none");
-      line.textContent = "not attempted yet";
+      line.disabled=true;
+      line.onclick=null;
+      line.replaceChildren(document.createTextNode("not attempted yet"));
     }
   });
 }
+
+/* ---- every attempt you have made at one drill, on this device */
+const HISTORY = {
+  when(t){
+    const d=new Date(t), now=new Date();
+    const day=d.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+    const time=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+    const sameDay = d.toDateString()===now.toDateString();
+    return (sameDay?"today":day)+", "+time;
+  },
+  open(id){
+    const rec=Store.get(id)||{n:0};
+    const runs=(rec.h||[]).slice();
+    const unit=rec.u||"", low=!!rec.low;
+    const box=el("div");
+
+    if(!runs.length){
+      box.appendChild(el("div","note","This drill was attempted "+rec.n+
+        (rec.n===1?" time":" times")+" before attempt history was kept, so only the count and the best score survive. Everything from here on is listed."));
+    } else {
+      const scored=runs.filter(r=>r.s!=null);
+      if(scored.length){
+        const vals=scored.map(r=>r.s);
+        const bestV = low?Math.min(...vals):Math.max(...vals);
+        const lo=Math.min(...vals), hi=Math.max(...vals), span=(hi-lo)||1;
+        const last5=vals.slice(-5), avg5=last5.reduce((a,b)=>a+b,0)/last5.length;
+        const move=vals.length>1 ? vals[vals.length-1]-vals[0] : null;
+
+        const chart=el("div","hchart");
+        scored.forEach((r,i)=>{
+          const b=el("div","hbar");
+          // taller always means better, so the trend reads the same way on every drill
+          const frac = hi===lo ? 1 : (low ? (hi-r.s)/span : (r.s-lo)/span);
+          b.style.height=(14+frac*86)+"%";
+          if(r.s===bestV) b.classList.add("top");
+          else if(i===scored.length-1) b.classList.add("last");
+          b.title=this.when(r.t)+" — "+r.s+unit+(r.p?" ("+r.p+")":"");
+          chart.appendChild(b);
+        });
+        box.appendChild(chart);
+        const key=el("div","hkey");
+        key.appendChild(el("span",null,"oldest · taller is better"+(low?", since a lower score wins here":"")));
+        key.appendChild(el("span",null,"newest"));
+        box.appendChild(key);
+
+        const rows=[
+          ["Attempts", rec.n],
+          [(low?"Lowest":"Best"), bestV+unit],
+          ["Latest", vals[vals.length-1]+unit],
+          ["Average of the last "+last5.length, (Math.round(avg5*10)/10)+unit]
+        ];
+        if(move!=null){
+          const better = low ? move<0 : move>0;
+          rows.push(["First to latest", (move>0?"+":"")+(Math.round(move*10)/10)+unit+
+            (move===0?"" : better?" — better":" — worse")]);
+        }
+        const st=el("div"); st.style.marginTop="18px";
+        rows.forEach(([k,v])=>{
+          const r=el("div","stat"); r.appendChild(el("span",null,k)); r.appendChild(el("b",null,String(v))); st.appendChild(r);
+        });
+        box.appendChild(st);
+      }
+    }
+
+    if(runs.length){
+      const h=el("h2",null,"Every attempt"); h.style.margin="22px 0 4px";
+      box.appendChild(h);
+      runs.slice().reverse().forEach((r,i)=>{
+        const row=el("div","hrow");
+        const lhs=el("div");
+        lhs.appendChild(el("div","when",(runs.length-i)+". "+this.when(r.t)));
+        if(r.p) lhs.appendChild(el("div","paper-name",r.p));
+        row.appendChild(lhs);
+        row.appendChild(el("b",null, r.s!=null ? r.s+unit : "completed"));
+        box.appendChild(row);
+      });
+    }
+
+    const back=el("button","go","Back to the list"); back.onclick=()=>App.quit();
+    const wipe=el("button","ghost","Clear this drill");
+    wipe.onclick=()=>{
+      if(confirm("Clear every saved attempt for "+(DRILL_NAMES[id]||id)+"? This cannot be undone.")){
+        Store.clearOne(id); App.quit();
+      }
+    };
+    const row=el("div","row"); row.style.marginTop="20px";
+    row.appendChild(back); row.appendChild(wipe);
+    box.appendChild(row);
+
+    App.active=null;
+    App.open((DRILL_NAMES[id]||id).split(" — ")[0]+" — your attempts", box);
+    App.clock(rec.n+(rec.n===1?" run":" runs"));
+  }
+};
 
 function paintCountdown(){
   const c=document.getElementById("countdown"); if(!c) return;
@@ -418,8 +540,8 @@ const App = {
     $("#test").classList.remove("on"); $("#menu").classList.add("on");
     this.clock("");
   },
-  done(id, score, low, unit){
-    Store.bump(id, score, low, unit);
+  done(id, score, low, unit, paper){
+    Store.bump(id, score, low, unit, paper);
     paintMenu();
   },
   countUp(onTick){
@@ -520,7 +642,7 @@ const VSE1 = {
       else if(!this.err[i] && this.marked[i]){fa++; sq.classList.add("fa");}
     }
     const total=hit+miss;
-    App.done("vse1", total? hit/total*100 : null, false, "%");
+    App.done("vse1", total? hit/total*100 : null, false, "%", this.way);
     const coach = fa>hit*0.25
       ? "Your false marks are high relative to your hits. You are marking on suspicion rather than on a confirmed break in the sequence. Hold the previous corner in mind and compare — do not mark because a square merely looks wrong."
       : miss>total*0.3
@@ -616,7 +738,7 @@ const VSE2 = {
       else if(!it.err&&this.marked[i]){fa++;n.classList.add("fa");}
     });
     const total=hit+miss;
-    App.done("vse2", total? hit/total*100 : null, false, "%");
+    App.done("vse2", total? hit/total*100 : null, false, "%", this.paper);
     const coach = fa>3
       ? "Most of your false marks will be boxes where the letters matched but sat in a different order. Compare the sets, not the rows — read the left column, then check each letter off against the right."
       : "Read the left column as a whole rather than letter by letter, then sweep the right for anything that is not in that set. It is faster than four separate comparisons. The box that slips through is the doubled one, where every letter on the right does appear on the left, but one of them twice.";
@@ -696,7 +818,7 @@ const VSE3 = {
     const sc=(errs,reps)=>{let h=0,m=0,f=0;errs.forEach((e,i)=>{if(e&&reps[i])h++;else if(e&&!reps[i])m++;else if(!e&&reps[i])f++;});return{h,m,f};};
     const D=sc(this.dotErr,this.repDot);
     const B=sc(this.boxes.map(b=>b.err),this.repBox);
-    App.done("vse3", (D.h+D.m)? D.h/(D.h+D.m)*100 : null, false, "% dots");
+    App.done("vse3", (D.h+D.m)? D.h/(D.h+D.m)*100 : null, false, "% dots", this.way+", "+this.paper);
     const dropped = D.m > B.m;
     const coach = dropped
       ? "You protected the letters at the expense of the dots. That is the wrong trade: the dot sequence is the primary task, and it is also the one you cannot recover, because each judgement depends on the square before it. Let the letters slip first."
@@ -715,6 +837,7 @@ const VSE3 = {
 const WAFV = {
   ON:600, OFF:400, WINDOW:1400, P:0.09,
   start(mins){
+    this.mins=mins;
     this.hits=0;this.miss=0;this.fa=0;this.rts=[];this.trials=0;
     this.armed=false;this.onset=0;this.ended=false;
     const box=el("div");
@@ -759,7 +882,7 @@ const WAFV = {
     window.removeEventListener("keydown",this.key);
     const mean = this.rts.length ? Math.round(this.rts.reduce((a,b)=>a+b,0)/this.rts.length) : 0;
     const tot=this.hits+this.miss;
-    App.done("wafv", tot? this.hits/tot*100 : null, false, "%");
+    App.done("wafv", tot? this.hits/tot*100 : null, false, "%", this.mins+" minutes");
     const half=Math.ceil(this.rts.length/2);
     const early=this.rts.slice(0,half), late=this.rts.slice(half);
     const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
@@ -1206,7 +1329,7 @@ const HAND = {
     cancelAnimationFrame(this.raf);
     window.removeEventListener("keydown",this.kd); window.removeEventListener("keyup",this.ku);
     const tot=this.log.reduce((a,b)=>a+b.t,0), out=this.log.reduce((a,b)=>a+b.out,0);
-    App.done("hand", tot? out/tot*100 : null, true, "% out");
+    App.done("hand", tot? out/tot*100 : null, true, "% out", this.trackName);
     const first=this.log.slice(0,3).reduce((a,b)=>a+b.out,0);
     const last=this.log.slice(3).reduce((a,b)=>a+b.out,0);
     const coach = out/tot>0.25
@@ -1575,7 +1698,7 @@ const SJT = {
       if(got[3]===sug[3])bots++;
     });
     const acc = maxd? Math.round((1-disp/maxd)*100):0;
-    App.done("sjt", answered? acc : null, false, "%");
+    App.done("sjt", answered? acc : null, false, "%", "set "+(this.set+1));
     const w=App.results("Scores",[
       ["Situations completed", answered+" / "+SJT_Q.length],
       ["Best response identified", tops+" / "+answered],
@@ -1841,7 +1964,7 @@ const SJE = {
       his.forEach(v=>{ if(v<=2) flags.push("You rated a <b>"+tag+"</b> response "+v+" — worth revisiting why."); });
       los.forEach(v=>{ if(v>=4) flags.push("You rated a <b>"+tag+"</b> response "+v+", which sits against the pattern of your other answers."); });
     });
-    App.done("sje", n? mad : null, true, " pts off");
+    App.done("sje", n? mad : null, true, " pts off", "set "+(this.set+1));
     const coach = flags.length
       ? "Consistency matters more than any single answer, because the interview is built on these responses. See the flags below."
       : "Consistent across the board, which is the thing this checks. Your answers would give an interviewer a coherent picture to probe.";
