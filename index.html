@@ -231,8 +231,8 @@
     <span class="lamp" id="l-wafv"></span>
     <div class="body">
       <h2>WAFV — vigilance</h2>
-      <p>A grey square flashes. Respond the moment it appears darker than usual.</p>
-      <div class="meta">choose 5, 10 or 30 min</div>
+      <p>A grey square flashes. Respond the moment it appears darker than usual. Thirty minutes is the real test and the only length that sets your best — 5 and 10 are warm-ups.</p>
+      <div class="meta">30 min is the one that counts · 5 and 10 to warm up</div>
     </div>
     <div class="row">
       <button onclick="WAFV.start(5)">5</button>
@@ -384,6 +384,24 @@ const DRILL_NAMES={};
    the sheet is taken off you at the target whether you have finished or not. */
 const TARGET_SECS={vse1:180, vse2:192};
 
+/* What makes an attempt the real thing rather than a warm-up. A short run still
+   counts as practice — it just has no business setting the standard you judge
+   yourself by, because it is not the test you are going to sit. */
+const FULL_RUN={
+  vse1:{ known:r=>r.sec!=null, ok:r=>r.sec<=TARGET_SECS.vse1, tag:"at pace", pass:"at pace",
+         miss:r=>mmss(r.sec-TARGET_SECS.vse1)+" over", quickest:true,
+         rawRow:"Best at any speed", row:"Inside the 3:00 target", bestRow:"Best score set at that pace",
+         faded:"faded bars ran over the target" },
+  vse2:{ known:r=>r.sec!=null, ok:r=>r.sec<=TARGET_SECS.vse2, tag:"at pace", pass:"at pace",
+         miss:r=>mmss(r.sec-TARGET_SECS.vse2)+" over", quickest:true,
+         rawRow:"Best at any speed", row:"Inside the 3:12 target", bestRow:"Best score set at that pace",
+         faded:"faded bars ran over the target" },
+  wafv:{ known:r=>!!r.p, ok:r=>r.p==="30 minutes", tag:"at 30 min", pass:"full length",
+         miss:()=>"warm-up length", hideTime:true,
+         rawRow:"Best at any length", row:"Run at the full 30 minutes", bestRow:"Best over the full 30 minutes",
+         faded:"faded bars were short runs" }
+};
+
 function paintMenu(){
   document.querySelectorAll("#menu .drill").forEach(dv=>{
     const lamp=dv.querySelector(".lamp"); if(!lamp) return;
@@ -403,9 +421,18 @@ function paintMenu(){
       let head = rec.best!=null
         ? (rec.low?"Lowest ":"Best ") + rec.best + (rec.u||"") + " · " + attempts
         : attempts;
-      if(TARGET_SECS[id] && rec.h){
-        const timed=rec.h.filter(r=>r.sec!=null);
-        if(timed.length) head += " · "+timed.filter(r=>r.sec<=TARGET_SECS[id]).length+" at pace";
+      const fr=FULL_RUN[id];
+      if(fr && rec.h){
+        const known=rec.h.filter(fr.known);
+        if(known.length){
+          const good=known.filter(fr.ok), ps=good.map(r=>r.s).filter(s=>s!=null);
+          // the headline best is the best run that would actually have counted
+          head = (ps.length
+            ? (rec.low?"Lowest ":"Best ")+(rec.low?Math.min.apply(null,ps):Math.max.apply(null,ps))+
+              (rec.u||"")+" "+fr.tag+" · "+attempts
+            : (rec.best!=null?(rec.low?"Lowest ":"Best ")+rec.best+(rec.u||"")+" · ":"")+attempts)
+            + ", " + (good.length?good.length+" "+fr.tag:"none "+fr.tag);
+        }
       }
       if(id==="day" && rec.h && rec.h.length){
         const last=rec.h[rec.h.length-1];
@@ -480,11 +507,10 @@ const HISTORY = {
           const row=el("div","hrow");
           const lhs=el("div");
           lhs.appendChild(el("div",null,(DRILL_NAMES[run.id]||run.id).split(" — ")[0]));
-          const bits=[];
+          const bits=[], f=FULL_RUN[run.id];
           if(run.p) bits.push(run.p);
-          const rt=TARGET_SECS[run.id];
-          if(rt && run.sec!=null) bits.push(run.sec<=rt ? mmss(run.sec)+" — at pace"
-                                                        : mmss(run.sec)+" — "+mmss(run.sec-rt)+" over target");
+          if(TARGET_SECS[run.id] && run.sec!=null) bits.push(mmss(run.sec));
+          if(f && f.known(run)) bits.push(f.ok(run) ? f.pass : f.miss(run)+" — would not have counted");
           if(bits.length) lhs.appendChild(el("div","paper-name",bits.join(" · ")));
           row.appendChild(lhs);
           const rhs=el("div"); rhs.style.textAlign="right";
@@ -560,8 +586,8 @@ const HISTORY = {
 
         // on a paced paper the green bar marks the best run that was also inside the target,
         // because a score set in four minutes is not a score you would have been given
-        const tg=TARGET_SECS[id];
-        const counts=r=>!tg || r.sec==null || r.sec<=tg;
+        const fr=FULL_RUN[id];
+        const counts=r=>!fr || !fr.known(r) || fr.ok(r);
         const eligible=scored.filter(counts).map(r=>r.s);
         const green = eligible.length ? (low?Math.min(...eligible):Math.max(...eligible)) : null;
 
@@ -580,13 +606,14 @@ const HISTORY = {
         box.appendChild(chart);
         const key=el("div","hkey");
         key.appendChild(el("span",null,"oldest · taller is better"+
-          (tg?" · faded bars ran over the target":(low?", since a lower score wins here":""))));
+          (fr?" · "+fr.faded:(low?", since a lower score wins here":""))));
         key.appendChild(el("span",null,"newest"));
         box.appendChild(key);
 
+        const frow=FULL_RUN[id];
         const rows=[
           ["Attempts", rec.n],
-          [(low?"Lowest":"Best"), bestV+unit],
+          [frow&&frow.rawRow ? (low?frow.rawRow.replace("Best","Lowest"):frow.rawRow) : (low?"Lowest":"Best"), bestV+unit],
           ["Latest", vals[vals.length-1]+unit],
           ["Average of the last "+last5.length, (Math.round(avg5*10)/10)+unit]
         ];
@@ -595,15 +622,13 @@ const HISTORY = {
           rows.push(["First to latest", (move>0?"+":"")+(Math.round(move*10)/10)+unit+
             (move===0?"" : better?" — better":" — worse")]);
         }
-        const tgt=TARGET_SECS[id];
-        if(tgt){
-          const timed=runs.filter(r=>r.sec!=null);
-          const atPace=timed.filter(r=>r.sec<=tgt);
-          if(timed.length){
-            rows.push(["Inside the "+mmss(tgt)+" target", atPace.length+" of "+timed.length]);
-            rows.push(["Quickest", mmss(Math.min.apply(null, timed.map(r=>r.sec)))]);
-            const ps=atPace.map(r=>r.s).filter(x=>x!=null);
-            rows.push(["Best score set at that pace",
+        if(fr){
+          const known=runs.filter(fr.known), good=known.filter(fr.ok);
+          if(known.length){
+            rows.push([fr.row, good.length+" of "+known.length]);
+            if(fr.quickest) rows.push(["Quickest", mmss(Math.min.apply(null, known.map(r=>r.sec)))]);
+            const ps=good.map(r=>r.s).filter(x=>x!=null);
+            rows.push([fr.bestRow,
               ps.length ? (low?Math.min.apply(null,ps):Math.max.apply(null,ps))+unit : "none yet"]);
           }
         }
@@ -622,16 +647,14 @@ const HISTORY = {
         const row=el("div","hrow");
         const lhs=el("div");
         lhs.appendChild(el("div","when",(runs.length-i)+". "+this.when(r.t)));
-        const bits=[];
+        const f=FULL_RUN[id], bits=[];
         if(r.p) bits.push(r.p);
-        if(r.sec!=null){
-          const tgt=TARGET_SECS[id];
-          bits.push(mmss(r.sec) + (tgt ? (r.sec<=tgt ? " — at pace" : " — "+mmss(r.sec-tgt)+" over") : ""));
-        }
+        if(r.sec!=null && !(f && f.hideTime)) bits.push(mmss(r.sec));
+        if(f && f.known(r)) bits.push(f.ok(r) ? f.pass : f.miss(r));
         if(bits.length) lhs.appendChild(el("div","paper-name",bits.join(" · ")));
         row.appendChild(lhs);
         const sc=el("b",null, r.s!=null ? r.s+unit : "completed");
-        if(TARGET_SECS[id] && r.sec!=null && r.sec>TARGET_SECS[id]) sc.classList.add("slow");
+        if(f && f.known(r) && !f.ok(r)) sc.classList.add("slow");
         row.appendChild(sc);
         box.appendChild(row);
       });
@@ -1087,18 +1110,23 @@ const WAFV = {
     const early=this.rts.slice(0,half), late=this.rts.slice(half);
     const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
     const drift = late.length&&early.length ? Math.round(avg(late)-avg(early)) : 0;
-    const coach = this.fa>tot*0.4
+    const short = this.mins<30;
+    const acc = this.fa>tot*0.4
       ? "Too many responses when nothing darkened. Errors are penalised on this test, so a twitchy finger costs you more than a slightly slow one. Wait until you have actually seen the change."
       : drift>60
-      ? "Your reactions slowed noticeably across the run — that is the vigilance decrement, and it is exactly what this test is built to measure. Practise the full thirty minutes rather than short bursts, because the back half is where it is decided."
-      : "Steady. Keep running the full thirty minutes; the difficulty is not the reaction, it is holding it for half an hour.";
+      ? "Your reactions slowed noticeably across the run — that is the vigilance decrement, and it is exactly what this test is built to measure. The back half is where it is decided."
+      : "Steady. The difficulty here is not the reaction, it is holding it for half an hour.";
+    const lengthNote = short
+      ? "This was a "+this.mins+"-minute run, so treat the score as a warm-up rather than a result. The real test runs thirty minutes and the whole thing turns on the decline that sets in after about twenty — which a "+this.mins+"-minute run ends before it starts. It will not set your best, and the drift figure below is measured over too little to mean much."
+      : "Full thirty minutes, which is the length that counts.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Run length", this.mins+" minutes"+(short?" — a warm-up":"")],
       ["Targets", tot],["Caught", this.hits],["Missed", this.miss],
       ["Responses in error", this.fa],
       ["Mean reaction", mean+" ms"],
       ["Drift, first half to second", (drift>0?"+":"")+drift+" ms"],
       ["Flashes shown", this.trials]
-    ], coach, this.hits+"/"+tot));
+    ], lengthNote+" "+acc, this.hits+"/"+tot+(short?" · warm-up":"")));
     $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
   },
   stop(){ this.ended=true; clearTimeout(App.timer); window.removeEventListener("keydown",this.key); }
