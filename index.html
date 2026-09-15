@@ -180,10 +180,12 @@
           border-bottom:1px solid var(--line);overflow-x:auto}
   .hbar{flex:1 0 13px;min-width:13px;background:#33434F;border-radius:3px 3px 0 0}
   .hbar.top{background:var(--green)} .hbar.last{background:var(--amber)}
+  .hbar.slow{opacity:.4}
   .hkey{display:flex;justify-content:space-between;color:var(--muted);font-size:.75rem;margin-top:7px}
   .hrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);
         font-size:.87rem;font-variant-numeric:tabular-nums}
   .hrow .when{color:var(--muted)}
+  .hrow b.slow{color:var(--amber)}
   .hrow .paper-name{color:var(--muted);font-size:.8rem}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -334,7 +336,7 @@ const Store = (()=>{
   return {
     ok:()=>ok,
     get:id=>mem[id],
-    bump(id, score, low, unit, paper){
+    bump(id, score, low, unit, paper, sec){
       const r = mem[id] || {n:0};
       r.n++;
       const v = (score!=null && isFinite(score)) ? Math.round(score*10)/10 : null;
@@ -343,7 +345,7 @@ const Store = (()=>{
       if(low) r.low=1;
       r.t=Date.now();
       r.h = r.h || [];
-      r.h.push({s:v, t:r.t, p:paper||null});
+      r.h.push({s:v, t:r.t, p:paper||null, sec:sec!=null?sec:null});
       if(r.h.length>80) r.h=r.h.slice(-80);   // keep the file small; 80 attempts is months of practice
       mem[id]=r; save();
     },
@@ -378,6 +380,10 @@ const Rot = (()=>{
 })();
 
 const DRILL_NAMES={};
+/* The pace the real papers are set at. Accuracy at half speed is not a pass:
+   the sheet is taken off you at the target whether you have finished or not. */
+const TARGET_SECS={vse1:180, vse2:192};
+
 function paintMenu(){
   document.querySelectorAll("#menu .drill").forEach(dv=>{
     const lamp=dv.querySelector(".lamp"); if(!lamp) return;
@@ -397,6 +403,10 @@ function paintMenu(){
       let head = rec.best!=null
         ? (rec.low?"Lowest ":"Best ") + rec.best + (rec.u||"") + " · " + attempts
         : attempts;
+      if(TARGET_SECS[id] && rec.h){
+        const timed=rec.h.filter(r=>r.sec!=null);
+        if(timed.length) head += " · "+timed.filter(r=>r.sec<=TARGET_SECS[id]).length+" at pace";
+      }
       if(id==="day" && rec.h && rec.h.length){
         const last=rec.h[rec.h.length-1];
         head = attempts + " · last one " + last.runs.length + " of " + DAY_ORDER.length;
@@ -470,7 +480,12 @@ const HISTORY = {
           const row=el("div","hrow");
           const lhs=el("div");
           lhs.appendChild(el("div",null,(DRILL_NAMES[run.id]||run.id).split(" — ")[0]));
-          if(run.p) lhs.appendChild(el("div","paper-name",run.p));
+          const bits=[];
+          if(run.p) bits.push(run.p);
+          const rt=TARGET_SECS[run.id];
+          if(rt && run.sec!=null) bits.push(run.sec<=rt ? mmss(run.sec)+" — at pace"
+                                                        : mmss(run.sec)+" — "+mmss(run.sec-rt)+" over target");
+          if(bits.length) lhs.appendChild(el("div","paper-name",bits.join(" · ")));
           row.appendChild(lhs);
           const rhs=el("div"); rhs.style.textAlign="right";
           rhs.appendChild(el("b",null, run.s!=null ? run.s+run.u : "done"));
@@ -486,6 +501,16 @@ const HISTORY = {
           row.appendChild(rhs);
           card.appendChild(row);
         });
+        const timed=s.runs.filter(r=>r.sec!=null);
+        if(timed.length===s.runs.length && s.runs.length>1){
+          const drill=timed.reduce((a,b)=>a+b.sec,0), gap=Math.round(s.ms/1000)-drill;
+          const gp=el("p",null,"Drills took "+this.dur(drill*1000)+" of the "+this.dur(s.ms)+
+            ", so "+(gap>60?this.dur(gap*1000):"under a minute")+" of it was between drills. "+
+            (gap>8*60
+              ? "Day mode is meant to run back to back — a break that long gives you a recovery the real day will not."
+              : "That is close enough to back to back to count."));
+          card.appendChild(gp);
+        }
         if(earlyN>=2 && lateN>=2){
           const worse = lateDown/lateN > earlyDown/earlyN;
           card.appendChild(el("p",null,
@@ -533,20 +558,29 @@ const HISTORY = {
         const last5=vals.slice(-5), avg5=last5.reduce((a,b)=>a+b,0)/last5.length;
         const move=vals.length>1 ? vals[vals.length-1]-vals[0] : null;
 
+        // on a paced paper the green bar marks the best run that was also inside the target,
+        // because a score set in four minutes is not a score you would have been given
+        const tg=TARGET_SECS[id];
+        const counts=r=>!tg || r.sec==null || r.sec<=tg;
+        const eligible=scored.filter(counts).map(r=>r.s);
+        const green = eligible.length ? (low?Math.min(...eligible):Math.max(...eligible)) : null;
+
         const chart=el("div","hchart");
         scored.forEach((r,i)=>{
           const b=el("div","hbar");
           // taller always means better, so the trend reads the same way on every drill
           const frac = hi===lo ? 1 : (low ? (hi-r.s)/span : (r.s-lo)/span);
           b.style.height=(14+frac*86)+"%";
-          if(r.s===bestV) b.classList.add("top");
+          if(green!=null && r.s===green && counts(r)) b.classList.add("top");
           else if(i===scored.length-1) b.classList.add("last");
-          b.title=this.when(r.t)+" — "+r.s+unit+(r.p?" ("+r.p+")":"");
+          if(!counts(r)) b.classList.add("slow");
+          b.title=this.when(r.t)+" — "+r.s+unit+(r.sec!=null?", "+mmss(r.sec):"")+(r.p?" ("+r.p+")":"");
           chart.appendChild(b);
         });
         box.appendChild(chart);
         const key=el("div","hkey");
-        key.appendChild(el("span",null,"oldest · taller is better"+(low?", since a lower score wins here":"")));
+        key.appendChild(el("span",null,"oldest · taller is better"+
+          (tg?" · faded bars ran over the target":(low?", since a lower score wins here":""))));
         key.appendChild(el("span",null,"newest"));
         box.appendChild(key);
 
@@ -560,6 +594,18 @@ const HISTORY = {
           const better = low ? move<0 : move>0;
           rows.push(["First to latest", (move>0?"+":"")+(Math.round(move*10)/10)+unit+
             (move===0?"" : better?" — better":" — worse")]);
+        }
+        const tgt=TARGET_SECS[id];
+        if(tgt){
+          const timed=runs.filter(r=>r.sec!=null);
+          const atPace=timed.filter(r=>r.sec<=tgt);
+          if(timed.length){
+            rows.push(["Inside the "+mmss(tgt)+" target", atPace.length+" of "+timed.length]);
+            rows.push(["Quickest", mmss(Math.min.apply(null, timed.map(r=>r.sec)))]);
+            const ps=atPace.map(r=>r.s).filter(x=>x!=null);
+            rows.push(["Best score set at that pace",
+              ps.length ? (low?Math.min.apply(null,ps):Math.max.apply(null,ps))+unit : "none yet"]);
+          }
         }
         const st=el("div"); st.style.marginTop="18px";
         rows.forEach(([k,v])=>{
@@ -576,9 +622,17 @@ const HISTORY = {
         const row=el("div","hrow");
         const lhs=el("div");
         lhs.appendChild(el("div","when",(runs.length-i)+". "+this.when(r.t)));
-        if(r.p) lhs.appendChild(el("div","paper-name",r.p));
+        const bits=[];
+        if(r.p) bits.push(r.p);
+        if(r.sec!=null){
+          const tgt=TARGET_SECS[id];
+          bits.push(mmss(r.sec) + (tgt ? (r.sec<=tgt ? " — at pace" : " — "+mmss(r.sec-tgt)+" over") : ""));
+        }
+        if(bits.length) lhs.appendChild(el("div","paper-name",bits.join(" · ")));
         row.appendChild(lhs);
-        row.appendChild(el("b",null, r.s!=null ? r.s+unit : "completed"));
+        const sc=el("b",null, r.s!=null ? r.s+unit : "completed");
+        if(TARGET_SECS[id] && r.sec!=null && r.sec>TARGET_SECS[id]) sc.classList.add("slow");
+        row.appendChild(sc);
         box.appendChild(row);
       });
     }
@@ -638,6 +692,7 @@ const App = {
     $("#t-title").textContent = title;
     $("#t-body").replaceChildren(node);
     window.scrollTo(0,0);
+    this.tStart = Date.now();     // every drill is timed, whether or not it shows a clock
   },
   clock(txt){ $("#t-clock").textContent = txt || ""; },
   quit(){
@@ -650,12 +705,28 @@ const App = {
     this.clock("");
   },
   done(id, score, low, unit, paper){
-    Store.bump(id, score, low, unit, paper);
+    const sec = this.tStart ? Math.round((Date.now()-this.tStart)/1000) : null;
+    Store.bump(id, score, low, unit, paper, sec);
     if(this.day && id!=="day"){
       this.day.runs.push({id, s:(score!=null && isFinite(score))?Math.round(score*10)/10:null,
-                          u:unit||"", low:low?1:0, p:paper||null});
+                          u:unit||"", low:low?1:0, p:paper||null, sec});
     }
     paintMenu();
+  },
+  /* how a self-paced paper went against the time the real one allows */
+  paceNote(id, t, n, item){
+    const target=TARGET_SECS[id], d=t-target;
+    const over=d>target*0.05, under=d<-target*0.05;
+    return {
+      over,
+      row: (Math.abs(d)<1 ? "exactly on it"
+            : mmss(Math.abs(Math.round(d)))+(d>0?" over":" inside")),
+      note: over
+        ? "You went "+mmss(Math.round(d))+" past the target of "+mmss(target)+". That matters more than the accuracy above: on the day the sheet is taken off you at "+mmss(target)+", so every "+item+" you marked after that would not have counted. Work at "+(target/n).toFixed(2)+" seconds a "+item+" and let the accuracy climb back — trying it the other way round does not work."
+        : under
+        ? "Finished in "+mmss(t)+", inside the "+mmss(target)+" target. If the accuracy below is not there as well, you are going too fast for your eyes rather than fast enough for the clock, and slowing down a little will cost you nothing."
+        : "Right on the target pace at "+mmss(t)+", which is where the real paper puts you."
+    };
   },
   /* a day-mode sitting is written when it ends, whether you finished it or stopped partway */
   endDay(){
@@ -764,7 +835,8 @@ const VSE1 = {
     }
     const total=hit+miss;
     App.done("vse1", total? hit/total*100 : null, false, "%", this.way);
-    const coach = fa>hit*0.25
+    const pace = App.paceNote("vse1", t, this.N, "square");
+    const acc = fa>hit*0.25
       ? "Your false marks are high relative to your hits. You are marking on suspicion rather than on a confirmed break in the sequence. Hold the previous corner in mind and compare — do not mark because a square merely looks wrong."
       : miss>total*0.3
       ? "You are missing more than you are catching. The usual cause is reading each square in isolation. The error only exists in the transition, so keep the previous corner live in your head as you move. The dot that has not moved at all is the one people sail straight past."
@@ -776,8 +848,10 @@ const VSE1 = {
       ["Missed", miss],
       ["Marked in error", fa],
       ["Time", mmss(t)],
-      ["Seconds per square", (t/this.N).toFixed(2)]
-    ], coach, hit+"/"+total));
+      ["Target time", mmss(TARGET_SECS.vse1)],
+      ["Against the target", pace.row],
+      ["Seconds per square", (t/this.N).toFixed(2)+" against 1.00"]
+    ], pace.note+" "+acc, hit+"/"+total+(pace.over?" · over time":"")));
     $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
   },
   stop(){}
@@ -860,14 +934,19 @@ const VSE2 = {
     });
     const total=hit+miss;
     App.done("vse2", total? hit/total*100 : null, false, "%", this.paper);
-    const coach = fa>3
+    const pace = App.paceNote("vse2", t, this.N, "box");
+    const acc = fa>3
       ? "Most of your false marks will be boxes where the letters matched but sat in a different order. Compare the sets, not the rows — read the left column, then check each letter off against the right."
       : "Read the left column as a whole rather than letter by letter, then sweep the right for anything that is not in that set. It is faster than four separate comparisons. The box that slips through is the doubled one, where every letter on the right does appear on the left, but one of them twice.";
     $("#t-body").appendChild(App.results("Scores",[
       ["Paper", this.paper],
       ["Mismatched boxes", total],["Caught", hit],["Missed", miss],
-      ["Marked in error", fa],["Time", mmss(t)],["Seconds per box",(t/this.N).toFixed(2)]
-    ], coach, hit+"/"+total));
+      ["Marked in error", fa],
+      ["Time", mmss(t)],
+      ["Target time", mmss(TARGET_SECS.vse2)],
+      ["Against the target", pace.row],
+      ["Seconds per box",(t/this.N).toFixed(2)+" against 2.00"]
+    ], pace.note+" "+acc, hit+"/"+total+(pace.over?" · over time":"")));
     $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
   },
   stop(){}
