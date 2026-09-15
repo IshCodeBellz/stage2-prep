@@ -255,10 +255,13 @@
     <span class="lamp" id="l-hand"></span>
     <div class="body">
       <h2>2-Hand — co-ordination</h2>
-      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel. A different channel shape each attempt.</p>
-      <div class="meta">6 runs · 5 tracks · buzzer on contact</div>
+      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel. A different channel shape each attempt. Ten runs is the length the real test is set at and the only one that sets your best — six is a warm-up.</p>
+      <div class="meta">10 runs is the one that counts · 5 tracks · buzzer on contact</div>
     </div>
-    <button class="go" onclick="HAND.start()">Start</button>
+    <div class="row">
+      <button onclick="HAND.start(6)">6</button>
+      <button class="go" onclick="HAND.start(10)">10</button>
+    </div>
   </div>
 
   <div class="drill">
@@ -396,6 +399,10 @@ const FULL_RUN={
          miss:r=>mmss(r.sec-TARGET_SECS.vse2)+" over", quickest:true,
          rawRow:"Best at any speed", row:"Inside the 3:12 target", bestRow:"Best score set at that pace",
          faded:"faded bars ran over the target" },
+  hand:{ known:r=>/\d+ runs/.test(r.p||""), ok:r=>parseInt(/(\d+) runs/.exec(r.p)[1],10)>=10,
+         tag:"at 10 runs", pass:"full set", miss:()=>"warm-up set", hideTime:true,
+         rawRow:"Lowest at any length", row:"Run at the full ten", bestRow:"Lowest over the full ten",
+         faded:"faded bars were short sets" },
   wafv:{ known:r=>!!r.p, ok:r=>r.p==="30 minutes", tag:"at 30 min", pass:"full length",
          miss:()=>"warm-up length", hideTime:true,
          rawRow:"Best at any length", row:"Run at the full 30 minutes", bestRow:"Best over the full 30 minutes",
@@ -1416,8 +1423,9 @@ const HAND_TRACKS = [
 ];
 
 const HAND = {
-  RUNS:6, CH:26, SPEED:150,
-  start(){
+  RUNS:10, CH:26, SPEED:150,
+  start(runs){
+    this.RUNS = runs || 10;
     this.run=1; this.log=[]; this.done_=false;
     const t=Rot.next("hand", HAND_TRACKS.length);
     this.trackName=HAND_TRACKS[t][0]; this.coef=HAND_TRACKS[t][1];
@@ -1557,23 +1565,28 @@ const HAND = {
     cancelAnimationFrame(this.raf);
     window.removeEventListener("keydown",this.kd); window.removeEventListener("keyup",this.ku);
     const tot=this.log.reduce((a,b)=>a+b.t,0), out=this.log.reduce((a,b)=>a+b.out,0);
-    App.done("hand", tot? out/tot*100 : null, true, "% out", this.trackName);
-    const first=this.log.slice(0,3).reduce((a,b)=>a+b.out,0);
-    const last=this.log.slice(3).reduce((a,b)=>a+b.out,0);
-    const coach = out/tot>0.25
+    App.done("hand", tot? out/tot*100 : null, true, "% out", this.trackName+" · "+this.RUNS+" runs");
+    const h=Math.floor(this.RUNS/2);
+    const first=this.log.slice(0,h).reduce((a,b)=>a+b.out,0);
+    const last=this.log.slice(this.RUNS-h).reduce((a,b)=>a+b.out,0);
+    const short=this.RUNS<10;
+    const lengthNote = short
+      ? "This was a "+this.RUNS+"-run warm-up. The real test is ten runs of one shape and the later ones are where control tells, so a short set flatters you: it stops before the hands start to tire. It will not set your best."
+      : "Ten runs, which is the length the real test is set at.";
+    const acc = out/tot>0.25
       ? "You are outside the channel a quarter of the time. Slow right down — halve your speed until the buzzer stops, then build back up. On the day the time outside is what is counted, and going slowly is not penalised the way straying is."
       : last<first*0.7
-      ? "Clear improvement across the six runs, which is what practice on this looks like. Keep going: the real test is ten runs of the same shape and the later ones are where control tells."
+      ? "Clear improvement across the set, which is what practice on this looks like."
       : "Reasonably controlled. Most people find one hand leads and the other lags — watch the hand that is lagging rather than the one that is working, because that is the one costing you the corners. Your next attempt runs a different channel shape, which is where a memorised route stops helping you.";
     $("#t-body").appendChild(App.results("Scores",[
       ["Track", this.trackName],
-      ["Runs", this.RUNS],
+      ["Runs", this.RUNS+(short?" — a warm-up":"")],
       ["Total time", tot.toFixed(1)+" s"],
       ["Time outside the channel", out.toFixed(1)+" s"],
       ["Proportion outside", Math.round(out/tot*100)+"%"],
-      ["First three runs, outside", first.toFixed(1)+" s"],
-      ["Last three runs, outside", last.toFixed(1)+" s"]
-    ], coach, Math.round(out/tot*100)+"% out"));
+      ["First "+h+" runs, outside", first.toFixed(1)+" s"],
+      ["Last "+h+" runs, outside", last.toFixed(1)+" s"]
+    ], lengthNote+" "+acc, Math.round(out/tot*100)+"% out"+(short?" · warm-up":"")));
   },
   stop(){ this.done_=true; buzzer(false); cancelAnimationFrame(this.raf);
           window.removeEventListener("keydown",this.kd); window.removeEventListener("keyup",this.ku); }
@@ -2231,7 +2244,7 @@ const DAY_ORDER=[
   ["WAFV, 30 minutes",()=>WAFV.start(30)],
   ["ATAVT",()=>ATAVT.start()],
   ["SJE",()=>SJE.start()],
-  ["2-Hand",()=>HAND.start()]
+  ["2-Hand, ten runs",()=>HAND.start(10)]
 ];
 const DAY = {
   start(){
