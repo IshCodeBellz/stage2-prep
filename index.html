@@ -186,6 +186,12 @@
         font-size:.87rem;font-variant-numeric:tabular-nums}
   .hrow .when{color:var(--muted)}
   .hrow b.slow{color:var(--amber)}
+  textarea.pif{width:100%;margin-top:12px;min-height:130px;padding:11px 12px;border-radius:8px;
+       background:var(--panel);border:1px solid var(--line);color:var(--ink);font:inherit;line-height:1.45;
+       resize:vertical}
+  textarea.pif:focus{outline:2px solid var(--amber);outline-offset:1px}
+  .pifback{background:var(--panel);border:1px dashed var(--line);border-radius:8px;padding:11px 13px;
+       margin-top:8px;font-size:.9rem;color:var(--muted);white-space:pre-wrap}
   .hrow .paper-name{color:var(--muted);font-size:.8rem}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -282,6 +288,16 @@
       <div class="meta">6 scenarios · 4 sets · untimed</div>
     </div>
     <button class="go" onclick="SJE.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-mmi"></span>
+    <div class="body">
+      <h2>MMI — the interview</h2>
+      <p>Write your six pre-interview form examples, then answer the interviewer's follow-ups out loud against the clock. Scores how much of the structure you actually covered, not what you said.</p>
+      <div class="meta">6 form examples · 8 questions · 4 sets · about 20 min</div>
+    </div>
+    <button class="go" onclick="MMI.start()">Start</button>
   </div>
 
   <div class="drill">
@@ -2233,6 +2249,252 @@ const SJE = {
     $("#t-body").appendChild(w);
   },
   stop(){}
+};
+
+/* ---------------------------------------------------------------- MMI data */
+/* The multi-modal interview, built to the shape the RACF pack describes: you fill
+   in a pre-interview form with six examples from any part of your life, then the
+   interviewer probes those examples in detail and asks how you would handle
+   imaginary scenarios. The form itself is not marked — what you say about it is.
+   Only the first form prompt is the one printed in the pack. The other five are
+   practice prompts of the same shape: the pack does not publish the real six. */
+
+const PIF_PROMPTS=[
+ ["Describe a time when you have had to organise an event, project, or function.", true],
+ ["Describe a time when you had to follow a strict procedure exactly.", false],
+ ["Describe a time when you had to work alone for a long stretch and stay focused.", false],
+ ["Describe a time when you had to stay calm while something went wrong.", false],
+ ["Describe a time when you had to learn something difficult in a short space of time.", false],
+ ["Describe a time when you noticed a mistake, your own or someone else's, and did something about it.", false]
+];
+
+/* the interviewer works through your example with open questions — what, where,
+   when, how, why. Four sets, so a second run does not ask the same things. */
+const MMI_SETS=[
+ { probes:["What exactly was your part in it, as opposed to anyone else's?",
+           "Walk me through what you actually did, step by step.",
+           "Why did you do it that way rather than some other way?",
+           "What was the hardest moment in it, and what did you do at that point?",
+           "How did you know it had worked?",
+           "What would you do differently if it came round again?"],
+   scenarios:["Imagine you see someone struggling to carry their shopping across a busy road. What would you do?",
+              "Imagine you arrive somewhere and find a door that should be locked standing open. What would you do?"] },
+
+ { probes:["Who else was involved, and what was left to you?",
+           "What was at stake if it went wrong?",
+           "What did you have to decide on your own, without being able to ask anyone?",
+           "What went wrong along the way, and how did you handle it?",
+           "What did other people say about how it turned out?",
+           "What did you take from it that you still use?"],
+   scenarios:["Imagine you are in a queue and the person in front drops their wallet without noticing. What would you do?",
+              "Imagine a neighbour's smoke alarm has been sounding for an hour and nobody answers the door. What would you do?"] },
+
+ { probes:["How did you plan it before you started?",
+           "What did you do first, and why that first?",
+           "Where did you have to change your approach partway through?",
+           "How did you keep track of whether you were on top of it?",
+           "What was the result, in concrete terms?",
+           "What would have happened if you had done nothing?"],
+   scenarios:["Imagine you are driving and the car in front is being driven erratically. What would you do?",
+              "Imagine you are handed a task you have not been trained on and the person who asked has left. What would you do?"] },
+
+ { probes:["Set the scene for me — where were you and when was this?",
+           "What were you responsible for, specifically?",
+           "Talk me through the actions you took, in order.",
+           "What did you do when it did not go to plan?",
+           "How did it end, and how did you know?",
+           "What did it cost you to do it that way?"],
+   scenarios:["Imagine you see a child alone on a station platform looking lost. What would you do?",
+              "Imagine you are told to do something at work you are certain is against the rules. What would you do?"] }
+];
+
+/* what the pack asks you to do in an answer: the STAR structure, plus the two
+   habits it singles out — talk about yourself, and stay concise and on topic */
+const MMI_CHECKS=[
+ ["s","Situation — I set the scene: where, when, who was there"],
+ ["t","Task — I said what I was responsible for"],
+ ["a","Actions — I talked through what I actually did"],
+ ["r","Result — I said how it ended and how I knew"],
+ ["me","I talked about what I did, not what the team or my manager did"],
+ ["tight","I kept it concise and on the topic asked, without repeating myself"]
+];
+
+/* your six form answers live on this device so you turn up with them ready */
+const PIF=(()=>{
+  const KEY="stage2.pif.v1";
+  let mem=[];
+  try{ mem=JSON.parse(localStorage.getItem(KEY)||"[]")||[]; }catch(e){ mem=[]; }
+  return {
+    all:()=>PIF_PROMPTS.map((_,i)=>mem[i]||""),
+    set(i,v){ mem[i]=v; try{ localStorage.setItem(KEY, JSON.stringify(mem)); }catch(e){} },
+    filled:()=>PIF_PROMPTS.filter((_,i)=>(mem[i]||"").trim().length>20).length,
+    clear(){ mem=[]; try{ localStorage.removeItem(KEY); }catch(e){} }
+  };
+})();
+
+const MMI = {
+  LONG:180, SHORT:45,
+  start(){
+    this.set=Rot.next("mmi", MMI_SETS.length);
+    App.open("MMI — set "+(this.set+1)+" of "+MMI_SETS.length, el("div"));
+    App.active=this;
+    this.intro();
+  },
+  intro(){
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Set "+(this.set+1)+" of "+MMI_SETS.length+
+      " — the form first, then the interview. Answer out loud: that is the only way the timing means anything."));
+    box.appendChild(el("p","sub","On the day you are given a pre-interview form and asked to write six examples of things you have done. The form itself is not marked. The interviewer then works through those examples in detail, and asks how you would handle situations you have not been in. Examples can come from anywhere in your life — work, training, school, family, anything."));
+    box.appendChild(el("div","note","Be honest in the examples you pick. The interviewer digs into the detail, so anything invented falls apart under two or three follow-up questions. Pick things recent enough that you still remember them properly."));
+    const done=PIF.filled();
+    if(done) box.appendChild(el("p","sub","You have "+done+" of 6 written already. They are saved on this device."));
+    const r=el("div","row"); r.style.marginTop="16px";
+    const a=el("button","go", done?"Go over the form again":"Fill in the form");
+    a.onclick=()=>{ this.p=0; this.formStep(); };
+    r.appendChild(a);
+    if(done===6){
+      const b=el("button",null,"Straight to the interview");
+      b.onclick=()=>this.interviewStart();
+      r.appendChild(b);
+    }
+    const c=el("button","ghost","Back"); c.onclick=()=>App.quit(); r.appendChild(c);
+    box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+  },
+  formStep(){
+    const i=this.p, [prompt,fromPack]=PIF_PROMPTS[i];
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Pre-interview form — "+(i+1)+" of "+PIF_PROMPTS.length+
+      ". Three or four lines is the right length. You are not marked on this."));
+    box.appendChild(el("div","scenbox",prompt));
+    box.appendChild(el("p","sub", fromPack
+      ? "This is the example question printed in your pack, so it is the one worth getting right first."
+      : "A practice prompt of the same shape. The pack does not publish the real six, so treat this as a rehearsal of the writing, not a prediction of the question."));
+    const ta=el("textarea"); ta.className="pif";
+    ta.value=PIF.all()[i];
+    ta.placeholder="What it was, what you had to sort out, and how big it was. Two or three sentences.";
+    box.appendChild(ta);
+    const r=el("div","row"); r.style.marginTop="14px";
+    const n=el("button","go", i===PIF_PROMPTS.length-1 ? "Done — start the interview" : "Next");
+    n.onclick=()=>{
+      PIF.set(i, ta.value);
+      if(i===PIF_PROMPTS.length-1) this.interviewStart();
+      else { this.p++; this.formStep(); }
+    };
+    r.appendChild(n);
+    if(i>0){ const b=el("button",null,"Back one"); b.onclick=()=>{ PIF.set(i,ta.value); this.p--; this.formStep(); }; r.appendChild(b); }
+    box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    App.clock((i+1)+" / "+PIF_PROMPTS.length);
+  },
+  interviewStart(){
+    const S=MMI_SETS[this.set], mine=PIF.all();
+    this.qs=PIF_PROMPTS.map((p,i)=>({
+      kind:"Your example", topic:p[0], mine:mine[i], q:S.probes[i]
+    })).concat(S.scenarios.map(s=>({kind:"Imaginary situation", topic:null, mine:null, q:s})));
+    this.i=0; this.marks=[]; this.secs=[];
+    this.ask();
+  },
+  ask(){
+    const it=this.qs[this.i];
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Interview — question "+(this.i+1)+" of "+this.qs.length+
+      " · "+it.kind+". Say the answer out loud, then tap when you have finished."));
+    if(it.topic){
+      box.appendChild(el("p","sub",it.topic));
+      box.appendChild(el("div","pifback", it.mine && it.mine.trim() ? it.mine : "You left this one blank on the form — answer from whatever example comes to mind."));
+    }
+    box.appendChild(el("div","scenbox",it.q));
+    const r=el("div","row"); r.style.marginTop="16px";
+    const b=el("button","go","Finished answering");
+    b.onclick=()=>this.check();
+    r.appendChild(b); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    this.t0=Date.now();
+    clearInterval(App.tick);
+    App.tick=setInterval(()=>{ App.clock(mmss((Date.now()-this.t0)/1000)); },250);
+  },
+  check(){
+    clearInterval(App.tick);
+    const secs=Math.round((Date.now()-this.t0)/1000);
+    this.secs.push(secs);
+    const box=el("div");
+    box.appendChild(el("div","chainbar","You spoke for "+mmss(secs)+
+      (secs>this.LONG ? " — longer than an interviewer wants. Tick only what you genuinely covered."
+       : secs<this.SHORT ? " — short. Tick only what you genuinely covered."
+       : ". Tick only what you genuinely covered.")));
+    const g=el("div","opts");
+    const boxes=[];
+    MMI_CHECKS.forEach(([k,label])=>{
+      const l=el("label"); const c=el("input"); c.type="checkbox"; c.dataset.k=k;
+      l.appendChild(c); l.appendChild(el("span",null,label)); g.appendChild(l); boxes.push(c);
+    });
+    box.appendChild(g);
+    const r=el("div","row"); r.style.marginTop="16px";
+    const n=el("button","go", this.i===this.qs.length-1 ? "Finish and score" : "Next question");
+    n.onclick=()=>{
+      this.marks.push(boxes.map(c=>c.checked));
+      this.i++;
+      if(this.i>=this.qs.length) this.finish(); else this.ask();
+    };
+    r.appendChild(n); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+  },
+  finish(){
+    App.clock("");
+    let hit=0, total=0;
+    const perCheck=MMI_CHECKS.map(()=>0);
+    this.marks.forEach(m=>m.forEach((v,j)=>{ total++; if(v){hit++; perCheck[j]++;} }));
+    const cov=Math.round(hit/total*100);
+    const avg=this.secs.reduce((a,b)=>a+b,0)/this.secs.length;
+    const long=this.secs.filter(s=>s>this.LONG).length;
+    const short=this.secs.filter(s=>s<this.SHORT).length;
+    App.done("mmi", cov, false, "%", "set "+(this.set+1));
+
+    // only name a weakest element when one is genuinely behind the others
+    const lo=Math.min.apply(null,perCheck), hiC=Math.max.apply(null,perCheck);
+    const weakest = lo<hiC ? MMI_CHECKS[perCheck.indexOf(lo)][1] : null;
+    const coach = short>=3
+      ? "Most of your answers came in under three quarters of a minute. That is not enough for an interviewer to score you on — they need the detail, and short answers read as having nothing to say. Add the bit you are skipping: what you actually did, action by action."
+      : long>=4
+      ? "Most of your answers ran past three minutes. Length is the commonest way people lose this interview: the answer stops being about you and starts being about everything around you. Say the situation in two sentences, then spend the rest on what you did."
+      : cov<60
+      ? "You are covering about "+cov+"% of the structure"+(weakest?", and the weakest part was: "+weakest.toLowerCase():"")+". Answers that miss a piece of STAR are the ones that get follow-up questions you have not prepared for."
+      : "Good coverage at a workable length. Keep the result on the end of every answer — it is the part people drop when they are tired, and it is the part that makes the example mean something.";
+
+    const w=App.results("Scores",[
+      ["Questions", this.qs.length],
+      ["Structure covered", cov+"%"],
+      ["Average answer", mmss(Math.round(avg))],
+      ["Over three minutes", long+" of "+this.qs.length],
+      ["Under forty-five seconds", short+" of "+this.qs.length]
+    ].concat(weakest?[["Weakest element", weakest.split(" — ")[0]]]:[]),
+      coach, cov+"%");
+
+    this.qs.forEach((it,i)=>{
+      const m=this.marks[i];
+      const missed=MMI_CHECKS.filter((c,j)=>!m[j]);
+      const r=el("div","rev");
+      r.appendChild(el("h4",null,(i+1)+". "+it.kind+" · "+mmss(this.secs[i])+
+        (missed.length?"":" — all six")));
+      r.appendChild(el("p",null,"<b>"+it.q+"</b>"));
+      if(missed.length) missed.forEach(c=>r.appendChild(el("p",null,"<b class='bad'>missed</b> "+c[1])));
+      else r.appendChild(el("p",null,"<b class='ok'>Everything covered.</b>"));
+      w.appendChild(r);
+    });
+
+    const g=el("div","rev");
+    g.appendChild(el("h4",null,"What the pack asks for"));
+    g.appendChild(el("p",null,"Talk about what you did or would do, not what other people did. Speak clearly and keep it to the point — detail yes, repetition and digression no. Leave out jargon a stranger would not follow. Structure the answer as situation, task, actions, result."));
+    g.appendChild(el("p",null,"If a better example comes to mind mid-interview, say so and use it. And be honest: the questions go into enough detail that invented examples come apart."));
+    w.appendChild(g);
+    $("#t-body").appendChild(w);
+  },
+  stop(){ clearInterval(App.tick); }
 };
 
 /* ---------------------------------------------------------------- DAY MODE */
