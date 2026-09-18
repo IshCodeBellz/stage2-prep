@@ -284,10 +284,13 @@
     <span class="lamp" id="l-sje"></span>
     <div class="body">
       <h2>SJE — rating</h2>
-      <p>Rate each response 1 to 5. Checks your answers against each other for contradictions. Four different sets, rotating.</p>
-      <div class="meta">6 scenarios · 4 sets · untimed</div>
+      <p>Rate each response 1 to 5. Checks your answers against each other for contradictions. Twenty-one is the length of the real exercise and the only one that sets your best — six is a quick run through one set.</p>
+      <div class="meta">21 is the one that counts · 6 for a quick run · untimed</div>
     </div>
-    <button class="go" onclick="SJE.start()">Start</button>
+    <div class="row">
+      <button onclick="SJE.start(6)">6</button>
+      <button class="go" onclick="SJE.start(21)">21</button>
+    </div>
   </div>
 
   <div class="drill">
@@ -305,7 +308,7 @@
     <div class="body">
       <h2>Day mode</h2>
       <p>Every drill back to back in one sitting, at full length. Rehearses the fatigue, not just the tasks.</p>
-      <div class="meta">about 1 hr 15 · do this twice before the day</div>
+      <div class="meta">about 1 hr 30 · do this twice before the day</div>
     </div>
     <button onclick="DAY.start()">Run</button>
   </div>
@@ -419,6 +422,10 @@ const FULL_RUN={
          tag:"at 10 runs", pass:"full set", miss:()=>"warm-up set", hideTime:true,
          rawRow:"Lowest at any length", row:"Run at the full ten", bestRow:"Lowest over the full ten",
          faded:"faded bars were short sets" },
+  sje:{ known:r=>/\d+ scenarios/.test(r.p||""), ok:r=>/\b21 scenarios/.test(r.p||""),
+        tag:"at full length", pass:"full length", miss:()=>"short practice",
+        rawRow:"Lowest at any length", row:"Run at the full 21", bestRow:"Lowest over the full 21",
+        faded:"faded bars were short practice runs" },
   wafv:{ known:r=>!!r.p, ok:r=>r.p==="30 minutes", tag:"at 30 min", pass:"full length",
          miss:()=>"warm-up length", hideTime:true,
          rawRow:"Best at any length", row:"Run at the full 30 minutes", bestRow:"Best over the full 30 minutes",
@@ -2151,11 +2158,22 @@ const SJE_SETS = [
 let SJE_Q = SJE_SETS[0];
 
 const SJE = {
-  start(){
+  FULL:21,
+  start(count){
     this.i=0; this.ratings=[];
-    this.set=Rot.next("sje", SJE_SETS.length);
-    SJE_Q = SJE_SETS[this.set];
-    App.open("SJE rating — set "+(this.set+1)+" of "+SJE_SETS.length, el("div"));
+    this.full = (count||this.FULL) >= this.FULL;
+    if(this.full){
+      // the real exercise is 21 scenarios, drawn here from all four sets so no
+      // two full runs are the same paper, and so the consistency check has more to work on
+      SJE_Q = shuffle(SJE_SETS.reduce((a,b)=>a.concat(b),[]).slice()).slice(0,this.FULL);
+      this.paper = this.FULL+" scenarios";
+      App.open("SJE rating — the full "+this.FULL, el("div"));
+    } else {
+      this.set=Rot.next("sje", SJE_SETS.length);
+      SJE_Q = SJE_SETS[this.set];
+      this.paper = "set "+(this.set+1)+" · "+SJE_Q.length+" scenarios";
+      App.open("SJE rating — set "+(this.set+1)+" of "+SJE_SETS.length, el("div"));
+    }
     App.active=this;
     this.show();
   },
@@ -2163,7 +2181,7 @@ const SJE = {
     const [txt,opts]=SJE_Q[this.i];
     this.cur=new Array(opts.length).fill(0);
     const box=el("div");
-    box.appendChild(el("div","chainbar","Set "+(this.set+1)+" of "+SJE_SETS.length+
+    box.appendChild(el("div","chainbar",(this.full?"The full "+this.FULL:"Set "+(this.set+1)+" of "+SJE_SETS.length)+
       " · scenario "+(this.i+1)+" of "+SJE_Q.length+
       " — rate every response on its own. Several can be helpful, or none."));
     box.appendChild(el("div","scenbox",txt));
@@ -2218,18 +2236,27 @@ const SJE = {
         flags.push("You rated similar <b>"+tag+"</b> responses inconsistently — from "+Math.min(...his)+" to "+Math.max(...his)+". Same principle, different scores.");
       if(los.length>1 && Math.max(...los)-Math.min(...los)>=3)
         flags.push("Your ratings of <b>"+tag+"</b> responses ranged from "+Math.min(...los)+" to "+Math.max(...los)+", which suggests the principle is not settled yet.");
-      his.forEach(v=>{ if(v<=2) flags.push("You rated a <b>"+tag+"</b> response "+v+" — worth revisiting why."); });
-      los.forEach(v=>{ if(v>=4) flags.push("You rated a <b>"+tag+"</b> response "+v+", which sits against the pattern of your other answers."); });
+      // grouped per principle, not per rating: across 21 scenarios the per-rating
+      // version buried the real pattern under dozens of near-identical lines
+      const lowHi=his.filter(v=>v<=2), highLo=los.filter(v=>v>=4);
+      if(lowHi.length) flags.push("You rated "+lowHi.length+" <b>"+tag+"</b> response"+(lowHi.length>1?"s":"")+
+        " at 2 or below. That is the principle you are least sold on — worth working out why.");
+      if(highLo.length) flags.push("You rated "+highLo.length+" <b>"+tag+"</b> response"+(highLo.length>1?"s":"")+
+        " at 4 or above, against the pattern of your other answers.");
     });
-    App.done("sje", n? mad : null, true, " pts off", "set "+(this.set+1));
-    const coach = flags.length
+    App.done("sje", n? mad : null, true, " pts off", this.paper);
+    const lengthNote = this.full
+      ? "Twenty-one scenarios, which is the length of the real exercise."
+      : "A "+SJE_Q.length+"-scenario practice run. The real exercise is "+this.FULL+", and the contradictions this is looking for only show up reliably across the full set — six scenarios rarely put the same principle in front of you twice. It will not set your best.";
+    const coach = lengthNote+" "+(flags.length
       ? "Consistency matters more than any single answer, because the interview is built on these responses. See the flags below."
-      : "Consistent across the board, which is the thing this checks. Your answers would give an interviewer a coherent picture to probe.";
+      : "Consistent across the board, which is the thing this checks. Your answers would give an interviewer a coherent picture to probe.");
     const w=App.results("Scores",[
+      ["Length", SJE_Q.length+" scenarios"+(this.full?"":" — short practice")],
       ["Responses rated", n+" / "+(n+unrated)],
       ["Average distance from suggested", mad.toFixed(2)+" points"],
       ["Contradictions flagged", flags.length]
-    ], coach, mad<0.8?"consistent":"review");
+    ], coach, (mad<0.8?"consistent":"review")+(this.full?"":" · practice"));
     if(flags.length){
       const r=el("div","rev");
       r.appendChild(el("h4",null,"Consistency check"));
@@ -2505,13 +2532,13 @@ const DAY_ORDER=[
   ["M7-SJT",()=>SJT.start()],
   ["WAFV, 30 minutes",()=>WAFV.start(30)],
   ["ATAVT",()=>ATAVT.start()],
-  ["SJE",()=>SJE.start()],
+  ["SJE, 21 scenarios",()=>SJE.start(21)],
   ["2-Hand, ten runs",()=>HAND.start(10)]
 ];
 const DAY = {
   start(){
     const box=el("div");
-    box.appendChild(el("p","sub","Every drill back to back, at full length, with no gaps. It takes about an hour and a quarter. The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
+    box.appendChild(el("p","sub","Every drill back to back, at full length, with no gaps. It takes about an hour and a half now that the SJE and 2-Hand run at their real lengths. The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
     box.appendChild(el("div","note","Do this twice before the 22nd. Start it in the morning, because that is when you will be sitting the real one."));
     const order=DAY_ORDER;
     const ol=el("div"); ol.style.margin="14px 0";
