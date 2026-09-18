@@ -186,6 +186,11 @@
         font-size:.87rem;font-variant-numeric:tabular-nums}
   .hrow .when{color:var(--muted)}
   .hrow b.slow{color:var(--amber)}
+  .dials{display:flex;gap:14px;justify-content:center;align-items:center}
+  .dial{text-align:center;flex:1 1 0;max-width:120px}
+  .dial svg{width:100%;height:auto;display:block}
+  .dial span{display:block;margin-top:5px;font-size:.8rem;font-weight:620;color:#333}
+  .paper h3{margin:0 0 8px;color:#111;font-size:1rem}
   textarea.pif{width:100%;margin-top:12px;min-height:130px;padding:11px 12px;border-radius:8px;
        background:var(--panel);border:1px solid var(--line);color:var(--ink);font:inherit;line-height:1.45;
        resize:vertical}
@@ -231,6 +236,29 @@
       <div class="meta">45 pairs · 4 papers · 3 min</div>
     </div>
     <button class="go" onclick="VSE3.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-trp1"></span>
+    <div class="body">
+      <h2>TRP1b — rules recall</h2>
+      <p>Study a passage of procedure for three minutes, then it is taken away and you answer eighteen questions on it in seven. Three passages, rotating.</p>
+      <div class="meta">18 questions · 7 min · 3 passages</div>
+    </div>
+    <button class="go" onclick="TRP1.start()">Start</button>
+  </div>
+
+  <div class="drill">
+    <span class="lamp" id="l-trp2"></span>
+    <div class="body">
+      <h2>TRP2 — order of checking</h2>
+      <p>Three dials, each with an arrow over a background that sets its priority. White first, black second, grey last — give the order. Forty-three is the real length; seven is a warm-up.</p>
+      <div class="meta">43 in 8 min is the one that counts · 7 to warm up</div>
+    </div>
+    <div class="row">
+      <button onclick="TRP2.start(7)">7</button>
+      <button class="go" onclick="TRP2.start(43)">43</button>
+    </div>
   </div>
 
   <div class="drill">
@@ -308,7 +336,7 @@
     <div class="body">
       <h2>Day mode</h2>
       <p>Every drill back to back in one sitting, at full length. Rehearses the fatigue, not just the tasks.</p>
-      <div class="meta">about 1 hr 30 · do this twice before the day</div>
+      <div class="meta">about 1 hr 45 · do this twice before the day</div>
     </div>
     <button onclick="DAY.start()">Run</button>
   </div>
@@ -422,6 +450,10 @@ const FULL_RUN={
          tag:"at 10 runs", pass:"full set", miss:()=>"warm-up set", hideTime:true,
          rawRow:"Lowest at any length", row:"Run at the full ten", bestRow:"Lowest over the full ten",
          faded:"faded bars were short sets" },
+  trp2:{ known:r=>/\d+ questions/.test(r.p||""), ok:r=>/\b43 questions/.test(r.p||""),
+         tag:"at full length", pass:"full length", miss:()=>"practice run", hideTime:true,
+         rawRow:"Best at any length", row:"Run at the full 43", bestRow:"Best over the full 43",
+         faded:"faded bars were practice runs" },
   sje:{ known:r=>/\d+ scenarios/.test(r.p||""), ok:r=>/\b21 scenarios/.test(r.p||""),
         tag:"at full length", pass:"full length", miss:()=>"short practice",
         rawRow:"Lowest at any length", row:"Run at the full 21", bestRow:"Lowest over the full 21",
@@ -2278,6 +2310,318 @@ const SJE = {
   stop(){}
 };
 
+/* ---------------------------------------------------------------- TRP data */
+/* Trainability for rules and procedures, per the RACF pack.
+   TRP1b: you are read a passage of job information, study it, then it is taken
+   away and you answer 18 multiple-choice questions in 7 minutes.
+   TRP2: dials in the cab, each with an arrow over a background that sets the
+   order things must be checked in. 43 questions in 8 minutes.
+   The passages below are practice material written in the register of the rules.
+   They are not the Rule Book and the rules in them are invented — what is being
+   drilled is reading dense procedure once and holding on to it. */
+
+const TRP1_SETS=[
+{
+ title:"Working of trains in fog or falling snow",
+ passage:[
+  "When fog or falling snow is reported, the signaller must advise the driver of every train before it enters the affected section. Drivers must not assume that a section is clear because the previous section was.",
+  "A driver who cannot read a signal from the normal sighting point must bring the train to a stand short of it, and may only proceed once the aspect has been confirmed. Where the aspect cannot be confirmed within three minutes, the driver must contact the signaller before moving.",
+  "Speed through an affected section must not exceed 40 mph. Where the driver is relying on a hand signal it must not exceed 20 mph.",
+  "The horn must be sounded at every whistle board and at each level crossing, and again whenever anyone is seen on or near the line. In fog the long tone is used, never the short.",
+  "Detonators are placed on the signaller's instruction only. The single exception is a train that has become divided, where the driver may place protection without waiting for authority. Three detonators are used, ten yards apart.",
+  "Where a train is brought to a stand for more than ten minutes, the driver must report the position to the signaller and repeat that report every ten minutes until the train moves.",
+  "The headlight must be switched to the day beam in fog, because the night beam reflects back off the fog and reduces what the driver can see. Marker lights remain lit as normal.",
+  "Where fog signalmen are provided they are posted at distant signals first. A driver passing a distant signal at caution must be prepared to stop short of the next signal, whether or not a fog signalman is present."
+ ],
+ qs:[
+  ["Who advises the driver that a section is affected?",["The previous driver","The signaller","The fog signalman","The guard"],1],
+  ["Before entering an affected section, the driver is advised:",["only for the first train","for every train","only if the train is a passenger train","only if visibility is below 200 yards"],1],
+  ["A driver who cannot read a signal from the normal sighting point must:",["proceed at 20 mph","stop short of it","sound the horn and continue","contact the signaller before slowing"],1],
+  ["The aspect cannot be confirmed. After how long must the driver contact the signaller?",["one minute","two minutes","three minutes","five minutes"],2],
+  ["Maximum speed through an affected section:",["20 mph","30 mph","40 mph","50 mph"],2],
+  ["Maximum speed when relying on a hand signal:",["10 mph","20 mph","30 mph","40 mph"],1],
+  ["The horn must be sounded at:",["level crossings only","whistle boards only","whistle boards and level crossings","whistle boards, level crossings, and whenever anyone is seen on or near the line"],3],
+  ["Which tone is used in fog?",["the short tone","the long tone","two short tones","whichever the driver prefers"],1],
+  ["Detonators are normally placed:",["at the driver's discretion","on the signaller's instruction only","by the guard","only after ten minutes at a stand"],1],
+  ["In which case may the driver place protection without waiting for authority?",["a signal that cannot be read","a train that has become divided","a level crossing failure","a failure of the headlight"],1],
+  ["How many detonators are used?",["one","two","three","six"],2],
+  ["How far apart are they placed?",["five yards","ten yards","twenty yards","a quarter of a mile"],1],
+  ["A train stands for more than ten minutes. The driver must:",["wait for the signaller to call","report the position to the signaller","place detonators","switch off the headlight"],1],
+  ["How often is that report repeated?",["once only","every five minutes","every ten minutes","every twenty minutes"],2],
+  ["In fog the headlight must be switched to:",["the night beam","the day beam","off","flashing"],1],
+  ["Why?",["it uses less power","the night beam reflects back off the fog","the day beam is brighter at distance","to preserve the bulb"],1],
+  ["What happens to the marker lights?",["they are switched off","they remain lit as normal","they are switched to flashing","they are covered"],1],
+  ["Where fog signalmen are provided, they are posted first at:",["level crossings","distant signals","stop signals","the section exit"],1]
+ ]
+},
+{
+ title:"Protecting a line that is obstructed",
+ passage:[
+  "A line is obstructed when anything on or near it would make the passage of a train unsafe. The driver who becomes aware of an obstruction must protect the line before doing anything else, other than making the train itself safe.",
+  "Protection is placed in the rear of the obstruction first, because that is the direction from which a train will arrive. The driver walks back a quarter of a mile and places three detonators twenty yards apart on the line to be protected, clipped to the head of the rail.",
+  "Having placed them, the driver returns towards the train, and on the way places a single detonator at a point halfway back. The driver then remains at the train unless instructed otherwise.",
+  "Where a second line is also obstructed, that line must be protected in the same way before the driver reports the obstruction. Where only one line is obstructed the adjacent line need not be protected unless anything is fouling it.",
+  "Detonators must be carried in the container provided and kept away from heat. A detonator that has been exposed to water must not be used. Used or damaged detonators are handed in at the end of the turn and are never left on the line.",
+  "The signaller must be told the exact location, the line or lines affected, and whether protection has been placed. Until that report has been made and acknowledged, the driver must assume that no other person knows the line is blocked.",
+  "Protection may only be withdrawn on the signaller's instruction. The driver collects the detonators in the reverse order to that in which they were placed, nearest to the train first."
+ ],
+ qs:[
+  ["A line is obstructed when:",["a signal has failed","anything on or near it would make the passage of a train unsafe","a train is standing on it","the signaller says so"],1],
+  ["What comes before protecting the line?",["reporting to the signaller","making the train itself safe","collecting the detonators","nothing at all"],1],
+  ["Protection is placed first:",["ahead of the obstruction","in the rear of the obstruction","on both sides at once","at the signal box"],1],
+  ["Why that direction first?",["it is nearer","that is the direction a train will arrive from","the detonators are carried at that end","the rule book lists it first"],1],
+  ["How far back does the driver walk?",["two hundred yards","a quarter of a mile","half a mile","one mile"],1],
+  ["How many detonators are placed there?",["one","two","three","five"],2],
+  ["How far apart?",["ten yards","twenty yards","forty yards","a quarter of a mile"],1],
+  ["Where are they fixed?",["to the sleeper","clipped to the head of the rail","to the cess marker","against the rail web"],1],
+  ["On the way back the driver places:",["nothing further","a single detonator halfway back","three more detonators","a hand signal"],1],
+  ["Having placed protection, the driver:",["walks on to the next signal","remains at the train unless instructed otherwise","returns to the signal box","waits at the detonators"],1],
+  ["A second line is also obstructed. It must be protected:",["after reporting the obstruction","before reporting the obstruction","only if a train is due","only on the signaller's instruction"],1],
+  ["Only one line is obstructed. The adjacent line:",["must always be protected","need not be protected unless something is fouling it","must be protected after twenty minutes","is protected by the signaller"],1],
+  ["Detonators must be kept:",["in a pocket","in the container provided, away from heat","in the cab locker with the lamps","anywhere dry"],1],
+  ["A detonator that has been exposed to water:",["may be used once dried","must not be used","may be used at half the spacing","must be used first"],1],
+  ["Used or damaged detonators are:",["left on the line","handed in at the end of the turn","returned to the container","destroyed on site"],1],
+  ["What must the report to the signaller contain?",["the exact location only","the location and the lines affected","the location, the lines affected, and whether protection is placed","the driver's name and the train reporting number"],2],
+  ["Until the report is made and acknowledged, the driver must assume:",["the signaller is aware","no other person knows the line is blocked","the adjacent line is clear","protection is not required"],1],
+  ["Protection may be withdrawn:",["once the obstruction is removed","on the signaller's instruction","after thirty minutes","when the driver is satisfied"],1]
+ ]
+},
+{
+ title:"A train failed in section",
+ passage:[
+  "A train is failed when it cannot proceed under its own power at a speed that would clear the section without causing delay. The driver must tell the signaller at once, giving the location, the nature of the failure, and whether the train is clear of any junction or crossing.",
+  "The driver may make one attempt to restart, lasting no more than five minutes. If that fails, no further attempt may be made without the signaller's permission, and the driver must not leave the cab while the attempt is under way.",
+  "Where assistance is required, the assisting train approaches at caution and must stop at least twenty yards from the failed train. It then moves up on the driver's hand signal only. Coupling is carried out by the driver of the failed train.",
+  "Before assistance arrives, the driver of the failed train must secure it against movement by applying the parking brake and, on a gradient steeper than one in a hundred, by placing a scotch under a wheel at the lower end.",
+  "Passengers must not be detrained unless there is a danger in remaining on board, or unless the signaller has confirmed that both lines are blocked and the current is discharged where applicable. Detraining begins from the rear of the train.",
+  "Once coupled, the combined train proceeds at no more than 20 mph to the first place where it can be taken out of service. The driver of the assisting train has control of the movement throughout and the driver of the failed train rides in the leading cab.",
+  "The failure must be reported in writing before the driver goes off duty, whether or not the train was assisted."
+ ],
+ qs:[
+  ["A train is failed when it cannot proceed under its own power:",["at all","at a speed that would clear the section without causing delay","for more than five minutes","without assistance"],1],
+  ["The report to the signaller must include:",["the location only","the location and the nature of the failure","the location, the nature of the failure, and whether the train is clear of a junction or crossing","the number of passengers on board"],2],
+  ["How many attempts to restart may the driver make unaided?",["none","one","two","as many as needed"],1],
+  ["How long may that attempt last?",["two minutes","three minutes","five minutes","ten minutes"],2],
+  ["A further attempt requires:",["nothing further","the signaller's permission","the guard's agreement","a written authority"],1],
+  ["During the attempt the driver must:",["walk back to protect the line","not leave the cab","contact control","detrain passengers"],1],
+  ["The assisting train must stop at least:",["ten yards away","twenty yards away","fifty yards away","a quarter of a mile away"],1],
+  ["It then moves up on:",["the signaller's instruction","the hand signal of the failed train's driver","a green aspect","the guard's whistle"],1],
+  ["Coupling is carried out by:",["the driver of the assisting train","the driver of the failed train","the guard","whoever is nearer"],1],
+  ["The failed train is secured by:",["the parking brake","the parking brake, plus a scotch on a steep gradient","a scotch alone","leaving it in gear"],1],
+  ["A scotch is required on a gradient steeper than:",["one in fifty","one in seventy-five","one in a hundred","one in two hundred"],2],
+  ["Where is the scotch placed?",["under the leading wheel","under a wheel at the lower end","under a wheel at the higher end","at either end"],1],
+  ["Passengers must not be detrained unless:",["the delay exceeds thirty minutes","there is danger in remaining on board, or both lines are blocked and the current discharged","the guard requests it","the signaller asks"],1],
+  ["Detraining begins from:",["the front of the train","the rear of the train","the nearest door to the cess","both ends at once"],1],
+  ["The combined train proceeds at no more than:",["10 mph","20 mph","30 mph","40 mph"],1],
+  ["It proceeds to:",["the next station","the first place where it can be taken out of service","the depot","the end of the booked journey"],1],
+  ["Who has control of the movement?",["the driver of the failed train","the driver of the assisting train","the signaller","the guard"],1],
+  ["The failure must be reported in writing:",["within seven days","before the driver goes off duty","only if assistance was given","only if passengers were detrained"],1]
+ ]
+}
+];
+
+const TRP1 = {
+  STUDY:180, ANSWER:420,
+  start(){
+    this.set=Rot.next("trp1", TRP1_SETS.length);
+    this.S=TRP1_SETS[this.set];
+    this.i=0; this.timedOut=false; this.answers=new Array(this.S.qs.length).fill(null);
+    App.open("TRP1b — "+this.S.title, el("div"));
+    App.active=this;
+    this.study();
+  },
+  study(){
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Study this for three minutes. You may take notes on paper, but they go face down before the questions — on the day both your notes and the passage are collected."));
+    const p=el("div","paper");
+    p.appendChild(el("h3",null,this.S.title));
+    this.S.passage.forEach(t=>{ const q=el("p",null,t); q.style.margin="9px 0"; q.style.color="#111"; p.appendChild(q); });
+    box.appendChild(p);
+    box.appendChild(el("p","sub","Practice material written in the register of the rules. The rules in it are invented — what is being drilled is taking dense procedure in once and holding on to it."));
+    const r=el("div","row"); r.style.marginTop="14px";
+    const b=el("button","go","Ready — take it away");
+    b.onclick=()=>{ clearInterval(App.tick); this.ask(); };
+    r.appendChild(b); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    App.countDown(this.STUDY, ()=>this.ask());
+  },
+  ask(){
+    clearInterval(App.tick);
+    this.t0=Date.now();
+    this.render();
+    App.tick=setInterval(()=>{
+      const left=this.ANSWER-(Date.now()-this.t0)/1000;
+      App.clock(left>0?mmss(left):"0:00");
+      if(left<=0){ clearInterval(App.tick); this.timedOut=true; this.finish(); }
+    },250);
+  },
+  render(){
+    const [q,opts]=this.S.qs[this.i];
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Question "+(this.i+1)+" of "+this.S.qs.length+
+      " · seven minutes for all of them. The passage is gone — answer from memory."));
+    box.appendChild(el("div","scenbox",q));
+    const g=el("div","opts");
+    opts.forEach((o,j)=>{
+      const l=el("label"); const c=el("input"); c.type="radio"; c.name="trp1q"; c.checked=this.answers[this.i]===j;
+      c.onchange=()=>{ this.answers[this.i]=j; };
+      l.appendChild(c); l.appendChild(el("span",null,"ABCD"[j]+"  "+o)); g.appendChild(l);
+    });
+    box.appendChild(g);
+    const r=el("div","row"); r.style.marginTop="16px";
+    const n=el("button","go", this.i===this.S.qs.length-1?"Finish":"Next");
+    n.onclick=()=>{ if(this.i===this.S.qs.length-1) this.finish(); else { this.i++; this.render(); } };
+    r.appendChild(n);
+    if(this.i>0){ const b=el("button",null,"Back"); b.onclick=()=>{ this.i--; this.render(); }; r.appendChild(b); }
+    box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+  },
+  finish(){
+    clearInterval(App.tick); App.clock("");
+    const n=this.S.qs.length;
+    let right=0, done=0;
+    this.S.qs.forEach((q,i)=>{ if(this.answers[i]!=null){ done++; if(this.answers[i]===q[2]) right++; } });
+    const secs=Math.round((Date.now()-this.t0)/1000);
+    App.done("trp1", Math.round(right/n*100), false, "%", this.S.title);
+    const coach = (done<n && this.timedOut)
+      ? "You ran out of time with "+(n-done)+" unanswered. That is the shape of this test: it is not hard to answer, it is hard to answer quickly enough. Read the passage for the numbers and the exceptions on the first pass — those are what nearly every question turns on."
+      : done<n
+      ? "You left "+(n-done)+" unanswered with time still on the clock. There is no penalty for a wrong answer here, so a guess between the two you cannot rule out is worth more than a blank."
+      : right/n<0.6
+      ? "Under 60% with everything answered means the study time is the problem, not the clock. Three minutes is not long enough to read it twice, so read it once properly: numbers, orders of action, and the word 'unless'."
+      : "Strong. The questions that catch people out are the ones about exceptions — the single case where the usual rule does not apply. Go back over the ones you missed and check whether they were all of that kind.";
+    const w=App.results("Scores",[
+      ["Passage", this.S.title],
+      ["Answered", done+" / "+n],
+      ["Correct", right+" / "+n],
+      ["Time on the questions", mmss(secs)+" of "+mmss(this.ANSWER)]
+    ], coach, right+"/"+n);
+    this.S.qs.forEach((q,i)=>{
+      const got=this.answers[i];
+      if(got===q[2]) return;
+      const r=el("div","rev");
+      r.appendChild(el("h4",null,"Question "+(i+1)+(got==null?" — not answered":" — wrong")));
+      r.appendChild(el("p",null,q[0]));
+      if(got!=null) r.appendChild(el("p",null,"You said <b class='bad'>"+q[1][got]+"</b>"));
+      r.appendChild(el("p",null,"Answer <b class='ok'>"+q[1][q[2]]+"</b>"));
+      w.appendChild(r);
+    });
+    $("#t-body").appendChild(w);
+  },
+  stop(){ clearInterval(App.tick); }
+};
+
+/* TRP2 — three panels, each with an arrow over one of three backgrounds.
+   White is checked first, black second, grey last. Give the order. */
+const TRP2_BG=[["#FFFFFF","white"],["#1A1A1A","black"],["#9A9A9A","grey"]];
+const TRP2_POS=["L","M","R"];
+function trp2Panel(which, sectors, arrowSector){
+  // three sectors of 120°, drawn from -90°, with the arrow pointing into one of them
+  const paths=sectors.map((bg,k)=>{
+    const a0=(-90+k*120)*Math.PI/180, a1=(-90+(k+1)*120)*Math.PI/180;
+    const x0=44+38*Math.cos(a0), y0=44+38*Math.sin(a0);
+    const x1=44+38*Math.cos(a1), y1=44+38*Math.sin(a1);
+    return `<path d="M44 44 L${x0.toFixed(1)} ${y0.toFixed(1)} A38 38 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${TRP2_BG[bg][0]}" stroke="#555" stroke-width="1"/>`;
+  }).join("");
+  const mid=(-90+arrowSector*120+60+(rnd(60)-30))*Math.PI/180;
+  const ax=44+30*Math.cos(mid), ay=44+30*Math.sin(mid);
+  return `<svg viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="44" cy="44" r="38" fill="#fff" stroke="#333" stroke-width="2"/>
+    ${paths}
+    <circle cx="44" cy="44" r="38" fill="none" stroke="#333" stroke-width="2"/>
+    <line x1="44" y1="44" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}" stroke="#C6321E" stroke-width="3.5"/>
+    <circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="4" fill="#C6321E"/>
+    <circle cx="44" cy="44" r="4.5" fill="#333"/></svg>`;
+}
+function trp2Question(){
+  // each panel gets a different priority: one white, one black, one grey under the arrow
+  const order=shuffle([0,1,2]);           // order[panel] = which background its arrow sits over
+  const panels=TRP2_POS.map((p,i)=>{
+    const sectors=shuffle([0,1,2]);       // where each background sits on that dial
+    return {svg:trp2Panel(p, sectors, sectors.indexOf(order[i])), pri:order[i]};
+  });
+  const correct=[0,1,2].map(pr=>TRP2_POS[panels.findIndex(p=>p.pri===pr)]).join("");
+  const perms=["LMR","LRM","MLR","MRL","RLM","RML"].filter(p=>p!==correct);
+  const opts=shuffle([correct].concat(shuffle(perms).slice(0,3)));
+  return {panels, correct, opts};
+}
+
+const TRP2_LENGTHS={full:[43,480], practice:[7,180]};
+const TRP2 = {
+  start(count){
+    const full=(count||43)>=43;
+    const [n,secs]=full?TRP2_LENGTHS.full:TRP2_LENGTHS.practice;
+    this.N=n; this.LIMIT=secs; this.full=full;
+    this.paper=n+" questions";
+    this.qs=[]; for(let i=0;i<n;i++) this.qs.push(trp2Question());
+    this.i=0; this.answers=new Array(n).fill(null);
+    App.open("TRP2 — "+(full?"the full 43":"7-question practice"), el("div"));
+    App.active=this;
+    this.t0=Date.now();
+    this.render();
+    App.tick=setInterval(()=>{
+      const left=this.LIMIT-(Date.now()-this.t0)/1000;
+      App.clock(left>0?mmss(left):"0:00");
+      if(left<=0){ clearInterval(App.tick); this.finish(); }
+    },250);
+  },
+  render(){
+    const q=this.qs[this.i];
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Question "+(this.i+1)+" of "+this.N+
+      " · white is checked first, black second, grey last. Give the order."));
+    const p=el("div","paper");
+    const row=el("div","dials");
+    q.panels.forEach((pn,k)=>{
+      const d=el("div","dial");
+      const s=el("div"); s.innerHTML=pn.svg; d.appendChild(s);
+      d.appendChild(el("span",null,TRP2_POS[k]));
+      row.appendChild(d);
+    });
+    p.appendChild(row); box.appendChild(p);
+    const g=el("div","opts");
+    q.opts.forEach((o,j)=>{
+      const l=el("label"); const c=el("input"); c.type="radio"; c.name="trp2q";
+      c.checked=this.answers[this.i]===o;
+      c.onchange=()=>{ this.answers[this.i]=o; };
+      l.appendChild(c); l.appendChild(el("span",null,"ABCD"[j]+"  "+o.split("").join(" "))); g.appendChild(l);
+    });
+    box.appendChild(g);
+    const r=el("div","row"); r.style.marginTop="16px";
+    const n=el("button","go", this.i===this.N-1?"Finish":"Next");
+    n.onclick=()=>{ if(this.i===this.N-1) this.finish(); else { this.i++; this.render(); } };
+    r.appendChild(n); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+  },
+  finish(){
+    clearInterval(App.tick); App.clock("");
+    let right=0, done=0;
+    this.qs.forEach((q,i)=>{ if(this.answers[i]!=null){ done++; if(this.answers[i]===q.correct) right++; } });
+    const secs=Math.round((Date.now()-this.t0)/1000);
+    App.done("trp2", Math.round(right/this.N*100), false, "%", this.paper);
+    const rate=done?(secs/done):0;
+    const lengthNote=this.full
+      ? "Forty-three questions in eight minutes, which is the real thing — about eleven seconds each."
+      : "A seven-question practice run. The real test is 43 in eight minutes and the difficulty is entirely in that rate, so this will not set your best.";
+    const acc = done<this.N
+      ? "You got through "+done+" of "+this.N+". Nobody is expected to finish, but the further you get at the same accuracy the better you score. Read the arrow, not the dial: the only thing that matters is which background it sits over."
+      : right/done<0.8
+      ? "Accuracy is the problem rather than speed. The order is always white, then black, then grey — say it to yourself as you look at each panel rather than working it out fresh each time."
+      : "Good rate at good accuracy. Keep the same routine every question: left panel, middle, right, then read off the order.";
+    $("#t-body").appendChild(App.results("Scores",[
+      ["Length", this.N+" questions"+(this.full?"":" — practice")],
+      ["Answered", done+" / "+this.N],
+      ["Correct", right+" / "+done],
+      ["Seconds a question", rate?rate.toFixed(1):"—"],
+      ["Time", mmss(secs)+" of "+mmss(this.LIMIT)]
+    ], lengthNote+" "+acc, right+"/"+this.N+(this.full?"":" · practice")));
+  },
+  stop(){ clearInterval(App.tick); }
+};
+
 /* ---------------------------------------------------------------- MMI data */
 /* The multi-modal interview, built to the shape the RACF pack describes: you fill
    in a pre-interview form with six examples from any part of your life, then the
@@ -2530,6 +2874,8 @@ const DAY_ORDER=[
   ["VSE task 2",()=>VSE2.start()],
   ["VSE task 3",()=>VSE3.start()],
   ["M7-SJT",()=>SJT.start()],
+  ["TRP1b",()=>TRP1.start()],
+  ["TRP2, 43 questions",()=>TRP2.start(43)],
   ["WAFV, 30 minutes",()=>WAFV.start(30)],
   ["ATAVT",()=>ATAVT.start()],
   ["SJE, 21 scenarios",()=>SJE.start(21)],
@@ -2538,7 +2884,7 @@ const DAY_ORDER=[
 const DAY = {
   start(){
     const box=el("div");
-    box.appendChild(el("p","sub","Every drill back to back, at full length, with no gaps. It takes about an hour and a half now that the SJE and 2-Hand run at their real lengths. The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
+    box.appendChild(el("p","sub","Every drill back to back, at full length, with no gaps. It takes about an hour and three quarters now that every drill runs at its real length. The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
     box.appendChild(el("div","note","Do this twice before the 22nd. Start it in the morning, because that is when you will be sitting the real one."));
     const order=DAY_ORDER;
     const ol=el("div"); ol.style.margin="14px 0";
