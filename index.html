@@ -186,6 +186,11 @@
         font-size:.87rem;font-variant-numeric:tabular-nums}
   .hrow .when{color:var(--muted)}
   .hrow b.slow{color:var(--amber)}
+  [hidden]{display:none!important}
+  .stagebar{display:flex;gap:8px;margin:0 0 10px}
+  .stagebar button{flex:1 1 0;padding:10px 12px;font-weight:600}
+  .stagebar button.on{background:var(--amber);border-color:var(--amber);color:#171003}
+  #stagenote{margin:0 0 20px;font-size:.86rem}
   .dials{display:flex;gap:14px;justify-content:center;align-items:center}
   .dial{text-align:center;flex:1 1 0;max-width:120px}
   .dial svg{width:100%;height:auto;display:block}
@@ -208,7 +213,13 @@
   <h1>Stage 2 test simulators</h1>
   <p class="sub" id="countdown">GTS trainee train driver · assessment 22 September, Watford</p>
 
-  <div class="drill">
+  <div class="stagebar">
+    <button data-s="1">Stage 1</button>
+    <button data-s="2">Stage 2</button>
+  </div>
+  <p class="sub" id="stagenote"></p>
+
+  <div class="drill" data-stage="2">
     <span class="lamp" id="l-vse1"></span>
     <div class="body">
       <h2>VSE task 1 — dot sequence</h2>
@@ -218,7 +229,7 @@
     <button class="go" onclick="VSE1.start()">Start</button>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="2">
     <span class="lamp" id="l-vse2"></span>
     <div class="body">
       <h2>VSE task 2 — letter columns</h2>
@@ -228,7 +239,7 @@
     <button class="go" onclick="VSE2.start()">Start</button>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="2">
     <span class="lamp" id="l-vse3"></span>
     <div class="body">
       <h2>VSE task 3 — both at once</h2>
@@ -238,7 +249,7 @@
     <button class="go" onclick="VSE3.start()">Start</button>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="1">
     <span class="lamp" id="l-trp1"></span>
     <div class="body">
       <h2>TRP1b — rules recall</h2>
@@ -248,7 +259,7 @@
     <button class="go" onclick="TRP1.start()">Start</button>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="1">
     <span class="lamp" id="l-trp2"></span>
     <div class="body">
       <h2>TRP2 — order of checking</h2>
@@ -261,7 +272,7 @@
     </div>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="2">
     <span class="lamp" id="l-wafv"></span>
     <div class="body">
       <h2>WAFV — vigilance</h2>
@@ -275,7 +286,7 @@
     </div>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="2">
     <span class="lamp" id="l-atavt"></span>
     <div class="body">
       <h2>ATAVT — perception</h2>
@@ -285,7 +296,7 @@
     <button class="go" onclick="ATAVT.start()">Start</button>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="2">
     <span class="lamp" id="l-hand"></span>
     <div class="body">
       <h2>2-Hand — co-ordination</h2>
@@ -298,7 +309,7 @@
     </div>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="2">
     <span class="lamp" id="l-sjt"></span>
     <div class="body">
       <h2>M7-SJT — ranking</h2>
@@ -308,7 +319,7 @@
     <button class="go" onclick="SJT.start()">Start</button>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="2">
     <span class="lamp" id="l-sje"></span>
     <div class="body">
       <h2>SJE — rating</h2>
@@ -321,7 +332,7 @@
     </div>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="2">
     <span class="lamp" id="l-mmi"></span>
     <div class="body">
       <h2>MMI — the interview</h2>
@@ -331,12 +342,12 @@
     <button class="go" onclick="MMI.start()">Start</button>
   </div>
 
-  <div class="drill">
+  <div class="drill" data-stage="both">
     <span class="lamp" id="l-day"></span>
     <div class="body">
       <h2>Day mode</h2>
-      <p>Every drill back to back in one sitting, at full length. Rehearses the fatigue, not just the tasks.</p>
-      <div class="meta">about 1 hr 45 · do this twice before the day</div>
+      <p>Every drill of the stage you are on, back to back in one sitting, at full length. Rehearses the fatigue, not just the tasks.</p>
+      <div class="meta">runs whichever stage is selected · do this twice before the day</div>
     </div>
     <button onclick="DAY.start()">Run</button>
   </div>
@@ -464,6 +475,47 @@ const FULL_RUN={
          faded:"faded bars were short runs" }
 };
 
+/* The process runs in two stages and they use different tests. Stage 1 is the
+   paper afternoon; stage 2 is the full day of Vienna tests, the SJE and the MMI.
+   Straight from the OPC invites. */
+const STAGES={
+  "1":{ label:"Stage 1",
+        when:new Date("2026-09-01T13:00:00+01:00"),
+        blurb:"Group Bourdon, Tea-Occ, TRP1b, TRP2 and the DFFT. An afternoon of paper tests, 13:00 to about 16:30.",
+        missing:"Group Bourdon, Tea-Occ and the DFFT have no drill here yet — say the word and I will build them." },
+  "2":{ label:"Stage 2",
+        when:new Date("2026-09-22T09:00:00+01:00"),
+        blurb:"The VSE, M7-SJT, the Vienna tests (WAFV, ATAVT, 2-Hand), the RSSB situational judgement exercise and the multi-modal interview. A full day, 09:00 to about 16:30.",
+        missing:null }
+};
+const Stage=(()=>{
+  const KEY="stage2.stage.v1";
+  let cur="2";
+  try{ const v=localStorage.getItem(KEY); if(v==="1"||v==="2") cur=v; }catch(e){}
+  return {
+    get:()=>cur,
+    set(v){ cur=v; try{ localStorage.setItem(KEY,v); }catch(e){} }
+  };
+})();
+
+function paintStage(){
+  const cur=Stage.get(), S=STAGES[cur];
+  document.querySelectorAll(".stagebar button").forEach(b=>{
+    const on=b.dataset.s===cur;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", on?"true":"false");
+    b.onclick=()=>{ Stage.set(b.dataset.s); paintStage(); paintMenu(); paintCountdown(); };
+  });
+  document.querySelectorAll("#menu .drill").forEach(dv=>{
+    const st=dv.dataset.stage;
+    dv.hidden = !(st===cur || st==="both");
+  });
+  const n=document.getElementById("stagenote");
+  if(n) n.innerHTML = S.blurb + (S.missing?" <b>"+S.missing+"</b>":"");
+  const h=document.querySelector("#menu h1");
+  if(h) h.textContent = S.label+" test simulators";
+}
+
 function paintMenu(){
   document.querySelectorAll("#menu .drill").forEach(dv=>{
     const lamp=dv.querySelector(".lamp"); if(!lamp) return;
@@ -498,7 +550,7 @@ function paintMenu(){
       }
       if(id==="day" && rec.h && rec.h.length){
         const last=rec.h[rec.h.length-1];
-        head = attempts + " · last one " + last.runs.length + " of " + DAY_ORDER.length;
+        head = attempts + " · last one " + last.runs.length + " of " + dayOrder().length;
       }
       line.replaceChildren(document.createTextNode(head+" "), el("span","chev","see all ›"));
       line.onclick=()=>HISTORY.open(id);
@@ -540,7 +592,7 @@ const HISTORY = {
   day(rec){
     const sittings=(rec.h||[]).slice();
     const box=el("div");
-    const full=sittings.filter(s=>s.runs.length===DAY_ORDER.length);
+    const full=sittings.filter(s=>s.runs.length===dayOrder().length);
 
     if(!sittings.length){
       box.appendChild(el("div","note","Day mode was run "+rec.n+(rec.n===1?" time":" times")+
@@ -562,7 +614,7 @@ const HISTORY = {
       sittings.slice().reverse().forEach((s,i)=>{
         const card=el("div","rev");
         card.appendChild(el("h4",null,(sittings.length-i)+". "+this.when(s.t)+" · "+this.dur(s.ms)+
-          " · "+s.runs.length+" of "+DAY_ORDER.length+" drills"));
+          " · "+s.runs.length+" of "+dayOrder().length+" drills"));
         let earlyDown=0, lateDown=0, earlyN=0, lateN=0;
         const half=Math.ceil(s.runs.length/2);
         s.runs.forEach((run,j)=>{
@@ -741,14 +793,16 @@ const HISTORY = {
 
 function paintCountdown(){
   const c=document.getElementById("countdown"); if(!c) return;
-  const target=new Date("2026-09-22T09:00:00+01:00");
+  const S=STAGES[Stage.get()];
+  const target=S.when;
   const days=Math.ceil((target-Date.now())/86400000);
   let tail;
   if(days>1) tail = days+" days to go";
   else if(days===1) tail = "tomorrow";
   else if(days===0) tail = "today — good luck";
-  else tail = "assessment date passed";
-  c.textContent="GTS trainee train driver · Watford, 22 September · "+tail;
+  else tail = "that date has passed";
+  const when=target.toLocaleDateString("en-GB",{day:"numeric",month:"long"});
+  c.textContent="GTS trainee train driver · "+S.label+" · Watford, "+when+" · "+tail;
 }
 
 function buildFooter(){
@@ -2869,24 +2923,35 @@ const MMI = {
 };
 
 /* ---------------------------------------------------------------- DAY MODE */
-const DAY_ORDER=[
-  ["VSE task 1",()=>VSE1.start()],
-  ["VSE task 2",()=>VSE2.start()],
-  ["VSE task 3",()=>VSE3.start()],
-  ["M7-SJT",()=>SJT.start()],
-  ["TRP1b",()=>TRP1.start()],
-  ["TRP2, 43 questions",()=>TRP2.start(43)],
-  ["WAFV, 30 minutes",()=>WAFV.start(30)],
-  ["ATAVT",()=>ATAVT.start()],
-  ["SJE, 21 scenarios",()=>SJE.start(21)],
-  ["2-Hand, ten runs",()=>HAND.start(10)]
-];
+const DAY_ORDERS={
+  "1":[
+    ["TRP1b",()=>TRP1.start()],
+    ["TRP2, 43 questions",()=>TRP2.start(43)]
+  ],
+  "2":[
+    ["VSE task 1",()=>VSE1.start()],
+    ["VSE task 2",()=>VSE2.start()],
+    ["VSE task 3",()=>VSE3.start()],
+    ["M7-SJT",()=>SJT.start()],
+    ["WAFV, 30 minutes",()=>WAFV.start(30)],
+    ["ATAVT",()=>ATAVT.start()],
+    ["SJE, 21 scenarios",()=>SJE.start(21)],
+    ["2-Hand, ten runs",()=>HAND.start(10)],
+    ["MMI",()=>MMI.start()]
+  ]
+};
+function dayOrder(){ return DAY_ORDERS[Stage.get()]; }
 const DAY = {
   start(){
     const box=el("div");
-    box.appendChild(el("p","sub","Every drill back to back, at full length, with no gaps. It takes about an hour and three quarters now that every drill runs at its real length. The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
-    box.appendChild(el("div","note","Do this twice before the 22nd. Start it in the morning, because that is when you will be sitting the real one."));
-    const order=DAY_ORDER;
+    const S=STAGES[Stage.get()];
+    box.appendChild(el("p","sub","Every "+S.label.toLowerCase()+" drill back to back, at full length, with no gaps. "+
+      (Stage.get()==="2"
+        ? "It takes about two hours. The real day runs 09:00 to 16:30 with breaks and administration in between, so this is the testing compressed."
+        : "It takes about twenty minutes, which is all that is built for this stage so far.")+
+      " The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
+    box.appendChild(el("div","note","Do this twice before the day. Start it in the morning, because that is when you will be sitting the real one."));
+    const order=dayOrder();
     const ol=el("div"); ol.style.margin="14px 0";
     order.forEach(([n],i)=>{
       const d_=el("div","stat");
@@ -2908,7 +2973,7 @@ const DAY = {
 };
 
 /* ---- boot */
-paintMenu(); paintCountdown(); buildFooter();
+paintStage(); paintMenu(); paintCountdown(); buildFooter();
 setInterval(paintCountdown, 60*60*1000);
 </script>
 <script>
