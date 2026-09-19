@@ -187,6 +187,23 @@
   .hrow .when{color:var(--muted)}
   .hrow b.slow{color:var(--amber)}
   [hidden]{display:none!important}
+  .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:5px}
+  .bg{background:#fff;border:1px solid #bbb;border-radius:2px;cursor:pointer;aspect-ratio:1;
+      -webkit-tap-highlight-color:transparent}
+  .bg svg{display:block;width:100%;height:100%}
+  .bg.mk{background:linear-gradient(to top right,transparent calc(50% - 1.3px),#C6321E calc(50% - 1.3px),
+         #C6321E calc(50% + 1.3px),transparent calc(50% + 1.3px)),#fff}
+  .dir{max-height:56vh;overflow-y:auto;background:#fff;color:#111}
+  .dirrow{display:flex;gap:10px;align-items:center;padding:7px 8px;border-bottom:1px solid #e3e3e3;
+          cursor:pointer;font-size:.86rem;-webkit-tap-highlight-color:transparent}
+  .dirrow.mk{background:#FDE8E4}
+  .dirname{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dirnum{color:#666;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .dirsym{font-size:1.1rem;letter-spacing:3px;white-space:nowrap}
+  input.num{width:130px;margin-top:12px;padding:11px 12px;border-radius:8px;background:var(--panel);
+            border:1px solid var(--line);color:var(--ink);font:inherit;font-size:1.3rem;
+            font-variant-numeric:tabular-nums}
+  input.num:focus{outline:2px solid var(--amber);outline-offset:1px}
   .stagebar{display:flex;gap:8px;margin:0 0 10px}
   .stagebar button{flex:1 1 0;padding:10px 12px;font-weight:600}
   .stagebar button.on{background:var(--amber);border-color:var(--amber);color:#171003}
@@ -247,6 +264,26 @@
       <div class="meta">45 pairs · 4 papers · 3 min</div>
     </div>
     <button class="go" onclick="VSE3.start()">Start</button>
+  </div>
+
+  <div class="drill" data-stage="1">
+    <span class="lamp" id="l-gb"></span>
+    <div class="body">
+      <h2>Group Bourdon — dot groups</h2>
+      <p>Mark every group of exactly four dots, working left to right, line by line. Five parts of a minute each, changing whether or not you have finished. Errors count against you.</p>
+      <div class="meta">5 parts · 1 min each · errors penalised</div>
+    </div>
+    <button class="go" onclick="GB.start()">Start</button>
+  </div>
+
+  <div class="drill" data-stage="1">
+    <span class="lamp" id="l-tea"></span>
+    <div class="body">
+      <h2>Tea-Occ — divided attention</h2>
+      <p>Count tones while ignoring a lower one, search a directory page, then do both at once. Needs sound. Scores what doing both costs you.</p>
+      <div class="meta">3 parts · about 6 min · sound required</div>
+    </div>
+    <button class="go" onclick="TEA.start()">Start</button>
   </div>
 
   <div class="drill" data-stage="1">
@@ -482,7 +519,7 @@ const STAGES={
   "1":{ label:"Stage 1",
         when:new Date("2026-09-01T13:00:00+01:00"),
         blurb:"Group Bourdon, Tea-Occ, TRP1b, TRP2 and the DFFT. An afternoon of paper tests, 13:00 to about 16:30.",
-        missing:"Group Bourdon, Tea-Occ and the DFFT have no drill here yet — say the word and I will build them." },
+        missing:"The DFFT has no drill here yet — it is the one test the pack does not describe." },
   "2":{ label:"Stage 2",
         when:new Date("2026-09-22T09:00:00+01:00"),
         blurb:"The VSE, M7-SJT, the Vienna tests (WAFV, ATAVT, 2-Hand), the RSSB situational judgement exercise and the multi-modal interview. A full day, 09:00 to about 16:30.",
@@ -1204,7 +1241,7 @@ const WAFV = {
       App.timer=setTimeout(()=>{ this.cycle(); }, this.OFF);
     }, this.ON);
     if(target){
-      setTimeout(()=>{ if(this.armed && !this.counted){ this.miss++; this.armed=false; } }, this.WINDOW);
+      setTimeout(()=>{ if(!this.ended && this.armed && !this.counted){ this.miss++; this.armed=false; } }, this.WINDOW);
     }
   },
   respond(){
@@ -2364,6 +2401,319 @@ const SJE = {
   stop(){}
 };
 
+/* ------------------------------------------------------- GROUP BOURDON data */
+/* Per the pack: work left to right, line after line, putting a mark through the
+   groups of four dots. Five parts, and the administrator says "change" between
+   them. Both accuracy and speed count, and errors are penalised.
+   The pack does not publish the length of each part; its own practice pages are
+   one minute each, so that is what is used here. */
+function dotCell(n){
+  const slots=[[9,9],[20,9],[31,9],[9,20],[20,20],[31,20],[9,31],[20,31],[31,31]];
+  const pick=shuffle(slots.slice()).slice(0,n);
+  return `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">`+
+    pick.map(([x,y])=>`<circle cx="${x+rnd(5)-2}" cy="${y+rnd(5)-2}" r="3.4" fill="#111"/>`).join("")+
+    `</svg>`;
+}
+
+const GB = {
+  PARTS:5, PER_PART:60, N:150,
+  start(){
+    this.part=0; this.log=[];
+    this.build();
+    App.open("Group Bourdon — part 1 of "+this.PARTS, el("div"));
+    App.active=this;
+    this.render();
+  },
+  build(){
+    // three, four or five dots a group; the fours are the ones to mark
+    this.groups=[]; this.marked=new Array(this.N).fill(false);
+    for(let i=0;i<this.N;i++){
+      const r=Math.random();
+      this.groups.push(r<0.28 ? 4 : (r<0.64 ? 3 : 5));
+    }
+  },
+  render(){
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Part "+(this.part+1)+" of "+this.PARTS+
+      " — work left to right, line by line, and mark every group of exactly four dots. "+
+      "One minute, then it changes whether or not you have finished. Errors count against you."));
+    const p=el("div","paper");
+    const g=el("div","bgrid");
+    this.nodes=[];
+    this.groups.forEach((n,i)=>{
+      const c=el("div","bg"); c.innerHTML=dotCell(n);
+      c.onclick=()=>{ this.marked[i]=!this.marked[i]; c.classList.toggle("mk"); this.reach=Math.max(this.reach||0,i+1); };
+      g.appendChild(c); this.nodes.push(c);
+    });
+    p.appendChild(g); box.appendChild(p);
+    box.appendChild(el("p","sub","Very few people reach the end of a part. Getting further at the same accuracy is what scores, not finishing."));
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    this.reach=0;
+    this.t0=Date.now();
+    clearInterval(App.tick);
+    App.tick=setInterval(()=>{
+      const left=this.PER_PART-(Date.now()-this.t0)/1000;
+      App.clock(left>0?Math.ceil(left)+"s":"change");
+      if(left<=0) this.change();
+    },200);
+  },
+  change(){
+    clearInterval(App.tick);
+    // score only as far as the last group you marked — that is how far you got
+    const reach=this.reach||0;
+    let hit=0,miss=0,fa=0,fours=0;
+    for(let i=0;i<reach;i++){
+      const four=this.groups[i]===4;
+      if(four) fours++;
+      if(four&&this.marked[i])hit++;
+      else if(four&&!this.marked[i])miss++;
+      else if(!four&&this.marked[i])fa++;
+    }
+    this.log.push({reach,fours,hit,miss,fa});
+    this.part++;
+    if(this.part>=this.PARTS){ this.finish(); return; }
+    $("#t-title").textContent="Group Bourdon — part "+(this.part+1)+" of "+this.PARTS;
+    this.build();
+    this.render();
+  },
+  finish(){
+    clearInterval(App.tick); App.clock("");
+    const tot=this.log.reduce((a,b)=>({reach:a.reach+b.reach,fours:a.fours+b.fours,
+      hit:a.hit+b.hit,miss:a.miss+b.miss,fa:a.fa+b.fa}),{reach:0,fours:0,hit:0,miss:0,fa:0});
+    const acc = tot.fours? Math.round(tot.hit/tot.fours*100) : 0;
+    const net = tot.hit - tot.fa;
+    App.done("gb", tot.fours? acc : null, false, "%", this.PARTS+" parts");
+    const first=this.log.slice(0,2).reduce((a,b)=>a+b.reach,0)/2;
+    const last=this.log.slice(-2).reduce((a,b)=>a+b.reach,0)/2;
+    const faded=last<first*0.8;
+    const coach = tot.fa>tot.hit*0.15
+      ? "Your false marks are high. On this test an error costs you more than a group you never reached, so the answer is not to speed up — it is to stop marking anything you have not actually counted. Three and five look like four when you are moving."
+      : faded
+      ? "You covered noticeably less ground in the last two parts than the first two. That fade is the whole point of five parts, and it is what the real one is looking for. Practise the full five rather than one."
+      : tot.fours && tot.hit/tot.fours<0.8
+      ? "You are passing over fours rather than mismarking. That usually means you are scanning the shape of the group instead of counting it. Count every group, even the obvious threes — it is faster than going back."
+      : "Good. Rate and accuracy both held up across the five parts, which is the combination this test scores.";
+    const marks=tot.hit+tot.fa;
+    const w=App.results("Scores",[
+      ["Caught", tot.hit],
+      ["Marked in error", tot.fa],
+      ["Net", net],
+      ["Of the marks you made, right", marks?Math.round(tot.hit/marks*100)+"%":"—"],
+      ["Worked as far as", tot.reach+" groups"],
+      ["Fours you passed over", tot.miss],
+      ["Fours caught in that stretch", acc+"%"]
+    ], coach, net+"");
+    const r=el("div","rev");
+    r.appendChild(el("h4",null,"Part by part"));
+    this.log.forEach((p,i)=>{
+      const row=el("div","hrow");
+      const l=el("div");
+      l.appendChild(el("div",null,"Part "+(i+1)));
+      l.appendChild(el("div","paper-name",p.reach+" groups covered · "+p.fa+" marked in error"));
+      row.appendChild(l);
+      row.appendChild(el("b",null,p.fours?Math.round(p.hit/p.fours*100)+"%":"—"));
+      r.appendChild(row);
+    });
+    w.appendChild(r);
+    $("#t-body").appendChild(w);
+  },
+  stop(){ clearInterval(App.tick); }
+};
+
+/* ------------------------------------------------------------- TEA-OCC data */
+/* Three parts, per the pack: count tones while ignoring a distracting tone of a
+   different pitch; search a directory page; then do the directory search while
+   the tones play. The pack's paper practice swaps the tones for a word read out
+   loud, because paper cannot make a sound — this can, so it uses the tones. */
+const TEA_SYMS=["○","□","△","◇","▽","●","■","▲","◆","▼"];
+const TEA_NAMES=["Abbott","Bailey","Carver","Dunn","Ellis","Fenton","Gale","Harper","Irving","Jarvis",
+  "Keane","Lomax","Mercer","Naylor","Oakley","Pryce","Quinn","Rhodes","Sadler","Tuckwell",
+  "Unwin","Vance","Wardle","Yates","Ashford","Brookes","Cutler","Denny","Easton","Farrow"];
+
+function teaDirectory(n){
+  const rows=[];
+  for(let i=0;i<n;i++){
+    const match=Math.random()<0.22;
+    const a=pick(TEA_SYMS);
+    let b=a;
+    if(!match){ b=pick(TEA_SYMS); while(b===a) b=pick(TEA_SYMS); }
+    rows.push({
+      name:pick(TEA_NAMES)+" "+"ABCDEFGHJKLMNPRSTW"[rnd(18)],
+      num:"0"+(1000+rnd(9000))+" "+(100000+rnd(900000)),
+      a, b, match
+    });
+  }
+  return rows;
+}
+function teaTones(secs){
+  // a target pitch to count and a lower one to ignore
+  const seq=[]; let t=800;
+  while(t < secs*1000-800){
+    seq.push({at:t, high:Math.random()<0.45});
+    t += 700+rnd(900);
+  }
+  return seq;
+}
+function tone(hz, ms){
+  try{
+    if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==="suspended") AC.resume();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type="sine"; o.frequency.value=hz;
+    o.connect(g); g.connect(AC.destination);
+    const t=AC.currentTime;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.10, t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+ms/1000);
+    o.start(t); o.stop(t+ms/1000+0.05);
+  }catch(e){}
+}
+
+const TEA = {
+  HIGH:1046, LOW:523, LISTEN:75, SEARCH:120, DIR:90,
+  start(){
+    this.timers=[]; this.res={};
+    App.open("TEA-Occ — part 1 of 3", el("div"));
+    App.active=this;
+    this.intro();
+  },
+  intro(){
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Three parts, about six minutes. Sound is needed — turn it up, or use headphones."));
+    box.appendChild(el("p","sub","First you count tones while ignoring a lower one. Then you search a directory page. Then you do the search and the counting at the same time, giving each equal priority — which is the part the whole test is really about."));
+    const r=el("div","row"); r.style.marginTop="14px";
+    const b=el("button","go","Start part 1 — listening");
+    b.onclick=()=>{ tone(this.HIGH,180); this.listen(); };
+    const c=el("button","ghost","Back"); c.onclick=()=>App.quit();
+    r.appendChild(b); r.appendChild(c); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+  },
+  playSeq(seq){
+    seq.forEach(t=>{
+      this.timers.push(setTimeout(()=>tone(t.high?this.HIGH:this.LOW, 220), t.at));
+    });
+  },
+  listen(){
+    const seq=teaTones(this.LISTEN);
+    this.res.tones1=seq.filter(t=>t.high).length;
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Part 1 of 3 — count the high tones. Ignore the low ones. Do not write anything down."));
+    box.appendChild(el("div","scenbox","Listen. Nothing to look at."));
+    $("#t-body").replaceChildren(box);
+    this.playSeq(seq);
+    App.countDown(this.LISTEN, ()=>this.askCount(1, ()=>this.searchIntro()));
+  },
+  askCount(part, next){
+    this.clearTimers();
+    const box=el("div");
+    box.appendChild(el("div","chainbar","How many high tones did you count?"));
+    const inp=el("input"); inp.className="num"; inp.type="number"; inp.min="0"; inp.inputMode="numeric";
+    box.appendChild(inp);
+    const r=el("div","row"); r.style.marginTop="14px";
+    const b=el("button","go","That is my answer");
+    b.onclick=()=>{ this.res["said"+part]=parseInt(inp.value,10); next(); };
+    r.appendChild(b); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    inp.focus();
+  },
+  searchIntro(){
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Part 2 of 3 — the directory. No sound in this one."));
+    box.appendChild(el("p","sub","Each entry has two symbols beside it. Tap every entry where the two symbols are the same, and ignore the rest. Work down the page in order. Two minutes."));
+    const r=el("div","row"); r.style.marginTop="14px";
+    const b=el("button","go","Start the search");
+    b.onclick=()=>this.search(2, this.SEARCH, null, ()=>this.dualIntro());
+    r.appendChild(b); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    $("#t-title").textContent="TEA-Occ — part 2 of 3";
+  },
+  dualIntro(){
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Part 3 of 3 — both at once, with equal priority to each."));
+    box.appendChild(el("p","sub","The same directory search, and at the same time the tones come back. Count the high ones and keep searching. Giving one of them up is the failure this part is built to catch."));
+    const r=el("div","row"); r.style.marginTop="14px";
+    const b=el("button","go","Start both");
+    b.onclick=()=>{
+      const seq=teaTones(this.DIR);
+      this.res.tones3=seq.filter(t=>t.high).length;
+      this.playSeq(seq);
+      this.search(3, this.DIR, seq, ()=>this.askCount(3, ()=>this.finish()));
+    };
+    r.appendChild(b); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    $("#t-title").textContent="TEA-Occ — part 3 of 3";
+  },
+  search(part, secs, seq, next){
+    const rows=teaDirectory(120);
+    const marked=new Array(rows.length).fill(false);
+    let reach=0;
+    const box=el("div");
+    box.appendChild(el("div","chainbar", part===3
+      ? "Part 3 — tap the entries whose two symbols match, and count the high tones as you go."
+      : "Part 2 — tap the entries whose two symbols match."));
+    const p=el("div","paper");
+    const d=el("div","dir");
+    rows.forEach((r,i)=>{
+      const row=el("div","dirrow");
+      row.appendChild(el("span","dirname",r.name));
+      row.appendChild(el("span","dirnum",r.num));
+      row.appendChild(el("span","dirsym",r.a+" "+r.b));
+      row.onclick=()=>{ marked[i]=!marked[i]; row.classList.toggle("mk"); reach=Math.max(reach,i+1); };
+      d.appendChild(row);
+    });
+    p.appendChild(d); box.appendChild(p);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    App.countDown(secs, ()=>{
+      let hit=0,miss=0,fa=0,tot=0;
+      for(let i=0;i<reach;i++){
+        if(rows[i].match) tot++;
+        if(rows[i].match&&marked[i])hit++;
+        else if(rows[i].match&&!marked[i])miss++;
+        else if(!rows[i].match&&marked[i])fa++;
+      }
+      this.res["search"+part]={reach,tot,hit,miss,fa,secs};
+      next();
+    });
+  },
+  clearTimers(){ this.timers.forEach(clearTimeout); this.timers=[]; },
+  finish(){
+    this.clearTimers(); clearInterval(App.tick); App.clock("");
+    const R=this.res;
+    const s2=R.search2, s3=R.search3;
+    const off1=Math.abs((R.said1||0)-R.tones1);
+    const off3=Math.abs((R.said3||0)-R.tones3);
+    const rate2=s2.reach/s2.secs, rate3=s3.reach/s3.secs;
+    const drop=rate2? Math.round((1-rate3/rate2)*100) : 0;
+    const caught=(s2.hit+s3.hit), matches=(s2.tot+s3.tot);
+    const acc=matches?Math.round(caught/matches*100):0;
+    App.done("tea", acc, false, "%", "3 parts");
+    const coach = drop>40
+      ? "Your search rate fell "+drop+"% once the tones came back. That is a big drop — under load you stopped searching and listened. Both tasks are scored, so a partial job on each beats a clean job on one."
+      : off3>off1+2
+      ? "The counting is what slipped when you had to do both, not the searching. That is the commoner way round, and it is worth knowing which way you fail: it tells you which task to deliberately protect."
+      : drop<15 && off3<=2
+      ? "You held both together with very little cost. That is the result this test is looking for and it is not common."
+      : "A reasonable split. Keep practising the third part rather than the first two — doing either task alone is not what is being measured.";
+    $("#t-body").appendChild(App.results("Scores",[
+      ["Tones, part 1", "you said "+(R.said1||0)+", there were "+R.tones1],
+      ["Directory, part 2", s2.hit+" of "+s2.tot+" matches · "+s2.reach+" entries · "+s2.fa+" in error"],
+      ["Tones, part 3", "you said "+(R.said3||0)+", there were "+R.tones3],
+      ["Directory, part 3", s3.hit+" of "+s3.tot+" matches · "+s3.reach+" entries · "+s3.fa+" in error"],
+      ["Search rate, alone", rate2.toFixed(2)+" entries a second"],
+      ["Search rate, doing both", rate3.toFixed(2)+" entries a second"],
+      ["Cost of dividing attention", (drop>0?"−":"+")+Math.abs(drop)+"%"],
+      ["Matches caught overall", acc+"%"]
+    ], coach, acc+"%"));
+  },
+  stop(){ this.clearTimers(); clearInterval(App.tick); }
+};
+
 /* ---------------------------------------------------------------- TRP data */
 /* Trainability for rules and procedures, per the RACF pack.
    TRP1b: you are read a passage of job information, study it, then it is taken
@@ -2925,6 +3275,8 @@ const MMI = {
 /* ---------------------------------------------------------------- DAY MODE */
 const DAY_ORDERS={
   "1":[
+    ["Group Bourdon",()=>GB.start()],
+    ["Tea-Occ",()=>TEA.start()],
     ["TRP1b",()=>TRP1.start()],
     ["TRP2, 43 questions",()=>TRP2.start(43)]
   ],
@@ -2948,7 +3300,7 @@ const DAY = {
     box.appendChild(el("p","sub","Every "+S.label.toLowerCase()+" drill back to back, at full length, with no gaps. "+
       (Stage.get()==="2"
         ? "It takes about two hours. The real day runs 09:00 to 16:30 with breaks and administration in between, so this is the testing compressed."
-        : "It takes about twenty minutes, which is all that is built for this stage so far.")+
+        : "It takes about forty minutes — everything built for this stage bar the DFFT.")+
       " The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
     box.appendChild(el("div","note","Do this twice before the day. Start it in the morning, because that is when you will be sitting the real one."));
     const order=dayOrder();
