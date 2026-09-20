@@ -110,9 +110,19 @@
   .flag button.armed{background:var(--red);border-color:var(--red);color:#fff}
 
   /* wafv */
-  .vig{background:#fff;border-radius:8px;height:64vh;min-height:340px;display:grid;place-items:center;
+  /* shorter than it was, so the tally and the stop control sit above the fold on a phone */
+  .vig{background:#fff;border-radius:8px;height:42vh;min-height:220px;display:grid;place-items:center;
        cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
   .vsq{width:96px;height:96px;border-radius:3px;background:#9A9A9A;visibility:hidden}
+  /* running tally under the panel */
+  .tally{display:grid;grid-template-columns:auto auto;gap:2px 9px;justify-content:center;
+         margin-top:11px;font-variant-numeric:tabular-nums}
+  .tally b{text-align:right;font-weight:650}
+  .tally span{color:var(--muted);font-size:.92rem}
+  .tally b.h{color:var(--green)} .tally b.m{color:var(--red)} .tally b.f{color:var(--amber)}
+  .stoprow{display:flex;justify-content:center;margin-top:6px}
+  .stoprow button{background:none;border:0;color:var(--muted);font-size:.9rem;padding:8px 14px}
+  .stoprow button:hover{color:var(--ink)}
 
   /* atavt */
   .scene{background:#fff;border-radius:8px;overflow:hidden;aspect-ratio:4/3}
@@ -1442,18 +1452,36 @@ const WAFV = {
         : this.mins<=WAFV_MINS.quick
         ? " Long enough to check the screen and your finger, and no longer. The real test is "+WAFV_MINS.exam+
           " minutes, so this does not set your best."
-        : " The real test is "+WAFV_MINS.exam+" minutes and the difficulty is entirely in the length, so this does not set your best.")));
-    box.appendChild(el("p","sub","Tap the panel — or press the space bar — the moment the square appears darker than usual. Nothing to do otherwise."));
+        : " The real test is "+WAFV_MINS.exam+" minutes and the difficulty is entirely in the length, so this does not set your best.")+
+      " Tap the panel — or press the space bar — the moment the square appears darker than usual. Nothing to do otherwise."));
     const v=el("div","vig"); this.sq=el("div","vsq"); v.appendChild(this.sq);
     v.onclick=()=>this.respond();
     box.appendChild(v);
+
+    // running tally, so you can see what the panel is doing to you while it is doing it
+    const t=el("div","tally");
+    this.nHit=el("b","h","0"); this.nMiss=el("b","m","0"); this.nFa=el("b","f","0");
+    t.appendChild(this.nHit); t.appendChild(el("span",null,"hits"));
+    t.appendChild(this.nMiss); t.appendChild(el("span",null,"misses"));
+    t.appendChild(this.nFa); t.appendChild(el("span",null,"false alarms"));
+    box.appendChild(t);
+    this.stopRow=el("div","stoprow");
+    const sb=el("button",null,"Stop test");
+    sb.onclick=()=>{ if(!this.ended) this.finish(true); };
+    this.stopRow.appendChild(sb); box.appendChild(this.stopRow);
+
     box.appendChild(el("p","sub","Sit at a comfortable distance and do not look away. The real test runs for thirty minutes."));
     App.open("WAFV vigilance"+(exam?"":" · practice"), box);
     this.key=e=>{ if(e.code==="Space"){e.preventDefault();this.respond();} };
     window.addEventListener("keydown",this.key);
     App.active=this;
+    this.t0=Date.now();
     App.countDown(this.mins*60, ()=>this.finish(), 30);
     this.cycle();
+  },
+  tally(){
+    if(!this.nHit) return;
+    this.nHit.textContent=this.hits; this.nMiss.textContent=this.miss; this.nFa.textContent=this.fa;
   },
   cycle(){
     if(this.ended) return;
@@ -1467,7 +1495,7 @@ const WAFV = {
       App.timer=setTimeout(()=>{ this.cycle(); }, this.OFF);
     }, this.ON);
     if(target){
-      setTimeout(()=>{ if(!this.ended && this.armed && !this.counted){ this.miss++; this.armed=false; } }, this.WINDOW);
+      setTimeout(()=>{ if(!this.ended && this.armed && !this.counted){ this.miss++; this.armed=false; this.tally(); } }, this.WINDOW);
     }
   },
   respond(){
@@ -1478,35 +1506,45 @@ const WAFV = {
     } else {
       this.fa++;
     }
+    this.tally();
   },
-  finish(){
-    this.ended=true; clearTimeout(App.timer);
+  finish(byHand){
+    this.ended=true; clearTimeout(App.timer); clearInterval(App.tick); App.clockPlain();
     window.removeEventListener("keydown",this.key);
+    if(this.stopRow) this.stopRow.hidden=true;          // the tally stays as the final count
+    const ran = this.t0 ? Math.round((Date.now()-this.t0)/1000) : this.mins*60;
+    // stopped by hand before the clock: whatever it was, it was not the run you set out to sit
+    const stopped = !!byHand && ran < this.mins*60-5;
+    if(stopped) App.clock("");        // a frozen countdown reads like time left, which it is not
     const mean = this.rts.length ? Math.round(this.rts.reduce((a,b)=>a+b,0)/this.rts.length) : 0;
     const tot=this.hits+this.miss;
     App.done("wafv", tot? this.hits/tot*100 : null, false, "%",
-      this.mins+" minutes · "+(this.exam?"exam":"practice"));
+      stopped ? "stopped at "+mmss(ran)+" of "+this.mins+" minutes · practice"
+              : this.mins+" minutes · "+(this.exam?"exam":"practice"));
     const half=Math.ceil(this.rts.length/2);
     const early=this.rts.slice(0,half), late=this.rts.slice(half);
     const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
     const drift = late.length&&early.length ? Math.round(avg(late)-avg(early)) : 0;
-    const short = !this.exam;
+    const short = !this.exam || stopped;
     const acc = this.fa>tot*0.4
       ? "Too many responses when nothing darkened. Errors are penalised on this test, so a twitchy finger costs you more than a slightly slow one. Wait until you have actually seen the change."
       : drift>60
       ? "Your reactions slowed noticeably across the run — that is the vigilance decrement, and it is exactly what this test is built to measure. The back half is where it is decided."
       : "Steady. The difficulty here is not the reaction, it is holding it for half an hour.";
-    const lengthNote = short
+    const lengthNote = stopped
+      ? "You stopped it at "+mmss(ran)+" of the "+this.mins+" minutes, so it is saved as a practice run whichever mode you started in — a run you ended yourself is not the run the day gives you. What is below still holds for the part you sat."
+      : short
       ? "This was a "+this.mins+"-minute practice run, so treat the score as a warm-up rather than a result. The real test runs thirty minutes and the whole thing turns on the decline that sets in after about twenty — which a "+this.mins+"-minute run ends before it starts. It will not set your best, and the drift figure below is measured over too little to mean much."
       : "Full thirty minutes, which is the length that counts.";
     $("#t-body").appendChild(App.results("Scores",[
-      ["Conditions", (this.exam?"Exam · ":"Practice · ")+this.mins+" minutes"],
+      ["Conditions", (this.exam?"Exam · ":"Practice · ")+this.mins+" minutes"+
+        (stopped?", stopped at "+mmss(ran):"")],
       ["Targets", tot],["Caught", this.hits],["Missed", this.miss],
       ["Responses in error", this.fa],
       ["Mean reaction", mean+" ms"],
       ["Drift, first half to second", (drift>0?"+":"")+drift+" ms"],
       ["Flashes shown", this.trials]
-    ], lengthNote+" "+acc, this.hits+"/"+tot+(short?" · practice":"")));
+    ], lengthNote+" "+acc, this.hits+"/"+tot+(stopped?" · stopped":short?" · practice":"")));
     $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
   },
   stop(){ this.ended=true; clearTimeout(App.timer); window.removeEventListener("keydown",this.key); }
