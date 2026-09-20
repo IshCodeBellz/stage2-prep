@@ -372,13 +372,12 @@
     <span class="lamp" id="l-wafv"></span>
     <div class="body">
       <h2>WAFV — vigilance</h2>
-      <p>A grey square flashes. Respond the moment it appears darker than usual. Thirty minutes is the real test and the only length that sets your best — 5 and 10 are warm-ups.</p>
-      <div class="meta">30 min is the one that counts · 5 and 10 to warm up</div>
+      <p>A grey square flashes. Respond the moment it appears darker than usual. Exam is the real thirty minutes and the only length that sets your best; practice is ten, which stops before the decline this test exists to find.</p>
+      <div class="meta">30 minutes · counts down · practice is 10</div>
     </div>
     <div class="row">
-      <button onclick="WAFV.start(5)">5</button>
-      <button onclick="WAFV.start(10)">10</button>
-      <button class="go" onclick="WAFV.start(30)">30</button>
+      <button onclick="WAFV.start('practice')">Practice</button>
+      <button class="go" onclick="WAFV.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -400,12 +399,12 @@
     <span class="lamp" id="l-hand"></span>
     <div class="body">
       <h2>2-Hand — co-ordination</h2>
-      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel. A different channel shape each attempt. Ten runs is the length the real test is set at and the only one that sets your best — six is a warm-up. A gamepad works too: left stick sideways, right stick up and down.</p>
-      <div class="meta">10 runs is the one that counts · 5 tracks · buzzer on contact</div>
+      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel. A different channel shape each attempt. Exam is the ten runs the real test is set at; practice is six, which stops before the hands start to tire. A gamepad works too: left stick sideways, right stick up and down.</p>
+      <div class="meta">10 runs · practice is 6 · 5 tracks · buzzer on contact</div>
     </div>
     <div class="row">
-      <button onclick="HAND.start(6)">6</button>
-      <button class="go" onclick="HAND.start(10)">10</button>
+      <button onclick="HAND.start('practice')">Practice</button>
+      <button class="go" onclick="HAND.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -426,12 +425,12 @@
     <span class="lamp" id="l-sje"></span>
     <div class="body">
       <h2>SJE — rating</h2>
-      <p>Rate each response 1 to 5. Checks your answers against each other for contradictions. Twenty-one is the length of the real exercise and the only one that sets your best — six is a quick run through one set.</p>
-      <div class="meta">21 is the one that counts · 6 for a quick run · untimed</div>
+      <p>Rate each response 1 to 5. Checks your answers against each other for contradictions. Exam is the twenty-one scenarios of the real exercise, drawn from all four sets; practice is one set of six. Untimed either way — the real one is too.</p>
+      <div class="meta">21 scenarios · untimed · practice is one set of 6</div>
     </div>
     <div class="row">
-      <button onclick="SJE.start(6)">6</button>
-      <button class="go" onclick="SJE.start(21)">21</button>
+      <button onclick="SJE.start('practice')">Practice</button>
+      <button class="go" onclick="SJE.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -602,7 +601,7 @@ const FULL_RUN={
   sjt:modeFull("at the full eight situations"),
   mmi:modeFull("at the full eight questions"),
   hand:{ known:r=>/\d+ runs/.test(r.p||""), ok:r=>parseInt(/(\d+) runs/.exec(r.p)[1],10)>=10,
-         tag:"at 10 runs", pass:"full set", miss:()=>"warm-up set", hideTime:true,
+         tag:"at 10 runs", pass:"exam conditions", miss:()=>"practice set", hideTime:true,
          rawRow:"Lowest at any length", row:"Run at the full ten", bestRow:"Lowest over the full ten",
          faded:"faded bars were short sets" },
   dfft:{ known:r=>/\d+ questions/.test(r.p||""), ok:r=>/\b20 questions/.test(r.p||""),
@@ -614,11 +613,11 @@ const FULL_RUN={
          rawRow:"Best at any length", row:"Run at the full 43", bestRow:"Best over the full 43",
          faded:"faded bars were practice runs" },
   sje:{ known:r=>/\d+ scenarios/.test(r.p||""), ok:r=>/\b21 scenarios/.test(r.p||""),
-        tag:"at full length", pass:"full length", miss:()=>"short practice",
+        tag:"at full length", pass:"exam conditions", miss:()=>"practice run",
         rawRow:"Lowest at any length", row:"Run at the full 21", bestRow:"Lowest over the full 21",
         faded:"faded bars were short practice runs" },
-  wafv:{ known:r=>!!r.p, ok:r=>r.p==="30 minutes", tag:"at 30 min", pass:"full length",
-         miss:()=>"warm-up length", hideTime:true,
+  wafv:{ known:r=>!!r.p, ok:r=>runMode(r)==="exam" || r.p==="30 minutes", tag:"at 30 min", pass:"exam conditions",
+         miss:()=>"practice run", hideTime:true,
          rawRow:"Best at any length", row:"Run at the full 30 minutes", bestRow:"Best over the full 30 minutes",
          faded:"faded bars were short runs" }
 };
@@ -1425,23 +1424,29 @@ const VSE3 = {
 };
 
 /* ---------------------------------------------------------------- WAFV */
+const WAFV_MINS={exam:30, practice:10};
 const WAFV = {
   ON:600, OFF:400, WINDOW:1400, P:0.09,
-  start(mins){
-    this.mins=mins;
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam;
+    this.mins = exam?WAFV_MINS.exam:WAFV_MINS.practice;
     this.hits=0;this.miss=0;this.fa=0;this.rts=[];this.trials=0;
     this.armed=false;this.onset=0;this.ended=false;
     const box=el("div");
+    box.appendChild(el("div","chainbar","<b>"+(exam?"Exam conditions":"Practice")+".</b> "+
+      this.mins+" minutes, counting down, and it ends itself at zero."+
+      (exam?"" : " The real test is "+WAFV_MINS.exam+" minutes and the difficulty is entirely in the length, so this does not set your best.")));
     box.appendChild(el("p","sub","Tap the panel — or press the space bar — the moment the square appears darker than usual. Nothing to do otherwise."));
     const v=el("div","vig"); this.sq=el("div","vsq"); v.appendChild(this.sq);
     v.onclick=()=>this.respond();
     box.appendChild(v);
     box.appendChild(el("p","sub","Sit at a comfortable distance and do not look away. The real test runs for thirty minutes."));
-    App.open("WAFV vigilance", box);
+    App.open("WAFV vigilance"+(exam?"":" · practice"), box);
     this.key=e=>{ if(e.code==="Space"){e.preventDefault();this.respond();} };
     window.addEventListener("keydown",this.key);
     App.active=this;
-    App.countDown(mins*60, ()=>this.finish());
+    App.countDown(this.mins*60, ()=>this.finish(), 30);
     this.cycle();
   },
   cycle(){
@@ -1473,28 +1478,29 @@ const WAFV = {
     window.removeEventListener("keydown",this.key);
     const mean = this.rts.length ? Math.round(this.rts.reduce((a,b)=>a+b,0)/this.rts.length) : 0;
     const tot=this.hits+this.miss;
-    App.done("wafv", tot? this.hits/tot*100 : null, false, "%", this.mins+" minutes");
+    App.done("wafv", tot? this.hits/tot*100 : null, false, "%",
+      this.mins+" minutes · "+(this.exam?"exam":"practice"));
     const half=Math.ceil(this.rts.length/2);
     const early=this.rts.slice(0,half), late=this.rts.slice(half);
     const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
     const drift = late.length&&early.length ? Math.round(avg(late)-avg(early)) : 0;
-    const short = this.mins<30;
+    const short = !this.exam;
     const acc = this.fa>tot*0.4
       ? "Too many responses when nothing darkened. Errors are penalised on this test, so a twitchy finger costs you more than a slightly slow one. Wait until you have actually seen the change."
       : drift>60
       ? "Your reactions slowed noticeably across the run — that is the vigilance decrement, and it is exactly what this test is built to measure. The back half is where it is decided."
       : "Steady. The difficulty here is not the reaction, it is holding it for half an hour.";
     const lengthNote = short
-      ? "This was a "+this.mins+"-minute run, so treat the score as a warm-up rather than a result. The real test runs thirty minutes and the whole thing turns on the decline that sets in after about twenty — which a "+this.mins+"-minute run ends before it starts. It will not set your best, and the drift figure below is measured over too little to mean much."
+      ? "This was a "+this.mins+"-minute practice run, so treat the score as a warm-up rather than a result. The real test runs thirty minutes and the whole thing turns on the decline that sets in after about twenty — which a "+this.mins+"-minute run ends before it starts. It will not set your best, and the drift figure below is measured over too little to mean much."
       : "Full thirty minutes, which is the length that counts.";
     $("#t-body").appendChild(App.results("Scores",[
-      ["Run length", this.mins+" minutes"+(short?" — a warm-up":"")],
+      ["Conditions", (this.exam?"Exam · ":"Practice · ")+this.mins+" minutes"],
       ["Targets", tot],["Caught", this.hits],["Missed", this.miss],
       ["Responses in error", this.fa],
       ["Mean reaction", mean+" ms"],
       ["Drift, first half to second", (drift>0?"+":"")+drift+" ms"],
       ["Flashes shown", this.trials]
-    ], lengthNote+" "+acc, this.hits+"/"+tot+(short?" · warm-up":"")));
+    ], lengthNote+" "+acc, this.hits+"/"+tot+(short?" · practice":"")));
     $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
   },
   stop(){ this.ended=true; clearTimeout(App.timer); window.removeEventListener("keydown",this.key); }
@@ -2050,14 +2056,20 @@ const HAND_TRACKS = [
   ["short steps",  [0.5,-0.5,0.6,0.45,0.4]]
 ];
 
+const HAND_RUNS={exam:10, practice:6};
 const HAND = {
   RUNS:10, CH:26, SPEED:150,
-  start(runs){
-    this.RUNS = runs || 10;
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam;
+    this.RUNS = exam?HAND_RUNS.exam:HAND_RUNS.practice;
     this.run=1; this.log=[]; this.done_=false;
     const t=Rot.next("hand", HAND_TRACKS.length);
     this.trackName=HAND_TRACKS[t][0]; this.coef=HAND_TRACKS[t][1];
     const box=el("div");
+    box.appendChild(el("div","chainbar","<b>"+(exam?"Exam conditions":"Practice")+".</b> "+
+      this.RUNS+" runs of the same channel, one after another, and it scores itself at the end of the last one."+
+      (exam?"" : " Six rather than ten, so the tiring half is missing and it does not set your best.")));
     box.appendChild(el("p","sub","Left pad moves it left and right. Right pad moves it up and down. You need both at once. The buzzer sounds whenever it leaves the channel — keep it quiet."));
     const wrap=el("div","cvswrap");
     this.cv=document.createElement("canvas"); wrap.appendChild(this.cv);
@@ -2225,13 +2237,14 @@ const HAND = {
     cancelAnimationFrame(this.raf);
     this.unbind();
     const tot=this.log.reduce((a,b)=>a+b.t,0), out=this.log.reduce((a,b)=>a+b.out,0);
-    App.done("hand", tot? out/tot*100 : null, true, "% out", this.trackName+" · "+this.RUNS+" runs");
+    App.done("hand", tot? out/tot*100 : null, true, "% out",
+      this.trackName+" · "+this.RUNS+" runs · "+(this.exam?"exam":"practice"));
     const h=Math.floor(this.RUNS/2);
     const first=this.log.slice(0,h).reduce((a,b)=>a+b.out,0);
     const last=this.log.slice(this.RUNS-h).reduce((a,b)=>a+b.out,0);
-    const short=this.RUNS<10;
+    const short=!this.exam;
     const lengthNote = short
-      ? "This was a "+this.RUNS+"-run warm-up. The real test is ten runs of one shape and the later ones are where control tells, so a short set flatters you: it stops before the hands start to tire. It will not set your best."
+      ? "This was a "+this.RUNS+"-run practice set. The real test is ten runs of one shape and the later ones are where control tells, so a short set flatters you: it stops before the hands start to tire. It will not set your best."
       : "Ten runs, which is the length the real test is set at.";
     const acc = out/tot>0.25
       ? "You are outside the channel a quarter of the time. Slow right down — halve your speed until the buzzer stops, then build back up. On the day the time outside is what is counted, and going slowly is not penalised the way straying is."
@@ -2240,13 +2253,13 @@ const HAND = {
       : "Reasonably controlled. Most people find one hand leads and the other lags — watch the hand that is lagging rather than the one that is working, because that is the one costing you the corners. Your next attempt runs a different channel shape, which is where a memorised route stops helping you.";
     $("#t-body").appendChild(App.results("Scores",[
       ["Track", this.trackName],
-      ["Runs", this.RUNS+(short?" — a warm-up":"")],
+      ["Conditions", (this.exam?"Exam · ":"Practice · ")+this.RUNS+" runs"],
       ["Total time", tot.toFixed(1)+" s"],
       ["Time outside the channel", out.toFixed(1)+" s"],
       ["Proportion outside", Math.round(out/tot*100)+"%"],
       ["First "+h+" runs, outside", first.toFixed(1)+" s"],
       ["Last "+h+" runs, outside", last.toFixed(1)+" s"]
-    ], lengthNote+" "+acc, Math.round(out/tot*100)+"% out"+(short?" · warm-up":"")));
+    ], lengthNote+" "+acc, Math.round(out/tot*100)+"% out"+(short?" · practice":"")));
   },
   unbind(){
     window.removeEventListener("keydown",this.kd); window.removeEventListener("keyup",this.ku);
@@ -2805,20 +2818,20 @@ let SJE_Q = SJE_SETS[0];
 
 const SJE = {
   FULL:21,
-  start(count){
+  start(mode){
     this.i=0; this.ratings=[];
-    this.full = (count||this.FULL) >= this.FULL;
+    this.full = mode!=="practice";
     if(this.full){
       // the real exercise is 21 scenarios, drawn here from all four sets so no
       // two full runs are the same paper, and so the consistency check has more to work on
       SJE_Q = shuffle(SJE_SETS.reduce((a,b)=>a.concat(b),[]).slice()).slice(0,this.FULL);
-      this.paper = this.FULL+" scenarios";
+      this.paper = this.FULL+" scenarios · exam";
       App.open("SJE rating — the full "+this.FULL, el("div"));
     } else {
       this.set=Rot.next("sje", SJE_SETS.length);
       SJE_Q = SJE_SETS[this.set];
-      this.paper = "set "+(this.set+1)+" · "+SJE_Q.length+" scenarios";
-      App.open("SJE rating — set "+(this.set+1)+" of "+SJE_SETS.length, el("div"));
+      this.paper = "set "+(this.set+1)+" · "+SJE_Q.length+" scenarios · practice";
+      App.open("SJE rating — set "+(this.set+1)+" of "+SJE_SETS.length+" · practice", el("div"));
     }
     App.active=this;
     this.show();
@@ -2827,9 +2840,11 @@ const SJE = {
     const [txt,opts]=SJE_Q[this.i];
     this.cur=new Array(opts.length).fill(0);
     const box=el("div");
-    box.appendChild(el("div","chainbar",(this.full?"The full "+this.FULL:"Set "+(this.set+1)+" of "+SJE_SETS.length)+
+    box.appendChild(el("div","chainbar","<b>"+(this.full?"Exam conditions":"Practice")+".</b> "+
+      (this.full?"The full "+this.FULL:"Set "+(this.set+1)+" of "+SJE_SETS.length)+
       " · scenario "+(this.i+1)+" of "+SJE_Q.length+
-      " — rate every response on its own. Several can be helpful, or none."));
+      " — rate every response on its own, untimed. Several can be helpful, or none."+
+      (this.full?"":" One set rather than all four, so it does not set your best.")));
     box.appendChild(el("div","scenbox",txt));
     const g=el("div","ratewrap");
     shuffle(opts.map((_,j)=>j)).forEach(j=>{
@@ -2893,12 +2908,12 @@ const SJE = {
     App.done("sje", n? mad : null, true, " pts off", this.paper);
     const lengthNote = this.full
       ? "Twenty-one scenarios, which is the length of the real exercise."
-      : "A "+SJE_Q.length+"-scenario practice run. The real exercise is "+this.FULL+", and the contradictions this is looking for only show up reliably across the full set — six scenarios rarely put the same principle in front of you twice. It will not set your best.";
+      : "A "+SJE_Q.length+"-scenario practice run with one set rather than all four. The real exercise is "+this.FULL+", and the contradictions this is looking for only show up reliably across the full set — six scenarios rarely put the same principle in front of you twice. It will not set your best.";
     const coach = lengthNote+" "+(flags.length
       ? "Consistency matters more than any single answer, because the interview is built on these responses. See the flags below."
       : "Consistent across the board, which is the thing this checks. Your answers would give an interviewer a coherent picture to probe.");
     const w=App.results("Scores",[
-      ["Length", SJE_Q.length+" scenarios"+(this.full?"":" — short practice")],
+      ["Conditions", (this.full?"Exam · ":"Practice · ")+SJE_Q.length+" scenarios, untimed"],
       ["Responses rated", n+" / "+(n+unrated)],
       ["Average distance from suggested", mad.toFixed(2)+" points"],
       ["Contradictions flagged", flags.length]
@@ -4069,13 +4084,13 @@ const DAY_ORDERS={
       {exam:"45 pairs at 4 s", practice:"15 pairs at 4 s"}],
     ["M7-SJT", m=>SJT.start(m),
       {exam:"8 situations, 45 s each", practice:"3 situations, 45 s each"}],
-    ["WAFV", m=>WAFV.start(m==="practice"?5:30),
-      {exam:"30 minutes", practice:"5 minutes"}],
+    ["WAFV", m=>WAFV.start(m),
+      {exam:"30 minutes", practice:"10 minutes"}],
     ["ATAVT", m=>ATAVT.start(m),
       {exam:"20 scenes", practice:"8 scenes"}],
-    ["SJE", m=>SJE.start(m==="practice"?6:21),
+    ["SJE", m=>SJE.start(m),
       {exam:"21 scenarios", practice:"6 scenarios"}],
-    ["2-Hand", m=>HAND.start(m==="practice"?6:10),
+    ["2-Hand", m=>HAND.start(m),
       {exam:"10 runs", practice:"6 runs"}],
     ["MMI", m=>MMI.start(m),
       {exam:"the form and 8 questions", practice:"the form and 3 questions"}]
