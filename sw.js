@@ -1,7 +1,8 @@
 /* Offline cache for the Stage 2 simulators.
    Bump CACHE after you change index.html so phones pick up the new version. */
-const CACHE = "stage2-v15";
+const CACHE = "stage2-v16";
 const ASSETS = ["/", "/index.html", "/manifest.webmanifest", "/icon-180.png", "/icon-512.png"];
+// scene photographs are fetched once into IndexedDB, so they are not precached
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
