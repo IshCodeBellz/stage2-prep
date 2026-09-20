@@ -328,5 +328,95 @@
   "lic": "Public domain",
   "licurl": "",
   "source": "https://commons.wikimedia.org/wiki/File:Rue_pietone_Pointe_Cadet.jpg"
+ },
+ {
+  "file": "s23.jpg",
+  "caption": "Stainbeck Corner, Leeds",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": false,
+   "sign": true,
+   "light": true
+  },
+  "credit": "Chemical Engineer",
+  "lic": "Public domain",
+  "licurl": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Stainbeck_Corner01.jpg"
+ },
+ {
+  "file": "s24.jpg",
+  "caption": "Junction in south Manchester",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": false,
+   "sign": true,
+   "light": true
+  },
+  "credit": "dzidek",
+  "lic": "CC BY 3.0",
+  "licurl": "https://creativecommons.org/licenses/by/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Po%C5%82udniowy_Manchester_-_panoramio_-_dzidek_(4).jpg"
+ },
+ {
+  "file": "s25.jpg",
+  "caption": "Bus lane, Ivry-sur-Seine",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": true,
+   "sign": true,
+   "light": true
+  },
+  "credit": "Wilfredor",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:Roadway_and_bus-lane_layout_at_Place_de_l%27%C3%89glise,_Ivry-sur-Seine.jpg"
+ },
+ {
+  "file": "s26.jpg",
+  "caption": "Held at a red light, London",
+  "tags": {
+   "ped": false,
+   "veh": true,
+   "bike": false,
+   "sign": true,
+   "light": true
+  },
+  "credit": "Charlie from United Kingdom",
+  "lic": "CC BY 2.0",
+  "licurl": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:2007_Acura_TL_3.5_V6_(16072114712).jpg"
+ },
+ {
+  "file": "s27.jpg",
+  "caption": "Police car at a junction",
+  "tags": {
+   "ped": false,
+   "veh": true,
+   "bike": false,
+   "sign": true,
+   "light": true
+  },
+  "credit": "Ingolfson",
+  "lic": "Public domain",
+  "licurl": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Police_Car_At_An_Intersection.jpg"
+ },
+ {
+  "file": "s28.jpg",
+  "caption": "Princes Street, Edinburgh",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": false,
+   "sign": false,
+   "light": true
+  },
+  "credit": "Reading Tom from Reading, UK",
+  "lic": "CC BY 2.0",
+  "licurl": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Princes_Street_%26_Castle_Street_junction,_Edinburgh,_26_May_2014.jpg"
  }
 ]

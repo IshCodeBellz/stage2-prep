@@ -1,6 +1,6 @@
 /* Offline cache for the Stage 2 simulators.
    Bump CACHE after you change index.html so phones pick up the new version. */
-const CACHE = "stage2-v17";
+const CACHE = "stage2-v18";
 const ASSETS = ["/", "/index.html", "/manifest.webmanifest", "/icon-180.png", "/icon-512.png"];
 // scene photographs are fetched once into IndexedDB, so they are not precached
 
