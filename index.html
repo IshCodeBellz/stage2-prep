@@ -187,6 +187,16 @@
   .hrow .when{color:var(--muted)}
   .hrow b.slow{color:var(--amber)}
   [hidden]{display:none!important}
+  .scene.shot{display:flex;align-items:center;justify-content:center;background:#000}
+  .scene.shot img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-top:12px}
+  .thumb{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+  .thumb img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+  .thumb span{display:block;padding:7px 9px;font-size:.76rem;color:var(--muted)}
+  .tdel{width:100%;border:0;border-top:1px solid var(--line);border-radius:0;font-size:.8rem;padding:7px}
+  .tagshot{background:#000;border-radius:8px;overflow:hidden;margin-top:12px;aspect-ratio:4/3;
+           display:flex;align-items:center;justify-content:center}
+  .tagshot img{width:100%;height:100%;object-fit:contain;display:block}
   .panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:7px;margin-top:8px}
   .pcell{display:flex;justify-content:space-between;gap:8px;background:#f2f4f6;border:1px solid #d7dbdf;
          border-radius:5px;padding:7px 9px;font-size:.85rem}
@@ -353,10 +363,13 @@
     <span class="lamp" id="l-atavt"></span>
     <div class="body">
       <h2>ATAVT — perception</h2>
-      <p>A traffic scene flashes for one second. Report which objects you saw. Street, junction, country road and after dark, mixed through the run.</p>
-      <div class="meta">20 scenes · 4 settings · about 6 min</div>
+      <p>A traffic scene flashes for one second. Report which objects you saw. Add your own photographs and it will use those instead — the real test uses photographs, and they are harder than anything drawn.</p>
+      <div class="meta">20 scenes · about 6 min · add your own</div>
     </div>
-    <button class="go" onclick="ATAVT.start()">Start</button>
+    <div class="row">
+      <button onclick="SCENELIB.open()">Scenes</button>
+      <button class="go" onclick="ATAVT.start()">Start</button>
+    </div>
   </div>
 
   <div class="drill" data-stage="2">
@@ -1486,28 +1499,226 @@ function scene(has, t){
   return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${P}</svg>`;
 }
 
+/* ------------------------------------------------------- ATAVT photo scenes */
+/* The real ATAVT flashes photographs, and a drawn scene is easier than a
+   photograph: no clutter, no occlusion, nothing half behind a lamp post. The
+   drill can only mark an image if it knows what is in it, so photographs have
+   to be tagged once by hand. They are kept on this device and never uploaded. */
+const CAT_SHORT={ped:"Pedestrians", veh:"Vehicles", bike:"Bikes", sign:"Signs", light:"Lights"};
+const Photos=(()=>{
+  const DB="stage2.scenes", STORE="scenes";
+  let dbp=null;
+  function open(){
+    if(dbp) return dbp;
+    dbp=new Promise((res,rej)=>{
+      let r;
+      try{ r=indexedDB.open(DB,1); }catch(e){ rej(e); return; }
+      r.onupgradeneeded=()=>{ r.result.createObjectStore(STORE,{keyPath:"id",autoIncrement:true}); };
+      r.onsuccess=()=>res(r.result);
+      r.onerror=()=>rej(r.error);
+    });
+    return dbp;
+  }
+  function run(mode, fn){
+    return open().then(db=>new Promise((res,rej)=>{
+      const t=db.transaction(STORE,mode), req=fn(t.objectStore(STORE));
+      t.onerror=()=>rej(t.error);
+      t.oncomplete=()=>res(req?req.result:undefined);
+    }));
+  }
+  return {
+    ok:()=>{ try{ return !!window.indexedDB; }catch(e){ return false; } },
+    add:rec=>run("readwrite", s=>s.add(rec)),
+    all:()=>run("readonly", s=>s.getAll()),
+    del:id=>run("readwrite", s=>s.delete(id)),
+    clear:()=>run("readwrite", s=>s.clear())
+  };
+})();
+
+/* photographs off a phone are far bigger than they need to be for a one-second
+   glance, so they are scaled down before they are stored */
+function shrinkImage(file, max, cb){
+  const url=URL.createObjectURL(file);
+  const img=new Image();
+  img.onload=()=>{
+    const sc=Math.min(1, max/Math.max(img.width,img.height));
+    const c=document.createElement("canvas");
+    c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    c.toBlob(b=>{ URL.revokeObjectURL(url); cb(b); }, "image/jpeg", 0.78);
+  };
+  img.onerror=()=>{ URL.revokeObjectURL(url); cb(null); };
+  img.src=url;
+}
+
+const SCENELIB = {
+  open(){
+    App.active=this;
+    App.open("Your scenes", el("div"));
+    this.list();
+  },
+  list(){
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Photographs you have added, and what each one contains. They stay on this device — nothing is uploaded anywhere."));
+    if(!Photos.ok()){
+      box.appendChild(el("div","note","This browser will not let the app store images. Open the hosted copy rather than a preview, or try a normal window rather than a private one."));
+      this.buttons(box); $("#t-body").replaceChildren(box); return;
+    }
+    const holder=el("div"); box.appendChild(holder);
+    this.buttons(box);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    Photos.all().then(rows=>{
+      if(!rows.length){
+        holder.appendChild(el("p","sub","Nothing added yet. Dashcam stills, photographs out of a train or car window, or anything that looks like a road scene will do. Aim for twenty or so — the more cluttered they are, the better the practice."));
+        return;
+      }
+      holder.appendChild(el("p","sub",rows.length+(rows.length===1?" scene":" scenes")+" saved."));
+      const g=el("div","thumbs");
+      rows.forEach(r=>{
+        const c=el("div","thumb");
+        const im=document.createElement("img");
+        im.src=URL.createObjectURL(r.blob);
+        im.onload=()=>URL.revokeObjectURL(im.src);
+        c.appendChild(im);
+        const tags=CATS.filter(([k])=>r.tags[k]).map(([k])=>CAT_SHORT[k]).join(" · ");
+        c.appendChild(el("span",null,tags||"nothing marked"));
+        const x=el("button","tdel","Remove");
+        x.onclick=()=>Photos.del(r.id).then(()=>this.list());
+        c.appendChild(x);
+        g.appendChild(c);
+      });
+      holder.appendChild(g);
+    }).catch(()=>{
+      holder.appendChild(el("div","note","Could not read the saved scenes on this device."));
+    });
+  },
+  buttons(box){
+    const r=el("div","row"); r.style.marginTop="18px";
+    const inp=document.createElement("input");
+    inp.type="file"; inp.accept="image/*"; inp.multiple=true; inp.style.display="none";
+    inp.onchange=()=>{ const f=Array.from(inp.files||[]); inp.value=""; if(f.length) this.tagQueue(f,0); };
+    const add=el("button","go","Add photographs");
+    add.onclick=()=>inp.click();
+    const back=el("button","ghost","Back"); back.onclick=()=>App.quit();
+    r.appendChild(add); r.appendChild(inp); r.appendChild(back);
+    box.appendChild(r);
+  },
+  tagQueue(files, i){
+    if(i>=files.length){ this.list(); return; }
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Tagging "+(i+1)+" of "+files.length+
+      " — tick everything that is actually in the picture. This is what the drill marks you against, so it has to be right."));
+    const wrap=el("div","tagshot");
+    const im=document.createElement("img");
+    wrap.appendChild(im);
+    box.appendChild(wrap);
+    const o=el("div","opts");
+    const boxes=[];
+    CATS.forEach(([k,label])=>{
+      const l=el("label"); const c=el("input"); c.type="checkbox"; c.dataset.k=k;
+      l.appendChild(c); l.appendChild(el("span",null,label)); o.appendChild(l); boxes.push(c);
+    });
+    box.appendChild(o);
+    const r=el("div","row"); r.style.marginTop="16px";
+    const save=el("button","go", i===files.length-1?"Save and finish":"Save and next");
+    save.disabled=true;
+    let blob=null;
+    save.onclick=()=>{
+      const tags={}; boxes.forEach(c=>tags[c.dataset.k]=c.checked);
+      if(!CATS.some(([k])=>tags[k])){
+        if(!confirm("Nothing is ticked. Save it as a scene containing none of the five?")) return;
+      }
+      Photos.add({blob, tags, added:Date.now()}).then(()=>this.tagQueue(files,i+1))
+        .catch(()=>{ alert("Could not save that one."); this.tagQueue(files,i+1); });
+    };
+    const skip=el("button",null,"Skip this one");
+    skip.onclick=()=>this.tagQueue(files,i+1);
+    r.appendChild(save); r.appendChild(skip);
+    box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+    shrinkImage(files[i], 1000, b=>{
+      if(!b){ this.tagQueue(files,i+1); return; }
+      blob=b;
+      im.src=URL.createObjectURL(b);
+      im.onload=()=>{ save.disabled=false; };
+    });
+  },
+  stop(){}
+};
+
 const ATAVT = {
   N:20, FLASH:1000,
   start(){
-    this.i=0; this.log=[];
-    this.trials=[];
-    let deck=[];
-    for(let i=0;i<this.N;i++){
-      let h={}; let any=false;
-      CATS.forEach(([k])=>{ h[k]=Math.random()<0.5; if(h[k])any=true; });
-      if(!any) h[pick(CATS)[0]]=true;
-      if(!deck.length) deck=shuffle(SCENES.map((_,k)=>k));   // all four scenes come round evenly
-      this.trials.push({has:h, t:SCENES[deck.pop()]});
-    }
     App.open("ATAVT perception", el("div"));
     App.active=this;
-    this.show();
+    if(!Photos.ok()){ this.begin([]); return; }
+    Photos.all().then(rows=>{
+      if(rows.length<4) this.begin([]);       // not enough of your own to be worth offering
+      else this.choose(rows);
+    }).catch(()=>this.begin([]));
+  },
+  choose(rows){
+    const box=el("div");
+    box.appendChild(el("div","chainbar","You have "+rows.length+" photographs saved. Which do you want this run built from?"));
+    box.appendChild(el("p","sub","Photographs are the harder and the more realistic of the two — the real test uses them. The drawn scenes are cleaner than anything you will see on the day, so a run made only of those will flatter you."));
+    if(rows.length<this.N) box.appendChild(el("div","note","With "+rows.length+
+      " saved, some will come round more than once in a run of "+this.N+
+      ". Add up to "+this.N+" and every scene is new, which is the point of the test."));
+    const r=el("div","row"); r.style.marginTop="16px";
+    const a=el("button","go","Your photographs");
+    a.onclick=()=>this.begin(rows, "photos");
+    const b=el("button",null,"Mixed");
+    b.onclick=()=>this.begin(rows, "mixed");
+    const c=el("button",null,"Drawn only");
+    c.onclick=()=>this.begin([], "drawn");
+    r.appendChild(a); r.appendChild(b); r.appendChild(c);
+    box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+  },
+  begin(rows, mode){
+    this.i=0; this.log=[]; this.trials=[]; this.urls=[];
+    const usePhotos = rows.length>=4 && mode!=="drawn";
+    const pool = usePhotos ? shuffle(rows.slice()) : [];
+    let deck=[], pi=0;
+    for(let i=0;i<this.N;i++){
+      const asPhoto = usePhotos && (mode==="photos" || i%2===0);
+      if(asPhoto && pool.length){
+        const p=pool[pi++ % pool.length];
+        this.trials.push({has:p.tags, photo:p.blob, key:"photograph"});
+      } else {
+        let h={}, any=false;
+        CATS.forEach(([k])=>{ h[k]=Math.random()<0.5; if(h[k])any=true; });
+        if(!any) h[pick(CATS)[0]]=true;
+        if(!deck.length) deck=shuffle(SCENES.map((_,k)=>k));   // all four scenes come round evenly
+        const t=SCENES[deck.pop()];
+        this.trials.push({has:h, t, key:t.key});
+      }
+    }
+    // decode every photograph before the run, or the first flash is not a second
+    const shots=this.trials.filter(t=>t.photo);
+    if(!shots.length){ this.show(); return; }
+    const box=el("div");
+    box.appendChild(el("p","sub","Getting the pictures ready…"));
+    $("#t-body").replaceChildren(box);
+    Promise.all(shots.map(t=>new Promise(res=>{
+      const u=URL.createObjectURL(t.photo); this.urls.push(u);
+      const im=new Image(); t.img=im;
+      im.onload=()=>{ (im.decode?im.decode().catch(()=>{}):Promise.resolve()).then(res); };
+      im.onerror=()=>res();
+      im.src=u;
+    }))).then(()=>this.show());
   },
   show(){
     App.clock((this.i+1)+" / "+this.N);
     const box=el("div");
-    box.appendChild(el("p","sub","Watch closely. The scene appears for one second. It may be a street, a junction, a country road, or the same street after dark."));
-    const s=el("div","scene"); s.innerHTML=scene(this.trials[this.i].has, this.trials[this.i].t);
+    const tr=this.trials[this.i];
+    box.appendChild(el("p","sub","Watch closely. The scene appears for one second."));
+    const s=el("div","scene");
+    if(tr.photo){ s.classList.add("shot"); s.appendChild(tr.img); }
+    else s.innerHTML=scene(tr.has, tr.t);
     box.appendChild(s);
     $("#t-body").replaceChildren(box);
     App.timer=setTimeout(()=>this.ask(), this.FLASH);
@@ -1537,6 +1748,7 @@ const ATAVT = {
     const perCat={}, perScene={};
     CATS.forEach(([k])=>perCat[k]={m:0,f:0});
     SCENES.forEach(s=>perScene[s.key]={n:0,ok:0});
+    perScene["photograph"]={n:0,ok:0};
     this.trials.forEach((tr,i)=>{
       const t=tr.has, g=this.log[i]; let ok=true;
       CATS.forEach(([k])=>{
@@ -1544,8 +1756,8 @@ const ATAVT = {
         else if(t[k]&&!g[k]){miss++;perCat[k].m++;ok=false;}
         else if(!t[k]&&g[k]){fa++;perCat[k].f++;ok=false;}
       });
-      perScene[tr.t.key].n++;
-      if(ok){exact++; perScene[tr.t.key].ok++;}
+      perScene[tr.key].n++;
+      if(ok){exact++; perScene[tr.key].ok++;}
     });
     App.done("atavt", exact/this.N*100, false, "%");
     let worst=null; CATS.forEach(([k,l])=>{ if(perCat[k].m>0 && (!worst||perCat[k].m>perCat[worst[0]].m)) worst=[k,l]; });
@@ -1562,13 +1774,13 @@ const ATAVT = {
       ["Objects present and missed", miss],
       ["Objects reported but absent", fa]
     ];
-    SCENES.forEach(s=>{
-      const p=perScene[s.key];
-      if(p.n) rows.push([s.key.charAt(0).toUpperCase()+s.key.slice(1)+" scenes", p.ok+" / "+p.n]);
+    SCENES.map(s=>s.key).concat(["photograph"]).forEach(k=>{
+      const p=perScene[k];
+      if(p && p.n) rows.push([k.charAt(0).toUpperCase()+k.slice(1)+" scenes", p.ok+" / "+p.n]);
     });
     $("#t-body").appendChild(App.results("Scores", rows, coach, exact+"/"+this.N));
   },
-  stop(){ clearTimeout(App.timer); }
+  stop(){ clearTimeout(App.timer); (this.urls||[]).forEach(u=>URL.revokeObjectURL(u)); this.urls=[]; }
 };
 
 /* ---------------------------------------------------------------- 2-HAND */
