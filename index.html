@@ -386,12 +386,13 @@
     <span class="lamp" id="l-atavt"></span>
     <div class="body">
       <h2>ATAVT — perception</h2>
-      <p>A traffic scene flashes for one second. Report which objects you saw. Comes with twenty-eight tagged photographs; add your own and it uses those too. The real test uses photographs and they are harder than anything drawn.</p>
-      <div class="meta">20 scenes · about 6 min · 15 photographs included</div>
+      <p>A traffic scene flashes for one second. Report which objects you saw. Comes with twenty-eight tagged photographs; add your own and it uses those too. The real test uses photographs and they are harder than anything drawn. Exam is twenty scenes; practice is eight.</p>
+      <div class="meta">20 scenes · 1 s each · practice is 8 · 15 photographs included</div>
     </div>
     <div class="row">
       <button onclick="SCENELIB.open()">Scenes</button>
-      <button class="go" onclick="ATAVT.start()">Start</button>
+      <button onclick="ATAVT.start('practice')">Practice</button>
+      <button class="go" onclick="ATAVT.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -412,10 +413,13 @@
     <span class="lamp" id="l-sjt"></span>
     <div class="body">
       <h2>M7-SJT — ranking</h2>
-      <p>Put four responses in order of preference. 45 seconds a situation, auto-advancing. Four different sets, rotating, so a second run is never the same paper.</p>
-      <div class="meta">8 situations · 4 sets · 6 min</div>
+      <p>Put four responses in order of preference. 45 seconds a situation, auto-advancing. Four different sets, rotating, so a second run is never the same paper. Exam is the full eight situations; practice is three.</p>
+      <div class="meta">8 situations · 45 s each · practice is 3 · 4 sets</div>
     </div>
-    <button class="go" onclick="SJT.start()">Start</button>
+    <div class="row">
+      <button onclick="SJT.start('practice')">Practice</button>
+      <button class="go" onclick="SJT.start('exam')">Exam</button>
+    </div>
   </div>
 
   <div class="drill" data-stage="2">
@@ -435,20 +439,26 @@
     <span class="lamp" id="l-mmi"></span>
     <div class="body">
       <h2>MMI — the interview</h2>
-      <p>Write your six pre-interview form examples, then answer the interviewer's follow-ups out loud against the clock. Scores how much of the structure you actually covered, not what you said.</p>
-      <div class="meta">6 form examples · 8 questions · 4 sets · about 20 min</div>
+      <p>Write your six pre-interview form examples, then answer the interviewer's follow-ups out loud against the clock. Scores how much of the structure you actually covered, not what you said. Exam is all eight follow-ups; practice is three.</p>
+      <div class="meta">6 form examples · 8 questions · practice is 3 · 4 sets</div>
     </div>
-    <button class="go" onclick="MMI.start()">Start</button>
+    <div class="row">
+      <button onclick="MMI.start('practice')">Practice</button>
+      <button class="go" onclick="MMI.start('exam')">Exam</button>
+    </div>
   </div>
 
   <div class="drill" data-stage="both">
     <span class="lamp" id="l-day"></span>
     <div class="body">
       <h2>Day mode</h2>
-      <p>Every drill of the stage you are on, back to back in one sitting, at full length. Rehearses the fatigue, not just the tasks.</p>
-      <div class="meta">runs whichever stage is selected · do this twice before the day</div>
+      <p>Every drill of the stage you are on, back to back in one sitting. Exam runs them all in their exam version and rehearses the fatigue, not just the tasks; practice runs the same order in their practice versions, for when you want to see what is coming.</p>
+      <div class="meta">runs whichever stage is selected · exam twice before the day</div>
     </div>
-    <button onclick="DAY.start()">Run</button>
+    <div class="row">
+      <button onclick="DAY.start('practice')">Practice</button>
+      <button class="go" onclick="DAY.start('exam')">Exam</button>
+    </div>
   </div>
 
   <div class="note">
@@ -509,12 +519,12 @@ const Store = (()=>{
       if(r.h.length>80) r.h=r.h.slice(-80);   // keep the file small; 80 attempts is months of practice
       mem[id]=r; save();
     },
-    /* a day-mode sitting: how long it took and what every drill in it scored */
-    bumpDay(ms, runs){
+    /* a day-mode sitting: which mode it was sat in, how long it took, and what every drill in it scored */
+    bumpDay(ms, runs, mode){
       const r = mem.day || {n:0};
       r.n++; r.t=Date.now();
       r.h = r.h || [];
-      r.h.push({t:r.t, ms, runs});
+      r.h.push({t:r.t, ms, runs, m:mode||"exam"});
       if(r.h.length>40) r.h=r.h.slice(-40);
       mem.day=r; save();
     },
@@ -588,6 +598,9 @@ const FULL_RUN={
   gb:modeFull("the full five parts"),
   tea:modeFull("all three parts at full length"),
   trp1:modeFull("on the seven-minute clock"),
+  atavt:modeFull("at the full twenty scenes"),
+  sjt:modeFull("at the full eight situations"),
+  mmi:modeFull("at the full eight questions"),
   hand:{ known:r=>/\d+ runs/.test(r.p||""), ok:r=>parseInt(/(\d+) runs/.exec(r.p)[1],10)>=10,
          tag:"at 10 runs", pass:"full set", miss:()=>"warm-up set", hideTime:true,
          rawRow:"Lowest at any length", row:"Run at the full ten", bestRow:"Lowest over the full ten",
@@ -685,7 +698,8 @@ function paintMenu(){
       }
       if(id==="day" && rec.h && rec.h.length){
         const last=rec.h[rec.h.length-1];
-        head = attempts + " · last one " + last.runs.length + " of " + dayOrder().length;
+        head = attempts + " · last one " + last.runs.length + " of " + dayOrder().length +
+               ", " + (last.m==="practice" ? "practice" : "under exam conditions");
       }
       line.replaceChildren(document.createTextNode(head+" "), el("span","chev","see all ›"));
       line.onclick=()=>HISTORY.open(id);
@@ -727,16 +741,21 @@ const HISTORY = {
   day(rec){
     const sittings=(rec.h||[]).slice();
     const box=el("div");
-    const full=sittings.filter(s=>s.runs.length===dayOrder().length);
+    // a sitting that counts is the exam version, run end to end. Sittings from before
+    // the two modes existed were the exam version, since there was nothing else.
+    const exams=sittings.filter(s=>s.m!=="practice");
+    const full=exams.filter(s=>s.runs.length===dayOrder().length);
 
     if(!sittings.length){
       box.appendChild(el("div","note","Day mode was run "+rec.n+(rec.n===1?" time":" times")+
         " before sittings were recorded, so there is nothing itemised. From now on each sitting keeps its length and every drill's score."));
     } else {
       const st=el("div");
-      [["Sittings", rec.n],
-       ["Finished end to end", full.length+" of "+sittings.length],
-       ["Last sitting", this.when(sittings[sittings.length-1].t)],
+      [["Sittings", rec.n+(exams.length<sittings.length
+          ? " · "+exams.length+" under exam conditions" : "")],
+       ["Exam sittings finished end to end", exams.length ? full.length+" of "+exams.length : "none yet"],
+       ["Last sitting", this.when(sittings[sittings.length-1].t)+
+          (sittings[sittings.length-1].m==="practice"?" · practice":"")],
        ["Last length", this.dur(sittings[sittings.length-1].ms)]
       ].forEach(([k,v])=>{
         const r=el("div","stat"); r.appendChild(el("span",null,k)); r.appendChild(el("b",null,String(v))); st.appendChild(r);
@@ -749,7 +768,8 @@ const HISTORY = {
       sittings.slice().reverse().forEach((s,i)=>{
         const card=el("div","rev");
         card.appendChild(el("h4",null,(sittings.length-i)+". "+this.when(s.t)+" · "+this.dur(s.ms)+
-          " · "+s.runs.length+" of "+dayOrder().length+" drills"));
+          " · "+s.runs.length+" of "+dayOrder().length+" drills · "+
+          (s.m==="practice"?"practice":"exam conditions")));
         let earlyDown=0, lateDown=0, earlyN=0, lateN=0;
         const half=Math.ceil(s.runs.length/2);
         s.runs.forEach((run,j)=>{
@@ -759,7 +779,9 @@ const HISTORY = {
           const bits=[], f=FULL_RUN[run.id];
           if(run.p) bits.push(run.p);
           if(TARGET_SECS[run.id] && run.sec!=null) bits.push(mmss(run.sec));
-          if(f && f.known(run)) bits.push(f.ok(run) ? f.pass : f.miss(run)+" — would not have counted");
+          // in a practice sitting nothing was meant to count, so saying so of each drill is noise
+          if(f && f.known(run)) bits.push(f.ok(run) ? f.pass
+            : f.miss(run)+(s.m==="practice" ? "" : " — would not have counted"));
           if(bits.length) lhs.appendChild(el("div","paper-name",bits.join(" · ")));
           row.appendChild(lhs);
           const rhs=el("div"); rhs.style.textAlign="right";
@@ -791,7 +813,9 @@ const HISTORY = {
           card.appendChild(el("p",null,
             "Below your usual on "+earlyDown+" of the first "+earlyN+
             " and "+lateDown+" of the last "+lateN+". "+
-            (worse
+            (s.m==="practice"
+              ? "A practice sitting is too short to say much about fatigue either way — that is what the exam version is for."
+              : worse
               ? "That is the drop this sitting exists to find — the tiredness is real and it arrives late."
               : "No drop-off across the sitting, which is the point of doing it at full length.")));
         }
@@ -1007,7 +1031,7 @@ const App = {
   endDay(){
     const d=this.day; this.day=null;
     if(!d || !d.runs.length) return;
-    Store.bumpDay(Date.now()-d.t0, d.runs);
+    Store.bumpDay(Date.now()-d.t0, d.runs, d.mode);
   },
   countUp(onTick){
     const t0=Date.now();
@@ -1855,10 +1879,14 @@ const SCENELIB = {
   stop(){}
 };
 
+const ATAVT_SCENES={exam:20, practice:8};
 const ATAVT = {
   N:20, FLASH:1000,
-  start(){
-    App.open("ATAVT perception", el("div"));
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam;
+    this.N = exam?ATAVT_SCENES.exam:ATAVT_SCENES.practice;
+    App.open("ATAVT perception"+(exam?"":" · practice"), el("div"));
     App.active=this;
     if(!Photos.ok()){ this.begin([]); return; }
     Photos.all().then(rows=>{
@@ -1922,7 +1950,8 @@ const ATAVT = {
     App.clock((this.i+1)+" / "+this.N);
     const box=el("div");
     const tr=this.trials[this.i];
-    box.appendChild(el("p","sub","Watch closely. The scene appears for one second."));
+    box.appendChild(el("p","sub","Watch closely. The scene appears for one second."+
+      (this.exam?"":" Practice run — "+this.N+" scenes rather than "+ATAVT_SCENES.exam+", so it does not set your best.")));
     const s=el("div","scene");
     if(tr.photo){ s.classList.add("shot"); s.appendChild(tr.img); }
     else s.innerHTML=scene(tr.has, tr.t);
@@ -1966,7 +1995,7 @@ const ATAVT = {
       perScene[tr.key].n++;
       if(ok){exact++; perScene[tr.key].ok++;}
     });
-    App.done("atavt", exact/this.N*100, false, "%");
+    App.done("atavt", exact/this.N*100, false, "%", this.N+" scenes · "+(this.exam?"exam":"practice"));
     let worst=null; CATS.forEach(([k,l])=>{ if(perCat[k].m>0 && (!worst||perCat[k].m>perCat[worst[0]].m)) worst=[k,l]; });
     const coach = (miss===0 && fa===0)
       ? "Clean run. Shorten the exposure by treating the scene as a single glance rather than a look — on the day it is gone before you can move your eyes across it."
@@ -2501,13 +2530,16 @@ const SJT_SETS = [
 ];
 let SJT_Q = SJT_SETS[0];
 
+const SJT_PRACTICE=3;
 const SJT = {
   LIMIT:45,
-  start(){
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam;
     this.i=0; this.answers=[];
     this.set=Rot.next("sjt", SJT_SETS.length);
-    SJT_Q = SJT_SETS[this.set];
-    App.open("M7-SJT ranking — set "+(this.set+1)+" of "+SJT_SETS.length, el("div"));
+    SJT_Q = exam ? SJT_SETS[this.set] : SJT_SETS[this.set].slice(0, SJT_PRACTICE);
+    App.open("M7-SJT ranking — set "+(this.set+1)+" of "+SJT_SETS.length+(exam?"":" · practice"), el("div"));
     App.active=this;
     this.show();
   },
@@ -2515,9 +2547,10 @@ const SJT = {
     const [txt,opts]=SJT_Q[this.i];
     this.picked=[];
     const box=el("div");
-    box.appendChild(el("div","chainbar","Set "+(this.set+1)+" of "+SJT_SETS.length+
+    box.appendChild(el("div","chainbar","<b>"+(this.exam?"Exam conditions":"Practice")+".</b> Set "+(this.set+1)+" of "+SJT_SETS.length+
       " · situation "+(this.i+1)+" of "+SJT_Q.length+
-      " — tap the responses in order, best first. Auto-advances after 45 seconds."));
+      " — tap the responses in order, best first. Forty-five seconds a situation, advancing on its own."+
+      (this.exam?"":" Three situations rather than the full eight, so it does not set your best.")));
     box.appendChild(el("div","scenbox",txt));
     const g=el("div","ranks");
     this.nodes=[];
@@ -2574,7 +2607,8 @@ const SJT = {
       if(got[3]===sug[3])bots++;
     });
     const acc = maxd? Math.round((1-disp/maxd)*100):0;
-    App.done("sjt", answered? acc : null, false, "%", "set "+(this.set+1));
+    App.done("sjt", answered? acc : null, false, "%",
+      "set "+(this.set+1)+" · "+SJT_Q.length+" situations · "+(this.exam?"exam":"practice"));
     const w=App.results("Scores",[
       ["Situations completed", answered+" / "+SJT_Q.length],
       ["Best response identified", tops+" / "+answered],
@@ -3836,18 +3870,22 @@ const PIF=(()=>{
   };
 })();
 
+const MMI_PRACTICE={probes:2, scenarios:1};
 const MMI = {
   LONG:180, SHORT:45,
-  start(){
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam;
     this.set=Rot.next("mmi", MMI_SETS.length);
-    App.open("MMI — set "+(this.set+1)+" of "+MMI_SETS.length, el("div"));
+    App.open("MMI — set "+(this.set+1)+" of "+MMI_SETS.length+(exam?"":" · practice"), el("div"));
     App.active=this;
     this.intro();
   },
   intro(){
     const box=el("div");
-    box.appendChild(el("div","chainbar","Set "+(this.set+1)+" of "+MMI_SETS.length+
-      " — the form first, then the interview. Answer out loud: that is the only way the timing means anything."));
+    box.appendChild(el("div","chainbar","<b>"+(this.exam?"Exam conditions":"Practice")+".</b> Set "+(this.set+1)+" of "+MMI_SETS.length+
+      " — the form first, then the interview. Answer out loud: that is the only way the timing means anything."+
+      (this.exam?"":" Three follow-ups rather than the full eight, so it does not set your best.")));
     box.appendChild(el("p","sub","On the day you are given a pre-interview form and asked to write six examples of things you have done. The form itself is not marked. The interviewer then works through those examples in detail, and asks how you would handle situations you have not been in. Examples can come from anywhere in your life — work, training, school, family, anything."));
     box.appendChild(el("div","note","Be honest in the examples you pick. The interviewer digs into the detail, so anything invented falls apart under two or three follow-up questions. Pick things recent enough that you still remember them properly."));
     const done=PIF.filled();
@@ -3895,9 +3933,12 @@ const MMI = {
   },
   interviewStart(){
     const S=MMI_SETS[this.set], mine=PIF.all();
-    this.qs=PIF_PROMPTS.map((p,i)=>({
+    const probes=PIF_PROMPTS.map((p,i)=>({
       kind:"Your example", topic:p[0], mine:mine[i], q:S.probes[i]
-    })).concat(S.scenarios.map(s=>({kind:"Imaginary situation", topic:null, mine:null, q:s})));
+    }));
+    const scens=S.scenarios.map(s=>({kind:"Imaginary situation", topic:null, mine:null, q:s}));
+    this.qs = this.exam ? probes.concat(scens)
+      : probes.slice(0, MMI_PRACTICE.probes).concat(scens.slice(0, MMI_PRACTICE.scenarios));
     this.i=0; this.marks=[]; this.secs=[];
     this.ask();
   },
@@ -3957,7 +3998,8 @@ const MMI = {
     const avg=this.secs.reduce((a,b)=>a+b,0)/this.secs.length;
     const long=this.secs.filter(s=>s>this.LONG).length;
     const short=this.secs.filter(s=>s<this.SHORT).length;
-    App.done("mmi", cov, false, "%", "set "+(this.set+1));
+    App.done("mmi", cov, false, "%",
+      "set "+(this.set+1)+" · "+this.qs.length+" questions · "+(this.exam?"exam":"practice"));
 
     // only name a weakest element when one is genuinely behind the others
     const lo=Math.min.apply(null,perCheck), hiC=Math.max.apply(null,perCheck);
@@ -4002,55 +4044,84 @@ const MMI = {
 };
 
 /* ---------------------------------------------------------------- DAY MODE */
+/* Each drill, what it is called, how to start it in a given mode, and what that
+   mode puts in front of you — so the list you see before you begin is the
+   conditions you are agreeing to, not just an order of play. */
 const DAY_ORDERS={
   "1":[
-    ["Group Bourdon, exam",()=>GB.start("exam")],
-    ["Tea-Occ, exam",()=>TEA.start("exam")],
-    ["TRP1b, exam",()=>TRP1.start("exam")],
-    ["TRP2, exam",()=>TRP2.start("exam")],
-    ["DFFT, exam",()=>DFFT.start("exam")]
+    ["Group Bourdon", m=>GB.start(m),
+      {exam:"5 parts of a minute", practice:"2 parts of a minute"}],
+    ["Tea-Occ", m=>TEA.start(m),
+      {exam:"1:15, 2:00, then 1:30 of both", practice:"0:40, 1:00, then 0:45 of both"}],
+    ["TRP1b", m=>TRP1.start(m),
+      {exam:"3:00 study, 18 questions in 7:00", practice:"3:00 study, questions untimed"}],
+    ["TRP2", m=>TRP2.start(m),
+      {exam:"43 questions in 8:00", practice:"7 questions, untimed"}],
+    ["DFFT", m=>DFFT.start(m),
+      {exam:"20 questions in 45:00", practice:"5 questions, untimed"}]
   ],
   "2":[
-    ["VSE task 1, exam",()=>VSE1.start("exam")],
-    ["VSE task 2, exam",()=>VSE2.start("exam")],
-    ["VSE task 3, exam",()=>VSE3.start("exam")],
-    ["M7-SJT",()=>SJT.start()],
-    ["WAFV, 30 minutes",()=>WAFV.start(30)],
-    ["ATAVT",()=>ATAVT.start()],
-    ["SJE, 21 scenarios",()=>SJE.start(21)],
-    ["2-Hand, ten runs",()=>HAND.start(10)],
-    ["MMI",()=>MMI.start()]
+    ["VSE task 1", m=>VSE1.start(m),
+      {exam:"180 squares, 3:00 clock", practice:"180 squares, untimed"}],
+    ["VSE task 2", m=>VSE2.start(m),
+      {exam:"96 boxes, 3:12 clock", practice:"96 boxes, untimed"}],
+    ["VSE task 3", m=>VSE3.start(m),
+      {exam:"45 pairs at 4 s", practice:"15 pairs at 4 s"}],
+    ["M7-SJT", m=>SJT.start(m),
+      {exam:"8 situations, 45 s each", practice:"3 situations, 45 s each"}],
+    ["WAFV", m=>WAFV.start(m==="practice"?5:30),
+      {exam:"30 minutes", practice:"5 minutes"}],
+    ["ATAVT", m=>ATAVT.start(m),
+      {exam:"20 scenes", practice:"8 scenes"}],
+    ["SJE", m=>SJE.start(m==="practice"?6:21),
+      {exam:"21 scenarios", practice:"6 scenarios"}],
+    ["2-Hand", m=>HAND.start(m==="practice"?6:10),
+      {exam:"10 runs", practice:"6 runs"}],
+    ["MMI", m=>MMI.start(m),
+      {exam:"the form and 8 questions", practice:"the form and 3 questions"}]
   ]
 };
-function dayOrder(){ return DAY_ORDERS[Stage.get()]; }
+function dayOrder(mode){
+  const m = mode==="practice" ? "practice" : "exam";
+  return DAY_ORDERS[Stage.get()].map(([name,run,label])=>
+    [name+(m==="exam"?"":" · practice"), ()=>run(m), label[m]]);
+}
 const DAY = {
-  start(){
+  start(mode){
+    const exam = mode!=="practice";
     const box=el("div");
     const S=STAGES[Stage.get()];
-    box.appendChild(el("p","sub","Every "+S.label.toLowerCase()+" drill back to back, at full length, with no gaps. "+
-      (Stage.get()==="2"
-        ? "It takes about two hours. The real day runs 09:00 to 16:30 with breaks and administration in between, so this is the testing compressed."
-        : "It takes about an hour and a half, and it is now the whole stage.")+
-      " The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
-    box.appendChild(el("div","note","Do this twice before the day. Start it in the morning, because that is when you will be sitting the real one."));
-    const order=dayOrder();
+    const two=Stage.get()==="2";
+    box.appendChild(el("div","chainbar", exam
+      ? "<b>Exam conditions.</b> Every "+S.label.toLowerCase()+" drill in its exam version, back to back, with no gaps. "+
+        (two ? "About two hours. The real day runs 09:00 to 16:30 with breaks and administration in between, so this is the testing compressed."
+             : "About an hour and a half, and it is now the whole stage.")
+      : "<b>Practice.</b> The same drills in the same order, each in its practice version — "+
+        (two?"about three quarters of an hour":"about half an hour")+
+        ". It rehearses the running order and the changes of gear, not the endurance, and it does not count as a sitting of the day."));
+    box.appendChild(el("p","sub", exam
+      ? "The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."
+      : "Useful the first time through, when what you want is to know what is coming rather than to be worn out by it. Sit the exam version when you want the real answer."));
+    if(exam) box.appendChild(el("div","note","Do this twice before the day. Start it in the morning, because that is when you will be sitting the real one."));
+    const order=dayOrder(exam?"exam":"practice");
     const ol=el("div"); ol.style.margin="14px 0";
-    order.forEach(([n],i)=>{
+    order.forEach(([n,,label],i)=>{
       const d_=el("div","stat");
-      d_.appendChild(el("span",null,(i+1)+". "+n));
+      d_.appendChild(el("span",null,(i+1)+". "+n.replace(" · practice","")));
+      d_.appendChild(el("b",null,label));
       ol.appendChild(d_);
     });
     box.appendChild(ol);
-    const b=el("button","go","Begin");
+    const b=el("button","go", exam?"Begin the sitting":"Begin the practice run");
     b.onclick=()=>{
       App.chain=order.slice(1).map(([name,run])=>({name,run}));
-      App.day={t0:Date.now(), runs:[]};
+      App.day={t0:Date.now(), runs:[], mode:exam?"exam":"practice"};
       order[0][1]();
     };
     const bb=el("button","ghost","Back");
     bb.onclick=()=>App.quit();
     const r=el("div","row"); r.appendChild(b); r.appendChild(bb); box.appendChild(r);
-    App.open("Day mode", box);
+    App.open("Day mode"+(exam?"":" — practice"), box);
   }
 };
 
