@@ -187,6 +187,19 @@
   .hrow .when{color:var(--muted)}
   .hrow b.slow{color:var(--amber)}
   [hidden]{display:none!important}
+  .panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:7px;margin-top:8px}
+  .pcell{display:flex;justify-content:space-between;gap:8px;background:#f2f4f6;border:1px solid #d7dbdf;
+         border-radius:5px;padding:7px 9px;font-size:.85rem}
+  .pk{color:#444} .pv{font-weight:650;color:#111;font-variant-numeric:tabular-nums;white-space:nowrap}
+  details.guide{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+                padding:10px 13px;margin-top:14px}
+  details.guide summary{cursor:pointer;font-weight:620;font-size:.9rem}
+  .gtab{margin-top:9px}
+  .grow{display:grid;grid-template-columns:18px 1fr 44px 1.5fr;gap:8px;padding:5px 0;
+        border-top:1px solid var(--line);font-size:.8rem;align-items:baseline}
+  .gp{color:var(--muted)} .gc{color:var(--ink)} .gk{font-weight:650;color:var(--amber)}
+  .ga{color:var(--muted)}
+  .gnote{margin:9px 0 0;font-size:.82rem;color:var(--amber)}
   .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:5px}
   .bg{background:#fff;border:1px solid #bbb;border-radius:2px;cursor:pointer;aspect-ratio:1;
       -webkit-tap-highlight-color:transparent}
@@ -306,6 +319,19 @@
     <div class="row">
       <button onclick="TRP2.start(7)">7</button>
       <button class="go" onclick="TRP2.start(43)">43</button>
+    </div>
+  </div>
+
+  <div class="drill" data-stage="1">
+    <span class="lamp" id="l-dfft"></span>
+    <div class="body">
+      <h2>DFFT — fault finding</h2>
+      <p>Read a display panel against a fault finder guide, work out which fault to deal with first, and give its code and the action that goes with it. Twenty in forty-five minutes is the real length; five is a warm-up.</p>
+      <div class="meta">20 in 45 min is the one that counts · 5 to warm up</div>
+    </div>
+    <div class="row">
+      <button onclick="DFFT.start(5)">5</button>
+      <button class="go" onclick="DFFT.start(20)">20</button>
     </div>
   </div>
 
@@ -498,6 +524,10 @@ const FULL_RUN={
          tag:"at 10 runs", pass:"full set", miss:()=>"warm-up set", hideTime:true,
          rawRow:"Lowest at any length", row:"Run at the full ten", bestRow:"Lowest over the full ten",
          faded:"faded bars were short sets" },
+  dfft:{ known:r=>/\d+ questions/.test(r.p||""), ok:r=>/\b20 questions/.test(r.p||""),
+         tag:"at full length", pass:"full length", miss:()=>"practice run", hideTime:true,
+         rawRow:"Best at any length", row:"Run at the full 20", bestRow:"Best over the full 20",
+         faded:"faded bars were practice runs" },
   trp2:{ known:r=>/\d+ questions/.test(r.p||""), ok:r=>/\b43 questions/.test(r.p||""),
          tag:"at full length", pass:"full length", miss:()=>"practice run", hideTime:true,
          rawRow:"Best at any length", row:"Run at the full 43", bestRow:"Best over the full 43",
@@ -519,7 +549,7 @@ const STAGES={
   "1":{ label:"Stage 1",
         when:new Date("2026-09-01T13:00:00+01:00"),
         blurb:"Group Bourdon, Tea-Occ, TRP1b, TRP2 and the DFFT. An afternoon of paper tests, 13:00 to about 16:30.",
-        missing:"The DFFT has no drill here yet — it is the one test the pack does not describe." },
+        missing:null },
   "2":{ label:"Stage 2",
         when:new Date("2026-09-22T09:00:00+01:00"),
         blurb:"The VSE, M7-SJT, the Vienna tests (WAFV, ATAVT, 2-Hand), the RSSB situational judgement exercise and the multi-modal interview. A full day, 09:00 to about 16:30.",
@@ -2401,6 +2431,188 @@ const SJE = {
   stop(){}
 };
 
+/* --------------------------------------------------------------- DFFT data */
+/* Driver Fault Finding Test. The OPC describe it as twenty diagrams of a train
+   system, each with a display panel, technical information and a fault finder
+   guide setting the priority order; you work out which fault to deal with, the
+   code that solves it and any further action. Twenty questions, about 45
+   minutes. It is explicitly not a test of train knowledge — the system in the
+   real one is invented so that nobody's background helps, and the system, codes
+   and rules below are invented in the same spirit. What is being drilled is
+   reading the guide and applying it exactly, at pace. */
+
+const DFFT_RULES=[
+ {p:1, cond:"Brake pipe below 4.6 bar",      code:"B12", act:"Stop. Do not move the train."},
+ {p:2, cond:"Door interlock broken",         code:"D04", act:"Do not move until the interlock is made."},
+ {p:3, cond:"Line volts below 600",          code:"L21", act:"Coast. Report at the next signal."},
+ {p:4, cond:"Coolant above 95°",             code:"C33", act:"Reduce to half power and continue."},
+ {p:5, cond:"Main reservoir below 6.5 bar",  code:"M09", act:"Run the compressor. Report at the end of the journey."},
+ {p:6, cond:"Battery below 24 V",            code:"E15", act:"Report at the end of the journey."},
+ {p:7, cond:"Traction current above 450 A",  code:"T07", act:"Notch back one step."}
+];
+function dfftBump(code){                     // the isolator rule: add one to the number
+  const n=parseInt(code.slice(1),10)+1;
+  return code[0]+String(n).padStart(2,"0");
+}
+const between=(a,b)=>a+Math.random()*(b-a);
+
+function dfftQuestion(){
+  // one to three faults live at once, so the priority order has to be applied
+  const live=shuffle(DFFT_RULES.map((_,i)=>i)).slice(0, 1+rnd(3)).sort((a,b)=>a-b);
+  const on=i=>live.indexOf(i)>=0;
+  const r={
+    brake:   (on(0)? between(3.0,4.5) : between(4.6,5.2)).toFixed(1)+" bar",
+    door:     on(1)? "BROKEN" : "MADE",
+    line:    Math.round(on(2)? between(380,599) : between(600,800))+" V",
+    coolant: Math.round(on(3)? between(96,120)  : between(40,95))+"°",
+    res:     (on(4)? between(5.0,6.4) : between(6.5,9.0)).toFixed(1)+" bar",
+    batt:    (on(5)? between(19,23.9) : between(24,30)).toFixed(1)+" V",
+    trac:    Math.round(on(6)? between(451,700) : between(0,450))+" A",
+    isolator: Math.random()<0.5 ? "OFF" : "ON"
+  };
+  const off = r.isolator==="OFF";
+  const top = DFFT_RULES[live[0]];                      // lowest index is highest priority
+  const code = off ? dfftBump(top.code) : top.code;
+  const right = code+" — "+top.act;
+
+  const wrong=[];
+  // took a lower-priority fault instead
+  if(live.length>1){
+    const second=DFFT_RULES[live[1]];
+    wrong.push([(off?dfftBump(second.code):second.code)+" — "+second.act, "priority"]);
+  }
+  // missed the isolator rule, or applied it when it did not apply
+  wrong.push([(off?top.code:dfftBump(top.code))+" — "+top.act, "isolator"]);
+  // right code, an action belonging to another fault
+  const other=pick(DFFT_RULES.filter(x=>x.act!==top.act));
+  wrong.push([code+" — "+other.act, "action"]);
+  // a fault that is not showing at all
+  const absent=DFFT_RULES.filter((_,i)=>!on(i));
+  if(absent.length){ const a=pick(absent); wrong.push([(off?dfftBump(a.code):a.code)+" — "+a.act, "absent"]); }
+
+  const seen={}; seen[right]=1;
+  const picked=[];
+  shuffle(wrong).forEach(w=>{ if(!seen[w[0]] && picked.length<3){ seen[w[0]]=1; picked.push(w); } });
+  while(picked.length<3){                               // last resort, keep four distinct options
+    const a=pick(DFFT_RULES), c=(Math.random()<0.5?dfftBump(a.code):a.code)+" — "+a.act;
+    if(!seen[c]){ seen[c]=1; picked.push([c,"absent"]); }
+  }
+  const opts=shuffle(picked.concat([[right,"correct"]]));
+  return {r, live, opts, right};
+}
+
+const DFFT_LENGTHS={full:[20,2700], practice:[5,675]};
+const DFFT = {
+  start(count){
+    const full=(count||20)>=20;
+    const [n,secs]=full?DFFT_LENGTHS.full:DFFT_LENGTHS.practice;
+    this.N=n; this.LIMIT=secs; this.full=full;
+    this.paper=n+" questions";
+    this.qs=[]; for(let i=0;i<n;i++) this.qs.push(dfftQuestion());
+    this.i=0; this.answers=new Array(n).fill(null);
+    App.open("DFFT — "+(full?"the full 20":"5-question practice"), el("div"));
+    App.active=this;
+    this.t0=Date.now();
+    this.render();
+    App.tick=setInterval(()=>{
+      const left=this.LIMIT-(Date.now()-this.t0)/1000;
+      App.clock(left>0?mmss(left):"0:00");
+      if(left<=0){ clearInterval(App.tick); this.finish(); }
+    },250);
+  },
+  guide(){
+    const d=document.createElement("details");
+    d.className="guide"; d.open=true;
+    const s=document.createElement("summary"); s.textContent="Fault finder guide";
+    d.appendChild(s);
+    const t=el("div","gtab");
+    DFFT_RULES.forEach(x=>{
+      const row=el("div","grow");
+      row.appendChild(el("span","gp",String(x.p)));
+      row.appendChild(el("span","gc",x.cond));
+      row.appendChild(el("span","gk",x.code));
+      row.appendChild(el("span","ga",x.act));
+      t.appendChild(row);
+    });
+    d.appendChild(t);
+    d.appendChild(el("p","gnote","Deal with the highest priority fault showing. If the isolator is OFF, add one to the number in the code."));
+    return d;
+  },
+  render(){
+    const q=this.qs[this.i], r=q.r;
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Question "+(this.i+1)+" of "+this.N+
+      " — read the panel against the guide. Which code, and what else must you do?"));
+    const p=el("div","paper");
+    p.appendChild(el("h3",null,"Display panel"));
+    const g=el("div","panel");
+    [["Brake pipe",r.brake],["Main reservoir",r.res],["Line volts",r.line],
+     ["Traction current",r.trac],["Coolant",r.coolant],["Battery",r.batt],
+     ["Door interlock",r.door],["Isolator",r.isolator]].forEach(([k,v])=>{
+      const c=el("div","pcell");
+      c.appendChild(el("span","pk",k));
+      c.appendChild(el("span","pv",v));
+      g.appendChild(c);
+    });
+    p.appendChild(g);
+    box.appendChild(p);
+    box.appendChild(this.guide());
+    const o=el("div","opts");
+    q.opts.forEach(([text],j)=>{
+      const l=el("label"); const c=el("input"); c.type="radio"; c.name="dfftq";
+      c.checked=this.answers[this.i]===j;
+      c.onchange=()=>{ this.answers[this.i]=j; };
+      l.appendChild(c); l.appendChild(el("span",null,"ABCD"[j]+"  "+text)); o.appendChild(l);
+    });
+    box.appendChild(o);
+    const row=el("div","row"); row.style.marginTop="16px";
+    const n=el("button","go", this.i===this.N-1?"Finish":"Next");
+    n.onclick=()=>{ if(this.i===this.N-1) this.finish(); else { this.i++; this.render(); } };
+    row.appendChild(n);
+    if(this.i>0){ const b=el("button",null,"Back"); b.onclick=()=>{ this.i--; this.render(); }; row.appendChild(b); }
+    box.appendChild(row);
+    $("#t-body").replaceChildren(box);
+    window.scrollTo(0,0);
+  },
+  finish(){
+    clearInterval(App.tick); App.clock("");
+    let right=0, done=0;
+    const kinds={priority:0, isolator:0, action:0, absent:0};
+    this.qs.forEach((q,i)=>{
+      const a=this.answers[i];
+      if(a==null) return;
+      done++;
+      const kind=q.opts[a][1];
+      if(kind==="correct") right++; else kinds[kind]++;
+    });
+    const secs=Math.round((Date.now()-this.t0)/1000);
+    App.done("dfft", Math.round(right/this.N*100), false, "%", this.paper);
+    const worst=Object.keys(kinds).sort((a,b)=>kinds[b]-kinds[a])[0];
+    const why={
+      priority:"Most of your errors were taking a fault that was showing but was not the highest priority one. The guide is ordered for a reason — read down it from the top and stop at the first condition the panel meets.",
+      isolator:"Most of your errors were the isolator rule. That single line under the guide is the detail the test is built around: it changes the answer on roughly half the questions and it is the easiest thing to stop checking once you are hurrying.",
+      action:"Most of your errors were the right code with the wrong action beside it. You are reading the code column and stopping. The action is half the answer.",
+      absent:"Most of your errors were codes for faults that were not showing at all. That is a panel-reading problem rather than a guide problem — check the reading against the threshold rather than recognising the name of the instrument."
+    };
+    const coach = done<this.N
+      ? "You got through "+done+" of "+this.N+" in the time. About two and a quarter minutes a question is the real pace, and the test is built so that most people feel it. "+(kinds[worst]?why[worst]:"")
+      : right/done<0.75
+      ? why[worst]
+      : "Strong. You are reading down the guide rather than pattern-matching, which is the whole skill here.";
+    $("#t-body").appendChild(App.results("Scores",[
+      ["Length", this.N+" questions"+(this.full?"":" — practice")],
+      ["Answered", done+" / "+this.N],
+      ["Correct", right+" / "+done],
+      ["Wrong priority", kinds.priority],
+      ["Isolator rule missed", kinds.isolator],
+      ["Right code, wrong action", kinds.action],
+      ["Fault not showing", kinds.absent],
+      ["Time", mmss(secs)+" of "+mmss(this.LIMIT)]
+    ], coach, right+"/"+this.N+(this.full?"":" · practice")));
+  },
+  stop(){ clearInterval(App.tick); }
+};
+
 /* ------------------------------------------------------- GROUP BOURDON data */
 /* Per the pack: work left to right, line after line, putting a mark through the
    groups of four dots. Five parts, and the administrator says "change" between
@@ -3278,7 +3490,8 @@ const DAY_ORDERS={
     ["Group Bourdon",()=>GB.start()],
     ["Tea-Occ",()=>TEA.start()],
     ["TRP1b",()=>TRP1.start()],
-    ["TRP2, 43 questions",()=>TRP2.start(43)]
+    ["TRP2, 43 questions",()=>TRP2.start(43)],
+    ["DFFT, 20 questions",()=>DFFT.start(20)]
   ],
   "2":[
     ["VSE task 1",()=>VSE1.start()],
@@ -3300,7 +3513,7 @@ const DAY = {
     box.appendChild(el("p","sub","Every "+S.label.toLowerCase()+" drill back to back, at full length, with no gaps. "+
       (Stage.get()==="2"
         ? "It takes about two hours. The real day runs 09:00 to 16:30 with breaks and administration in between, so this is the testing compressed."
-        : "It takes about forty minutes — everything built for this stage bar the DFFT.")+
+        : "It takes about an hour and a half, and it is now the whole stage.")+
       " The point is not the individual scores — it is finding out what happens to your accuracy in the last twenty minutes, which is what the real day does to people."));
     box.appendChild(el("div","note","Do this twice before the day. Start it in the morning, because that is when you will be sitting the real one."));
     const order=dayOrder();
