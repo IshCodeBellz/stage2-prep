@@ -372,10 +372,11 @@
     <span class="lamp" id="l-wafv"></span>
     <div class="body">
       <h2>WAFV — vigilance</h2>
-      <p>A grey square flashes. Respond the moment it appears darker than usual. Exam is the real thirty minutes and the only length that sets your best; practice is ten, which stops before the decline this test exists to find.</p>
-      <div class="meta">30 minutes · counts down · practice is 10</div>
+      <p>A grey square flashes. Respond the moment it appears darker than usual. Exam is the real thirty minutes and the only length that sets your best; practice is ten, which stops before the decline this test exists to find, and five is a check that the screen and your finger are working.</p>
+      <div class="meta">30 minutes · counts down · practice is 10, or 5 for a quick check</div>
     </div>
     <div class="row">
+      <button onclick="WAFV.start('quick')">5 min</button>
       <button onclick="WAFV.start('practice')">Practice</button>
       <button class="go" onclick="WAFV.start('exam')">Exam</button>
     </div>
@@ -1424,19 +1425,24 @@ const VSE3 = {
 };
 
 /* ---------------------------------------------------------------- WAFV */
-const WAFV_MINS={exam:30, practice:10};
+/* two practice lengths: ten to warm up on, five to check the sound and the screen */
+const WAFV_MINS={exam:30, practice:10, quick:5};
 const WAFV = {
   ON:600, OFF:400, WINDOW:1400, P:0.09,
   start(mode){
-    const exam = mode!=="practice";
+    const exam = mode!=="practice" && mode!=="quick";
     this.exam=exam;
-    this.mins = exam?WAFV_MINS.exam:WAFV_MINS.practice;
+    this.mins = exam ? WAFV_MINS.exam : (mode==="quick" ? WAFV_MINS.quick : WAFV_MINS.practice);
     this.hits=0;this.miss=0;this.fa=0;this.rts=[];this.trials=0;
     this.armed=false;this.onset=0;this.ended=false;
     const box=el("div");
     box.appendChild(el("div","chainbar","<b>"+(exam?"Exam conditions":"Practice")+".</b> "+
       this.mins+" minutes, counting down, and it ends itself at zero."+
-      (exam?"" : " The real test is "+WAFV_MINS.exam+" minutes and the difficulty is entirely in the length, so this does not set your best.")));
+      (exam ? ""
+        : this.mins<=WAFV_MINS.quick
+        ? " Long enough to check the screen and your finger, and no longer. The real test is "+WAFV_MINS.exam+
+          " minutes, so this does not set your best."
+        : " The real test is "+WAFV_MINS.exam+" minutes and the difficulty is entirely in the length, so this does not set your best.")));
     box.appendChild(el("p","sub","Tap the panel — or press the space bar — the moment the square appears darker than usual. Nothing to do otherwise."));
     const v=el("div","vig"); this.sq=el("div","vsq"); v.appendChild(this.sq);
     v.onclick=()=>this.respond();
