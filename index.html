@@ -182,6 +182,18 @@
   .stat b{font-weight:620}
   .big{font-size:2.1rem;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:6px 0}
 
+  /* where a run landed against the line, coloured like the aspects */
+  .verdict{background:var(--panel);border:1px solid var(--line);border-left-width:3px;
+           border-radius:0 8px 8px 0;padding:11px 13px;margin-bottom:16px}
+  .verdict .head{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;font-weight:650}
+  .verdict .said{font-size:.95rem;line-height:1.45;margin-top:4px;font-variant-numeric:tabular-nums}
+  .verdict .why{color:var(--muted);font-size:.79rem;line-height:1.45;margin-top:7px}
+  .verdict.clear{border-left-color:var(--green)} .verdict.clear .head{color:var(--green)}
+  .verdict.pass{border-left-color:var(--green)} .verdict.pass .head{color:var(--ink)}
+  .verdict.near{border-left-color:var(--amber)} .verdict.near .head{color:var(--amber)}
+  .verdict.below{border-left-color:var(--red)} .verdict.below .head{color:var(--red)}
+  .verdict.none{border-left-color:var(--line)} .verdict.none .head{color:var(--muted)}
+
   /* the attempts line under each drill, and the history screen behind it */
   .best{margin-top:6px;padding:0;border:0;background:none;text-align:left;cursor:pointer;
         color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
@@ -190,16 +202,23 @@
   .best.none{cursor:default}
   .foot{margin-top:26px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
   .warn{color:var(--amber);font-size:.82rem}
-  .hchart{display:flex;align-items:flex-end;gap:4px;height:148px;margin-top:6px;padding-top:10px;
+  .hchart{position:relative;display:flex;align-items:flex-end;gap:4px;height:148px;margin-top:6px;padding-top:10px;
           border-bottom:1px solid var(--line);overflow-x:auto}
   .hbar{flex:1 0 13px;min-width:13px;background:#33434F;border-radius:3px 3px 0 0}
   .hbar.top{background:var(--green)} .hbar.last{background:var(--amber)}
   .hbar.slow{opacity:.4}
+  /* the benchmark drawn across the bars, so the trend reads against it and not just itself */
+  .hline{position:absolute;left:0;right:0;border-top:1px dashed var(--green);pointer-events:none}
+  /* labelled on the left, where the shortest bars are: the line is drawn only when
+     it sits above your worst run, so that end of the chart is the emptiest */
+  .hline span{position:absolute;left:0;top:-8px;background:var(--desk);padding:0 4px;
+              color:var(--green);font-size:.68rem;letter-spacing:.04em}
   .hkey{display:flex;justify-content:space-between;color:var(--muted);font-size:.75rem;margin-top:7px}
   .hrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);
         font-size:.87rem;font-variant-numeric:tabular-nums}
   .hrow .when{color:var(--muted)}
   .hrow b.slow{color:var(--amber)}
+  .hrow b.over{color:var(--green)} .hrow b.under{color:var(--amber)} .hrow b.way{color:var(--red)}
   [hidden]{display:none!important}
   .scene.shot{display:flex;align-items:center;justify-content:center;background:#000}
   .scene.shot img{width:100%;height:100%;object-fit:cover;display:block}
@@ -633,6 +652,132 @@ const FULL_RUN={
          faded:"faded bars were short runs" }
 };
 
+/* ---- the line each drill is judged against.
+   None of these is a pass mark and none of them comes from the OPC. The real
+   assessment is norm-referenced: your score is ranked against a comparison
+   group, the cut-offs are not published, and each operator sets its own bar on
+   top of them. What follows is this app's own standard, pitched deliberately
+   above the level people report scraping through on — a number you produce at
+   your kitchen table with nobody watching is not the number you will produce at
+   09:00 in Watford. Clear these consistently and the real thing should not be
+   where you are surprised.
+
+   line  — the standard this app holds you to
+   clear — comfortably above it, with something in hand for the day
+   near  — how far the wrong side of the line still counts as a caution
+   dp    — decimal places, for the drills not scored in whole percent
+   gate  — a second condition that a good headline number can hide  */
+const BENCH={
+  vse1:{line:85, clear:95, near:6,
+        why:"Coverage is already inside the number — squares you never reached were scored as missed — so this is accuracy across the whole paper at the pace the clock sets, not accuracy over the part you got to."},
+  vse2:{line:85, clear:95, near:6,
+        why:"Same logic as VSE 1: boxes you never reached count as missed, so this is the whole paper at two seconds a box."},
+  vse3:{line:80, clear:92, near:7,
+        why:"The line sits on the dots because the dot stream is the primary task and the one you cannot recover — each judgement depends on the square before it. The letters are scored too, but they are what you are allowed to drop first."},
+  gb:{line:90, clear:97, near:5,
+      why:"Accuracy on its own means little here, so the line carries two more conditions: about fifty groups a minute covered, and fewer than one mark in ten wrong.",
+      gate(x){
+        if(x.rate!=null && x.rate<50)
+          return "you covered "+Math.round(x.rate)+" groups a minute against the fifty this asks for, and accuracy over a short stretch is not what the sheet scores";
+        if(x.marks>=10 && x.faRate>0.1)
+          return Math.round(x.faRate*100)+"% of the marks you made were wrong, against the one in ten this allows — an error costs you more than a group you never reached";
+        return null;
+      }},
+  tea:{line:80, clear:92, near:8,
+       why:"Matches caught across parts two and three together. Part three is the one that counts for anything, so a high figure here has to survive the tones coming back."},
+  trp1:{line:70, clear:85, near:8,
+        why:"Scored out of every question, so anything the clock stopped you answering counts against you. Rules you half-remember read as wrong answers on the day too."},
+  trp2:{line:60, clear:75, near:8,
+        why:"Out of all forty-three, and nobody finishes forty-three in eight minutes — sixty per cent is around twenty-six right, which is a working rate at a good accuracy rather than a clean sheet."},
+  dfft:{line:70, clear:85, near:8,
+        why:"Out of all twenty, so questions the forty-five minutes stopped you reaching count against you the way they do on the real paper."},
+  wafv:{line:90, clear:97, near:5,
+        why:"Signals detected across the full half hour. The line is high because missing them is the failure this test exists to catch, and it carries a second condition on responses to nothing.",
+        gate(x){
+          if(x.targets>=20 && x.faRate>0.15)
+            return "you responded to nothing there "+x.fa+" times, more than the one in seven of the targets this allows — a twitchy finger is penalised here, not forgiven";
+          return null;
+        }},
+  atavt:{line:70, clear:85, near:8,
+         why:"A scene only counts when all five categories are right, missed and imagined both — which is a hard way to be scored, so the line sits lower than it looks."},
+  hand:{line:15, clear:7, near:5,
+        why:"Time outside the channel, so a lower number wins. Going slowly is not penalised the way straying is, and this is measured over ten runs because the later ones are where the control tells."},
+  sjt:{line:75, clear:88, near:7,
+       why:"Agreement with the suggested ranking across all four positions. Getting best and worst right carries most of it — the middle two are where the points quietly go."},
+  sje:{line:1, clear:0.6, near:0.25, dp:2,
+       why:"Average distance from the suggested rating, so a lower number wins. There is no marking scheme on the real exercise — what it checks is whether your answers hold together, since the interview is built on them."},
+  mmi:{line:75, clear:90, near:8,
+       why:"How much of the STAR structure your answers covered. An interviewer cannot score what you did not say, and the part people drop when they are tired is the result on the end."}
+};
+
+const Bench={
+  has:id=>!!BENCH[id],
+  fmt(id, v, unit){
+    const B=BENCH[id];
+    return v.toFixed(B&&B.dp?B.dp:0)+(unit||"");
+  },
+  /* on some drills a lower number is the good one, so every comparison goes through here */
+  side(id, score, low){
+    const B=BENCH[id]; if(!B) return null;
+    const at=(a,b)=> low ? a<=b : a>=b;
+    return at(score,B.clear) ? "clear"
+         : at(score,B.line) ? "pass"
+         : at(score, low ? B.line+B.near : B.line-B.near) ? "near" : "below";
+  },
+  /* the block at the top of a results screen */
+  judge(id, score, low, unit, full, extra){
+    const B=BENCH[id];
+    if(!B || score==null || !isFinite(score)) return null;
+    const n=v=>this.fmt(id,v,unit);
+    const tail=" The line is this app's own standard, not an OPC pass mark — the real assessment ranks you against a comparison group rather than marking you against a number.";
+    if(!full) return {
+      band:"none", head:"not a result",
+      said:"A short or practice run is not judged against the line. For the record it came to "+
+           n(score)+", and the line is "+n(B.line)+".",
+      why:"Sit this one at full length and under exam conditions to be judged on it."+tail
+    };
+    const band=this.side(id, score, low);
+    const missed=B.gate ? B.gate(extra||{}) : null;
+    const held=(band==="clear"||band==="pass") && missed ? "near" : band;
+    const against=n(score)+" against a line of "+n(B.line);
+    // a gate that fails takes the verdict down with it, so the sentence has to
+    // stop congratulating you halfway through
+    const said = missed && held!==band
+      ? against+" — the right side of it on the number, but "+missed+"."
+      : {
+          clear: against+" — clear of it, with something in hand.",
+          pass:  against+" — the right side of it.",
+          near:  against+" — just the wrong side of it.",
+          below: against+" — well the wrong side of it."
+        }[band] + (missed ? " And "+missed+"." : "");
+    const head={clear:"clear", pass:"above the line", near:"caution", below:"below the line"}[held];
+    return {band:held, head, said, why:B.why + tail};
+  },
+  node(v){
+    const d=el("div","verdict "+v.band);
+    d.appendChild(el("div","head",v.head));
+    d.appendChild(el("div","said",v.said));
+    d.appendChild(el("div","why",v.why));
+    return d;
+  },
+  /* the short form, for the menu line and the day-mode itemisation */
+  tag(id, score, low, unit){
+    const B=BENCH[id];
+    if(!B || score==null || !isFinite(score)) return null;
+    const s=this.side(id, score, low), line=this.fmt(id,B.line,unit);
+    return s==="clear" ? "clear of the "+line+" line"
+         : s==="pass" ? "the right side of the "+line+" line"
+         : s==="near" ? "just under the "+line+" line"
+         : "the wrong side of the "+line+" line";
+  },
+  word(id, score, low){
+    const s=this.side(id, score, low);
+    return s==="clear" ? "clear of the line"
+         : s==="pass" ? "above the line"
+         : s==="near" ? "just under it" : "below the line";
+  }
+};
+
 /* The process runs in two stages and they use different tests. Stage 1 is the
    paper afternoon; stage 2 is the full day of Vienna tests, the SJE and the MMI.
    Straight from the OPC invites. */
@@ -699,11 +844,15 @@ function paintMenu(){
         if(known.length){
           const good=known.filter(fr.ok), ps=good.map(r=>r.s).filter(s=>s!=null);
           // the headline best is the best run that would actually have counted
+          const bestGood = ps.length ? (rec.low?Math.min.apply(null,ps):Math.max.apply(null,ps)) : null;
           head = (ps.length
-            ? (rec.low?"Lowest ":"Best ")+(rec.low?Math.min.apply(null,ps):Math.max.apply(null,ps))+
+            ? (rec.low?"Lowest ":"Best ")+bestGood+
               (rec.u||"")+" "+fr.tag+" · "+attempts
             : (rec.best!=null?(rec.low?"Lowest ":"Best ")+rec.best+(rec.u||"")+" · ":"")+attempts)
             + ", " + (good.length?good.length+" "+fr.tag:"none "+fr.tag);
+          // your best counting run said against the line, since that is the one being judged
+          const t = bestGood!=null ? Bench.tag(id, bestGood, !!rec.low, rec.u||"") : null;
+          if(t) head += " · "+t;
         }
       }
       if(id==="day" && rec.h && rec.h.length){
@@ -777,9 +926,18 @@ const HISTORY = {
 
       sittings.slice().reverse().forEach((s,i)=>{
         const card=el("div","rev");
+        // in a practice sitting nothing counted, so a tally against the line would be a fiction
+        const judged=s.m==="practice" ? [] : s.runs.filter(r=>{
+          const f=FULL_RUN[r.id];
+          return r.s!=null && BENCH[r.id] && (!f || !f.known(r) || f.ok(r));
+        });
+        const cleared=judged.filter(r=>{
+          const sd=Bench.side(r.id, r.s, !!r.low); return sd==="clear"||sd==="pass";
+        }).length;
         card.appendChild(el("h4",null,(sittings.length-i)+". "+this.when(s.t)+" · "+this.dur(s.ms)+
           " · "+s.runs.length+" of "+dayOrder().length+" drills · "+
-          (s.m==="practice"?"practice":"exam conditions")));
+          (s.m==="practice"?"practice":"exam conditions")+
+          (judged.length ? " · "+cleared+" of "+judged.length+" above the line" : "")));
         let earlyDown=0, lateDown=0, earlyN=0, lateN=0;
         const half=Math.ceil(s.runs.length/2);
         s.runs.forEach((run,j)=>{
@@ -792,6 +950,7 @@ const HISTORY = {
           // in a practice sitting nothing was meant to count, so saying so of each drill is noise
           if(f && f.known(run)) bits.push(f.ok(run) ? f.pass
             : f.miss(run)+(s.m==="practice" ? "" : " — would not have counted"));
+          if(judged.indexOf(run)>=0) bits.push(Bench.word(run.id, run.s, !!run.low));
           if(bits.length) lhs.appendChild(el("div","paper-name",bits.join(" · ")));
           row.appendChild(lhs);
           const rhs=el("div"); rhs.style.textAlign="right";
@@ -886,6 +1045,18 @@ const HISTORY = {
           b.title=this.when(r.t)+" — "+r.s+unit+(r.sec!=null?", "+mmss(r.sec):"")+(r.p?" ("+r.p+")":"");
           chart.appendChild(b);
         });
+        // the line drawn across the bars, but only when it falls inside the range
+        // you have actually scored — pinned to the top or the floor it would lie
+        const B=BENCH[id];
+        if(B && B.line>lo && B.line<hi){
+          const lf = low ? (hi-B.line)/span : (B.line-lo)/span;
+          const mark=el("div","hline");
+          // the bars are a percentage of the content box, the marker of the padding
+          // box, so the 10px of padding comes off before the fraction is applied
+          mark.style.bottom="calc((100% - 10px) * "+((14+lf*86)/100).toFixed(4)+" - 1px)";
+          mark.appendChild(el("span",null,Bench.fmt(id,B.line,unit)+" line"));
+          chart.appendChild(mark);
+        }
         box.appendChild(chart);
         const key=el("div","hkey");
         key.appendChild(el("span",null,"oldest · taller is better"+
@@ -915,6 +1086,24 @@ const HISTORY = {
               ps.length ? (low?Math.min.apply(null,ps):Math.max.apply(null,ps))+unit : "none yet"]);
           }
         }
+        // the line, and how often a run that counted was on the right side of it
+        if(BENCH[id]){
+          rows.push(["The line", Bench.fmt(id, BENCH[id].line, unit)]);
+          const counting=scored.filter(counts);
+          if(counting.length){
+            const over=counting.filter(r=>{
+              const s=Bench.side(id, r.s, low); return s==="clear"||s==="pass";
+            }).length;
+            rows.push(["Counting runs on the right side of it", over+" of "+counting.length]);
+            const lastFive=counting.slice(-5);
+            if(lastFive.length>=3){
+              const recent=lastFive.filter(r=>{
+                const s=Bench.side(id, r.s, low); return s==="clear"||s==="pass";
+              }).length;
+              rows.push(["Last "+lastFive.length+" of those", recent+" on the right side"]);
+            }
+          }
+        }
         const st=el("div"); st.style.marginTop="18px";
         rows.forEach(([k,v])=>{
           const r=el("div","stat"); r.appendChild(el("span",null,k)); r.appendChild(el("b",null,String(v))); st.appendChild(r);
@@ -934,10 +1123,16 @@ const HISTORY = {
         if(r.p) bits.push(r.p);
         if(r.sec!=null && !(f && f.hideTime)) bits.push(mmss(r.sec));
         if(f && f.known(r)) bits.push(f.ok(r) ? f.pass : f.miss(r));
+        const counted = !f || !f.known(r) || f.ok(r);
+        if(counted && r.s!=null && BENCH[id]) bits.push(Bench.word(id, r.s, low));
         if(bits.length) lhs.appendChild(el("div","paper-name",bits.join(" · ")));
         row.appendChild(lhs);
         const sc=el("b",null, r.s!=null ? r.s+unit : "completed");
         if(f && f.known(r) && !f.ok(r)) sc.classList.add("slow");
+        else if(counted && r.s!=null && BENCH[id]){
+          const s=Bench.side(id, r.s, low);
+          sc.classList.add(s==="clear"||s==="pass" ? "over" : s==="near" ? "under" : "way");
+        }
         row.appendChild(sc);
         box.appendChild(row);
       });
@@ -985,6 +1180,35 @@ function buildFooter(){
     }
   };
   f.appendChild(b);
+
+  // the lines, in one place, with where they came from said plainly
+  const d=el("details","guide");
+  d.style.alignSelf="stretch";
+  d.appendChild(el("summary",null,"The lines your scores are judged against"));
+  const t=el("div","gtab");
+  const order=["vse1","vse2","vse3","gb","tea","trp1","trp2","dfft","wafv","atavt","hand","sjt","sje","mmi"];
+  order.forEach(id=>{
+    const B=BENCH[id]; if(!B) return;
+    const rec=Store.get(id)||{};
+    const unit=rec.u || (id==="hand"?"% out":id==="sje"?" pts off":"%");
+    const r=el("div","grow");
+    r.style.gridTemplateColumns="1fr auto";
+    r.appendChild(el("div","gc",(DRILL_NAMES[id]||id).split(" — ")[0]));
+    const v=el("div","ga");
+    v.appendChild(el("b","gk",Bench.fmt(id,B.line,unit)));
+    v.appendChild(document.createTextNode(" · clear at "+Bench.fmt(id,B.clear,unit)));
+    r.appendChild(v);
+    t.appendChild(r);
+  });
+  d.appendChild(t);
+  d.appendChild(el("p","gnote",
+    "None of these is a pass mark and none of them is the OPC's. The real assessment is norm-referenced — your score is ranked against a comparison group, the cut-offs are not published, and each operator sets its own bar on top of them."));
+  const gwhy=el("p","sub",
+    "They are this app's own standard, set a little above the level people report scraping through on, because a number you produce at your kitchen table with nobody watching is not the number you will produce at 09:00 in Watford. Only a full-length run under exam conditions is judged against them: a practice run is told where it landed and left at that.");
+  gwhy.style.margin="8px 0 0";
+  d.appendChild(gwhy);
+  f.appendChild(d);
+
   if(!Store.ok()){
     f.appendChild(el("span","warn",
       "Scores cannot be saved here — this preview blocks browser storage. Open the hosted or downloaded copy and progress will persist between sessions."));
@@ -1002,6 +1226,7 @@ const App = {
     $("#t-body").replaceChildren(node);
     window.scrollTo(0,0);
     this.tStart = Date.now();     // every drill is timed, whether or not it shows a clock
+    this.verdict = null;          // a run abandoned before its results cannot leave one behind
   },
   clock(txt){ $("#t-clock").textContent = txt || ""; },
   quit(){
@@ -1013,9 +1238,15 @@ const App = {
     $("#test").classList.remove("on"); $("#menu").classList.add("on");
     this.clock(""); this.clockPlain();
   },
-  done(id, score, low, unit, paper){
+  done(id, score, low, unit, paper, extra){
     const sec = this.tStart ? Math.round((Date.now()-this.tStart)/1000) : null;
     Store.bump(id, score, low, unit, paper, sec);
+    // judged here rather than in each drill: done() already knows everything the
+    // line needs, and results() picks the verdict up on its way past
+    const run={s:score, p:paper||null, sec};
+    const fr=FULL_RUN[id];
+    const full = !fr || !fr.known(run) || fr.ok(run);
+    this.verdict = Bench.judge(id, score, low, unit, full, extra);
     if(this.day && id!=="day"){
       this.day.runs.push({id, s:(score!=null && isFinite(score))?Math.round(score*10)/10:null,
                           u:unit||"", low:low?1:0, p:paper||null, sec});
@@ -1070,6 +1301,7 @@ const App = {
   results(title, rows, coach, headline){
     const w=el("div","res");
     if(headline){ w.appendChild(el("div","big",headline)); }
+    if(this.verdict){ w.appendChild(Bench.node(this.verdict)); this.verdict=null; }
     w.appendChild(el("h2",null,title));
     rows.forEach(([k,v])=>{
       const r=el("div","stat"); r.appendChild(el("span",null,k)); r.appendChild(el("b",null,v)); w.appendChild(r);
@@ -1520,7 +1752,9 @@ const WAFV = {
     const tot=this.hits+this.miss;
     App.done("wafv", tot? this.hits/tot*100 : null, false, "%",
       stopped ? "stopped at "+mmss(ran)+" of "+this.mins+" minutes · practice"
-              : this.mins+" minutes · "+(this.exam?"exam":"practice"));
+              : this.mins+" minutes · "+(this.exam?"exam":"practice"),
+      // catching everything while also pressing at nothing is not a pass here
+      {targets:tot, fa:this.fa, faRate: tot ? this.fa/tot : 0});
     const half=Math.ceil(this.rts.length/2);
     const early=this.rts.slice(0,half), late=this.rts.slice(half);
     const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
@@ -3264,8 +3498,13 @@ const GB = {
       hit:a.hit+b.hit,miss:a.miss+b.miss,fa:a.fa+b.fa}),{reach:0,fours:0,hit:0,miss:0,fa:0});
     const acc = tot.fours? Math.round(tot.hit/tot.fours*100) : 0;
     const net = tot.hit - tot.fa;
+    const madeMarks = tot.hit + tot.fa;
     App.done("gb", tot.fours? acc : null, false, "%",
-      this.PARTS+" parts · "+(this.exam?"exam":"practice"));
+      this.PARTS+" parts · "+(this.exam?"exam":"practice"),
+      // accuracy over ten groups is not a score: the line checks the ground you
+      // covered and the marks you got wrong as well
+      {rate: tot.reach/(this.PARTS*this.PER_PART/60),
+       marks: madeMarks, faRate: madeMarks ? tot.fa/madeMarks : 0});
     const first=this.log.slice(0,2).reduce((a,b)=>a+b.reach,0)/2;
     const last=this.log.slice(-2).reduce((a,b)=>a+b.reach,0)/2;
     const faded=this.exam && last<first*0.8;
