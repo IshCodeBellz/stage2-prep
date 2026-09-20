@@ -307,42 +307,51 @@
     <span class="lamp" id="l-gb"></span>
     <div class="body">
       <h2>Group Bourdon — dot groups</h2>
-      <p>Mark every group of exactly four dots, working left to right, line by line. Five parts of a minute each, changing whether or not you have finished. Errors count against you.</p>
-      <div class="meta">5 parts · 1 min each · errors penalised</div>
+      <p>Mark every group of exactly four dots, working left to right, line by line. A minute a part, changing whether or not you have finished, and it scores itself at the end of the last one. Errors count against you. Exam runs all five parts; practice runs two.</p>
+      <div class="meta">5 parts · 1 min each · exam ends at 5:00 · errors penalised</div>
     </div>
-    <button class="go" onclick="GB.start()">Start</button>
+    <div class="row">
+      <button onclick="GB.start('practice')">Practice</button>
+      <button class="go" onclick="GB.start('exam')">Exam</button>
+    </div>
   </div>
 
   <div class="drill" data-stage="1">
     <span class="lamp" id="l-tea"></span>
     <div class="body">
       <h2>Tea-Occ — divided attention</h2>
-      <p>Count tones while ignoring a lower one, search a directory page, then do both at once. Needs sound. Scores what doing both costs you.</p>
-      <div class="meta">3 parts · about 6 min · sound required</div>
+      <p>Count tones while ignoring a lower one, search a directory page, then do both at once. Needs sound. Scores what doing both costs you. Every part ends itself on the clock; practice runs the same three parts short.</p>
+      <div class="meta">3 parts · 1:15, 2:00, 1:30 · sound required</div>
     </div>
-    <button class="go" onclick="TEA.start()">Start</button>
+    <div class="row">
+      <button onclick="TEA.start('practice')">Practice</button>
+      <button class="go" onclick="TEA.start('exam')">Exam</button>
+    </div>
   </div>
 
   <div class="drill" data-stage="1">
     <span class="lamp" id="l-trp1"></span>
     <div class="body">
       <h2>TRP1b — rules recall</h2>
-      <p>Study a passage of procedure for three minutes, then it is taken away and you answer eighteen questions on it in seven. Three passages, rotating.</p>
-      <div class="meta">18 questions · 7 min · 3 passages</div>
+      <p>Study a passage of procedure for three minutes, then it is taken away and you answer eighteen questions on it. Exam puts seven minutes on those questions and hands the paper in at zero; practice leaves them untimed so you see what you actually retained. Three passages, rotating.</p>
+      <div class="meta">18 questions · 3 min study · exam ends at 7:00 · 3 passages</div>
     </div>
-    <button class="go" onclick="TRP1.start()">Start</button>
+    <div class="row">
+      <button onclick="TRP1.start('practice')">Practice</button>
+      <button class="go" onclick="TRP1.start('exam')">Exam</button>
+    </div>
   </div>
 
   <div class="drill" data-stage="1">
     <span class="lamp" id="l-trp2"></span>
     <div class="body">
       <h2>TRP2 — order of checking</h2>
-      <p>Three dials, each with an arrow over a background that sets its priority. White first, black second, grey last — give the order. Forty-three is the real length; seven is a warm-up.</p>
-      <div class="meta">43 in 8 min is the one that counts · 7 to warm up</div>
+      <p>Three dials, each with an arrow over a background that sets its priority. White first, black second, grey last — give the order. Exam is the real 43 in eight minutes and ends at zero; practice is seven with no clock.</p>
+      <div class="meta">43 questions · 11 s each · exam ends at 8:00 · practice is 7, untimed</div>
     </div>
     <div class="row">
-      <button onclick="TRP2.start(7)">7</button>
-      <button class="go" onclick="TRP2.start(43)">43</button>
+      <button onclick="TRP2.start('practice')">Practice</button>
+      <button class="go" onclick="TRP2.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -350,12 +359,12 @@
     <span class="lamp" id="l-dfft"></span>
     <div class="body">
       <h2>DFFT — fault finding</h2>
-      <p>Read a display panel against a fault finder guide, work out which fault to deal with first, and give its code and the action that goes with it. Twenty in forty-five minutes is the real length; five is a warm-up.</p>
-      <div class="meta">20 in 45 min is the one that counts · 5 to warm up</div>
+      <p>Read a display panel against a fault finder guide, work out which fault to deal with first, and give its code and the action that goes with it. Exam is the real 20 in forty-five minutes and ends at zero; practice is five with no clock.</p>
+      <div class="meta">20 questions · 2:15 each · exam ends at 45:00 · practice is 5, untimed</div>
     </div>
     <div class="row">
-      <button onclick="DFFT.start(5)">5</button>
-      <button class="go" onclick="DFFT.start(20)">20</button>
+      <button onclick="DFFT.start('practice')">Practice</button>
+      <button class="go" onclick="DFFT.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -540,20 +549,33 @@ const TARGET_SECS={vse1:180, vse2:192};
 /* What makes an attempt the real thing rather than a warm-up. A short run still
    counts as practice — it just has no business setting the standard you judge
    yourself by, because it is not the test you are going to sit. */
-/* Which way a saved VSE attempt was sat. Runs from before the two modes existed say
-   neither, and are judged the old way — on whether they came in inside the target. */
-const vseMode = r => /\bexam\b/.test(r.p||"") ? "exam"
+/* Which way a saved attempt was sat. Runs from before the two modes existed say
+   neither, and are judged however that drill judged them before. */
+const runMode = r => /\bexam\b/.test(r.p||"") ? "exam"
                    : /\bpractice\b/.test(r.p||"") ? "practice" : null;
+
+/* the paced VSE papers: an exam run counts, and so does an old run that came in
+   inside the target, because that is what the app used to ask of it */
 const vseFull = (target, clock) => ({
   known:r=>r.sec!=null,
-  ok:r=>{ const m=vseMode(r); return m==="exam" || (m===null && r.sec<=target); },
+  ok:r=>{ const m=runMode(r); return m==="exam" || (m===null && r.sec<=target); },
   tag:"under exam timing", pass:"exam conditions",
-  miss:r=>vseMode(r)==="practice" ? "practice run"
+  miss:r=>runMode(r)==="practice" ? "practice run"
         : mmss(Math.max(0, Math.round(r.sec-target)))+" over",
   quickest:true,
   rawRow:"Best in either mode", row:"Sat under the "+clock+" clock",
   bestRow:"Best under exam timing",
   faded:"faded bars were practice runs, or ran over the target"
+});
+
+/* drills where the only question is which mode you sat it in. Attempts from before
+   the modes existed were the full thing, since there was nothing else to run. */
+const modeFull = (what, low) => ({
+  known:()=>true, ok:r=>runMode(r)!=="practice",
+  tag:"under exam conditions", pass:"exam conditions", miss:()=>"practice run", hideTime:true,
+  rawRow:(low?"Lowest":"Best")+" in either mode", row:"Sat "+what,
+  bestRow:(low?"Lowest":"Best")+" under exam conditions",
+  faded:"faded bars were practice runs"
 });
 
 const FULL_RUN={
@@ -563,6 +585,9 @@ const FULL_RUN={
          tag:"at full length", pass:"exam length", miss:()=>"practice run", hideTime:true,
          rawRow:"Best at any length", row:"Run at the full 45", bestRow:"Best over the full 45",
          faded:"faded bars were practice runs" },
+  gb:modeFull("the full five parts"),
+  tea:modeFull("all three parts at full length"),
+  trp1:modeFull("on the seven-minute clock"),
   hand:{ known:r=>/\d+ runs/.test(r.p||""), ok:r=>parseInt(/(\d+) runs/.exec(r.p)[1],10)>=10,
          tag:"at 10 runs", pass:"full set", miss:()=>"warm-up set", hideTime:true,
          rawRow:"Lowest at any length", row:"Run at the full ten", bestRow:"Lowest over the full ten",
@@ -989,28 +1014,25 @@ const App = {
     this.tick=setInterval(()=>{ const s=(Date.now()-t0)/1000; this.clock(mmss(s)); if(onTick)onTick(s); },250);
     return ()=>(Date.now()-t0)/1000;
   },
-  countDown(secs, onEnd){
-    const t0=Date.now();
+  /* warnAt turns the clock red for the last so many seconds. Returns how long it ran. */
+  countDown(secs, onEnd, warnAt){
+    const t0=Date.now(), w=warnAt||0;
     this.tick=setInterval(()=>{
       const left=secs-(Date.now()-t0)/1000;
-      if(left<=0){ clearInterval(this.tick); this.clock("0:00"); onEnd(); }
-      else this.clock(mmss(left));
-    },250);
-  },
-  /* a paper with a hard limit: counts down, goes red for the last thirty seconds,
-     and hands itself in at zero. Returns how long the run actually took. */
-  countLimit(secs, onEnd){
-    const t0=Date.now(), c=$("#t-clock");
-    this.clock(mmss(secs));
-    this.tick=setInterval(()=>{
-      const left=secs-(Date.now()-t0)/1000;
-      if(left<=30) c.classList.add("late");
-      if(left<=0){ clearInterval(this.tick); this.clock("0:00"); onEnd(); }
+      if(w) this.late(left<=w);
+      if(left<=0){ clearInterval(this.tick); this.clock("0:00"); this.late(false); onEnd(); }
       else this.clock(mmss(left));
     },250);
     return ()=>(Date.now()-t0)/1000;
   },
-  clockPlain(){ $("#t-clock").classList.remove("late"); },
+  /* a paper with a hard limit: counts down, goes red for the last thirty seconds,
+     and hands itself in at zero. Returns how long the run actually took. */
+  countLimit(secs, onEnd){
+    this.clock(mmss(secs));
+    return this.countDown(secs, onEnd, 30);
+  },
+  late(on){ $("#t-clock").classList.toggle("late", !!on); },
+  clockPlain(){ this.late(false); },
   results(title, rows, coach, headline){
     const w=el("div","res");
     if(headline){ w.appendChild(el("div","big",headline)); }
@@ -2938,24 +2960,23 @@ function dfftQuestion(){
   return {r, live, opts, right};
 }
 
-const DFFT_LENGTHS={full:[20,2700], practice:[5,675]};
+/* the exam is 20 in forty-five minutes; practice is five of them with no clock */
+const DFFT_LENGTHS={exam:[20,2700], practice:[5,null]};
 const DFFT = {
-  start(count){
-    const full=(count||20)>=20;
-    const [n,secs]=full?DFFT_LENGTHS.full:DFFT_LENGTHS.practice;
-    this.N=n; this.LIMIT=secs; this.full=full;
-    this.paper=n+" questions";
+  EXAM_LIMIT:2700, EXAM_N:20,
+  start(mode){
+    const full=mode!=="practice";
+    const [n,secs]=full?DFFT_LENGTHS.exam:DFFT_LENGTHS.practice;
+    this.N=n; this.LIMIT=secs; this.full=full; this.ranOut=false;
+    this.paper=n+" questions · "+(full?"exam":"practice");
     this.qs=[]; for(let i=0;i<n;i++) this.qs.push(dfftQuestion());
     this.i=0; this.answers=new Array(n).fill(null);
     App.open("DFFT — "+(full?"the full 20":"5-question practice"), el("div"));
     App.active=this;
     this.t0=Date.now();
     this.render();
-    App.tick=setInterval(()=>{
-      const left=this.LIMIT-(Date.now()-this.t0)/1000;
-      App.clock(left>0?mmss(left):"0:00");
-      if(left<=0){ clearInterval(App.tick); this.finish(); }
-    },250);
+    if(full) App.countLimit(this.LIMIT, ()=>{ this.ranOut=true; this.finish(); });
+    else App.countUp();
   },
   guide(){
     const d=document.createElement("details");
@@ -2978,8 +2999,10 @@ const DFFT = {
   render(){
     const q=this.qs[this.i], r=q.r;
     const box=el("div");
-    box.appendChild(el("div","chainbar","Question "+(this.i+1)+" of "+this.N+
-      " — read the panel against the guide. Which code, and what else must you do?"));
+    box.appendChild(el("div","chainbar","<b>"+(this.full?"Exam conditions":"Practice")+".</b> Question "+(this.i+1)+" of "+this.N+
+      (this.full ? " · "+mmss(this.LIMIT)+" for all 20, about two and a quarter minutes each, and it hands itself in at zero."
+                 : " · no clock, so you can learn the guide before you sit it against one.")+
+      " Read the panel against the guide. Which code, and what else must you do?"));
     const p=el("div","paper");
     p.appendChild(el("h3",null,"Display panel"));
     const g=el("div","panel");
@@ -3012,7 +3035,7 @@ const DFFT = {
     window.scrollTo(0,0);
   },
   finish(){
-    clearInterval(App.tick); App.clock("");
+    clearInterval(App.tick); App.clock(""); App.clockPlain();
     let right=0, done=0;
     const kinds={priority:0, isolator:0, action:0, absent:0};
     this.qs.forEach((q,i)=>{
@@ -3031,21 +3054,30 @@ const DFFT = {
       action:"Most of your errors were the right code with the wrong action beside it. You are reading the code column and stopping. The action is half the answer.",
       absent:"Most of your errors were codes for faults that were not showing at all. That is a panel-reading problem rather than a guide problem — check the reading against the threshold rather than recognising the name of the instrument."
     };
+    const rate=done?secs/done:0;
+    const examRate=this.EXAM_LIMIT/this.EXAM_N;
     const coach = done<this.N
       ? "You got through "+done+" of "+this.N+" in the time. About two and a quarter minutes a question is the real pace, and the test is built so that most people feel it. "+(kinds[worst]?why[worst]:"")
       : right/done<0.75
       ? why[worst]
       : "Strong. You are reading down the guide rather than pattern-matching, which is the whole skill here.";
+    const lengthNote = this.full ? ""
+      : " A five-question practice run with no clock on it, so it does not set your best"+
+        (rate>examRate ? ", and at "+mmss(Math.round(rate))+" a question you would have reached about "+
+          Math.floor(this.EXAM_LIMIT/rate)+" of the 20 in the real forty-five minutes." : ".");
     $("#t-body").appendChild(App.results("Scores",[
-      ["Length", this.N+" questions"+(this.full?"":" — practice")],
+      ["Conditions", this.full ? "Exam · 20 questions, "+mmss(this.LIMIT)+" limit" : "Practice · 5 questions, untimed"],
       ["Answered", done+" / "+this.N],
       ["Correct", right+" / "+done],
       ["Wrong priority", kinds.priority],
       ["Isolator rule missed", kinds.isolator],
       ["Right code, wrong action", kinds.action],
       ["Fault not showing", kinds.absent],
-      ["Time", mmss(secs)+" of "+mmss(this.LIMIT)]
-    ], coach, right+"/"+this.N+(this.full?"":" · practice")));
+      ["Minutes a question", (rate?mmss(Math.round(rate)):"—")+" against "+mmss(examRate)],
+      ["Time", this.full
+        ? (this.ranOut ? "clock ran out at "+mmss(this.LIMIT) : mmss(secs)+", with "+mmss(this.LIMIT-secs)+" left")
+        : mmss(secs)+", untimed"]
+    ], coach+lengthNote, right+"/"+this.N+(this.full?(this.ranOut?" · time up":""):" · practice")));
   },
   stop(){ clearInterval(App.tick); }
 };
@@ -3064,12 +3096,16 @@ function dotCell(n){
     `</svg>`;
 }
 
+const GB_PARTS={exam:5, practice:2};
 const GB = {
   PARTS:5, PER_PART:60, N:150,
-  start(){
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam;
+    this.PARTS = exam?GB_PARTS.exam:GB_PARTS.practice;   // the minute a part is the test, so practice is fewer parts, not longer ones
     this.part=0; this.log=[];
     this.build();
-    App.open("Group Bourdon — part 1 of "+this.PARTS, el("div"));
+    App.open("Group Bourdon — part 1 of "+this.PARTS+(exam?"":" · practice"), el("div"));
     App.active=this;
     this.render();
   },
@@ -3083,9 +3119,11 @@ const GB = {
   },
   render(){
     const box=el("div");
-    box.appendChild(el("div","chainbar","Part "+(this.part+1)+" of "+this.PARTS+
+    box.appendChild(el("div","chainbar","<b>"+(this.exam?"Exam conditions":"Practice")+".</b> Part "+
+      (this.part+1)+" of "+this.PARTS+
       " — work left to right, line by line, and mark every group of exactly four dots. "+
-      "One minute, then it changes whether or not you have finished. Errors count against you."));
+      "One minute a part, then it changes whether or not you have finished, and it scores itself at the end of the last one. Errors count against you."+
+      (this.exam?"":" Two parts rather than five, so the fade the real test is looking for will not show and this does not set your best.")));
     const p=el("div","paper");
     const g=el("div","bgrid");
     this.nodes=[];
@@ -3104,11 +3142,12 @@ const GB = {
     App.tick=setInterval(()=>{
       const left=this.PER_PART-(Date.now()-this.t0)/1000;
       App.clock(left>0?Math.ceil(left)+"s":"change");
+      App.late(left<=10);
       if(left<=0) this.change();
     },200);
   },
   change(){
-    clearInterval(App.tick);
+    clearInterval(App.tick); App.clockPlain();
     // score only as far as the last group you marked — that is how far you got
     const reach=this.reach||0;
     let hit=0,miss=0,fa=0,fours=0;
@@ -3122,7 +3161,7 @@ const GB = {
     this.log.push({reach,fours,hit,miss,fa});
     this.part++;
     if(this.part>=this.PARTS){ this.finish(); return; }
-    $("#t-title").textContent="Group Bourdon — part "+(this.part+1)+" of "+this.PARTS;
+    $("#t-title").textContent="Group Bourdon — part "+(this.part+1)+" of "+this.PARTS+(this.exam?"":" · practice");
     this.build();
     this.render();
   },
@@ -3132,19 +3171,23 @@ const GB = {
       hit:a.hit+b.hit,miss:a.miss+b.miss,fa:a.fa+b.fa}),{reach:0,fours:0,hit:0,miss:0,fa:0});
     const acc = tot.fours? Math.round(tot.hit/tot.fours*100) : 0;
     const net = tot.hit - tot.fa;
-    App.done("gb", tot.fours? acc : null, false, "%", this.PARTS+" parts");
+    App.done("gb", tot.fours? acc : null, false, "%",
+      this.PARTS+" parts · "+(this.exam?"exam":"practice"));
     const first=this.log.slice(0,2).reduce((a,b)=>a+b.reach,0)/2;
     const last=this.log.slice(-2).reduce((a,b)=>a+b.reach,0)/2;
-    const faded=last<first*0.8;
+    const faded=this.exam && last<first*0.8;
     const coach = tot.fa>tot.hit*0.15
       ? "Your false marks are high. On this test an error costs you more than a group you never reached, so the answer is not to speed up — it is to stop marking anything you have not actually counted. Three and five look like four when you are moving."
       : faded
       ? "You covered noticeably less ground in the last two parts than the first two. That fade is the whole point of five parts, and it is what the real one is looking for. Practise the full five rather than one."
       : tot.fours && tot.hit/tot.fours<0.8
       ? "You are passing over fours rather than mismarking. That usually means you are scanning the shape of the group instead of counting it. Count every group, even the obvious threes — it is faster than going back."
-      : "Good. Rate and accuracy both held up across the five parts, which is the combination this test scores.";
+      : "Good. Rate and accuracy both held up across the parts, which is the combination this test scores.";
+    const lengthNote = this.exam ? ""
+      : " This was a two-part practice run, so it does not set your best — the five parts are where the tiredness shows up.";
     const marks=tot.hit+tot.fa;
     const w=App.results("Scores",[
+      ["Conditions", (this.exam?"Exam · ":"Practice · ")+this.PARTS+" parts of a minute"],
       ["Caught", tot.hit],
       ["Marked in error", tot.fa],
       ["Net", net],
@@ -3152,7 +3195,7 @@ const GB = {
       ["Worked as far as", tot.reach+" groups"],
       ["Fours you passed over", tot.miss],
       ["Fours caught in that stretch", acc+"%"]
-    ], coach, net+"");
+    ], coach+lengthNote, net+"");
     const r=el("div","rev");
     r.appendChild(el("h4",null,"Part by part"));
     this.log.forEach((p,i)=>{
@@ -3219,17 +3262,27 @@ function tone(hz, ms){
   }catch(e){}
 }
 
+/* listen, search, then both at once. Practice runs the same three parts short. */
+const TEA_LENGTHS={exam:[75,120,90], practice:[40,60,45]};
 const TEA = {
   HIGH:1046, LOW:523, LISTEN:75, SEARCH:120, DIR:90,
-  start(){
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam;
+    const T = exam?TEA_LENGTHS.exam:TEA_LENGTHS.practice;
+    this.LISTEN=T[0]; this.SEARCH=T[1]; this.DIR=T[2];
     this.timers=[]; this.res={};
-    App.open("TEA-Occ — part 1 of 3", el("div"));
+    App.open("TEA-Occ — part 1 of 3"+(exam?"":" · practice"), el("div"));
     App.active=this;
     this.intro();
   },
+  total(){ return this.LISTEN+this.SEARCH+this.DIR; },
   intro(){
     const box=el("div");
-    box.appendChild(el("div","chainbar","Three parts, about six minutes. Sound is needed — turn it up, or use headphones."));
+    box.appendChild(el("div","chainbar","<b>"+(this.exam?"Exam conditions":"Practice")+".</b> Three parts — "+
+      mmss(this.LISTEN)+" listening, "+mmss(this.SEARCH)+" searching, then "+mmss(this.DIR)+
+      " of both at once. Each part ends itself on the clock. Sound is needed — turn it up, or use headphones."+
+      (this.exam?"":" Every part is cut short here, so it does not set your best.")));
     box.appendChild(el("p","sub","First you count tones while ignoring a lower one. Then you search a directory page. Then you do the search and the counting at the same time, giving each equal priority — which is the part the whole test is really about."));
     const r=el("div","row"); r.style.marginTop="14px";
     const b=el("button","go","Start part 1 — listening");
@@ -3252,7 +3305,7 @@ const TEA = {
     box.appendChild(el("div","scenbox","Listen. Nothing to look at."));
     $("#t-body").replaceChildren(box);
     this.playSeq(seq);
-    App.countDown(this.LISTEN, ()=>this.askCount(1, ()=>this.searchIntro()));
+    App.countDown(this.LISTEN, ()=>this.askCount(1, ()=>this.searchIntro()), 10);
   },
   askCount(part, next){
     this.clearTimers();
@@ -3271,19 +3324,19 @@ const TEA = {
   searchIntro(){
     const box=el("div");
     box.appendChild(el("div","chainbar","Part 2 of 3 — the directory. No sound in this one."));
-    box.appendChild(el("p","sub","Each entry has two symbols beside it. Tap every entry where the two symbols are the same, and ignore the rest. Work down the page in order. Two minutes."));
+    box.appendChild(el("p","sub","Each entry has two symbols beside it. Tap every entry where the two symbols are the same, and ignore the rest. Work down the page in order. "+mmss(this.SEARCH)+", and it ends itself."));
     const r=el("div","row"); r.style.marginTop="14px";
     const b=el("button","go","Start the search");
     b.onclick=()=>this.search(2, this.SEARCH, null, ()=>this.dualIntro());
     r.appendChild(b); box.appendChild(r);
     $("#t-body").replaceChildren(box);
     window.scrollTo(0,0);
-    $("#t-title").textContent="TEA-Occ — part 2 of 3";
+    $("#t-title").textContent="TEA-Occ — part 2 of 3"+(this.exam?"":" · practice");
   },
   dualIntro(){
     const box=el("div");
     box.appendChild(el("div","chainbar","Part 3 of 3 — both at once, with equal priority to each."));
-    box.appendChild(el("p","sub","The same directory search, and at the same time the tones come back. Count the high ones and keep searching. Giving one of them up is the failure this part is built to catch."));
+    box.appendChild(el("p","sub","The same directory search, and at the same time the tones come back. Count the high ones and keep searching. "+mmss(this.DIR)+", and it ends itself. Giving one of them up is the failure this part is built to catch."));
     const r=el("div","row"); r.style.marginTop="14px";
     const b=el("button","go","Start both");
     b.onclick=()=>{
@@ -3295,7 +3348,7 @@ const TEA = {
     r.appendChild(b); box.appendChild(r);
     $("#t-body").replaceChildren(box);
     window.scrollTo(0,0);
-    $("#t-title").textContent="TEA-Occ — part 3 of 3";
+    $("#t-title").textContent="TEA-Occ — part 3 of 3"+(this.exam?"":" · practice");
   },
   search(part, secs, seq, next){
     const rows=teaDirectory(120);
@@ -3328,7 +3381,7 @@ const TEA = {
       }
       this.res["search"+part]={reach,tot,hit,miss,fa,secs};
       next();
-    });
+    }, 10);
   },
   clearTimers(){ this.timers.forEach(clearTimeout); this.timers=[]; },
   finish(){
@@ -3341,7 +3394,7 @@ const TEA = {
     const drop=rate2? Math.round((1-rate3/rate2)*100) : 0;
     const caught=(s2.hit+s3.hit), matches=(s2.tot+s3.tot);
     const acc=matches?Math.round(caught/matches*100):0;
-    App.done("tea", acc, false, "%", "3 parts");
+    App.done("tea", acc, false, "%", "3 parts · "+(this.exam?"exam":"practice"));
     const coach = drop>40
       ? "Your search rate fell "+drop+"% once the tones came back. That is a big drop — under load you stopped searching and listened. Both tasks are scored, so a partial job on each beats a clean job on one."
       : off3>off1+2
@@ -3349,7 +3402,11 @@ const TEA = {
       : drop<15 && off3<=2
       ? "You held both together with very little cost. That is the result this test is looking for and it is not common."
       : "A reasonable split. Keep practising the third part rather than the first two — doing either task alone is not what is being measured.";
+    const lengthNote = this.exam ? ""
+      : " This was a short practice run — "+mmss(this.total())+" against the "+mmss(TEA_LENGTHS.exam.reduce((a,b)=>a+b,0))+
+        " of the full thing — so it does not set your best. The divided-attention cost is also measured over less ground here, which makes it a rougher number than it looks.";
     $("#t-body").appendChild(App.results("Scores",[
+      ["Conditions", (this.exam?"Exam · ":"Practice · ")+mmss(this.LISTEN)+" · "+mmss(this.SEARCH)+" · "+mmss(this.DIR)],
       ["Tones, part 1", "you said "+(R.said1||0)+", there were "+R.tones1],
       ["Directory, part 2", s2.hit+" of "+s2.tot+" matches · "+s2.reach+" entries · "+s2.fa+" in error"],
       ["Tones, part 3", "you said "+(R.said3||0)+", there were "+R.tones3],
@@ -3358,7 +3415,7 @@ const TEA = {
       ["Search rate, doing both", rate3.toFixed(2)+" entries a second"],
       ["Cost of dividing attention", (drop>0?"−":"+")+Math.abs(drop)+"%"],
       ["Matches caught overall", acc+"%"]
-    ], coach, acc+"%"));
+    ], coach+lengthNote, acc+"%"));
   },
   stop(){ this.clearTimers(); clearInterval(App.tick); }
 };
@@ -3475,17 +3532,24 @@ const TRP1_SETS=[
 
 const TRP1 = {
   STUDY:180, ANSWER:420,
-  start(){
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam;
     this.set=Rot.next("trp1", TRP1_SETS.length);
     this.S=TRP1_SETS[this.set];
     this.i=0; this.timedOut=false; this.answers=new Array(this.S.qs.length).fill(null);
-    App.open("TRP1b — "+this.S.title, el("div"));
+    App.open("TRP1b — "+this.S.title+(exam?"":" · practice"), el("div"));
     App.active=this;
     this.study();
   },
   study(){
     const box=el("div");
-    box.appendChild(el("div","chainbar","Study this for three minutes. You may take notes on paper, but they go face down before the questions — on the day both your notes and the passage are collected."));
+    box.appendChild(el("div","chainbar","<b>"+(this.exam?"Exam conditions":"Practice")+".</b> Study this for "+
+      mmss(this.STUDY)+" — the clock takes it away at zero, and you may go early. "+
+      (this.exam
+        ? "Then "+this.S.qs.length+" questions with "+mmss(this.ANSWER)+" on the clock, and it hands itself in when that runs out."
+        : "Then the same "+this.S.qs.length+" questions with no clock on them, so you find out what you actually retained rather than where you got cut off. The real one allows "+mmss(this.ANSWER)+", and practice runs do not set your best.")+
+      " You may take notes on paper, but they go face down before the questions — on the day both your notes and the passage are collected."));
     const p=el("div","paper");
     p.appendChild(el("h3",null,this.S.title));
     this.S.passage.forEach(t=>{ const q=el("p",null,t); q.style.margin="9px 0"; q.style.color="#111"; p.appendChild(q); });
@@ -3497,23 +3561,23 @@ const TRP1 = {
     r.appendChild(b); box.appendChild(r);
     $("#t-body").replaceChildren(box);
     window.scrollTo(0,0);
-    App.countDown(this.STUDY, ()=>this.ask());
+    App.countDown(this.STUDY, ()=>this.ask(), 20);
   },
   ask(){
     clearInterval(App.tick);
     this.t0=Date.now();
     this.render();
-    App.tick=setInterval(()=>{
-      const left=this.ANSWER-(Date.now()-this.t0)/1000;
-      App.clock(left>0?mmss(left):"0:00");
-      if(left<=0){ clearInterval(App.tick); this.timedOut=true; this.finish(); }
-    },250);
+    if(this.exam) App.countLimit(this.ANSWER, ()=>{ this.timedOut=true; this.finish(); });
+    else App.countUp();
   },
   render(){
     const [q,opts]=this.S.qs[this.i];
     const box=el("div");
-    box.appendChild(el("div","chainbar","Question "+(this.i+1)+" of "+this.S.qs.length+
-      " · seven minutes for all of them. The passage is gone — answer from memory."));
+    box.appendChild(el("div","chainbar","<b>"+(this.exam?"Exam conditions":"Practice")+".</b> Question "+
+      (this.i+1)+" of "+this.S.qs.length+
+      (this.exam ? " · "+mmss(this.ANSWER)+" for all of them, and it hands itself in at zero."
+                 : " · no clock on these.")+
+      " The passage is gone — answer from memory."));
     box.appendChild(el("div","scenbox",q));
     const g=el("div","opts");
     opts.forEach((o,j)=>{
@@ -3532,25 +3596,35 @@ const TRP1 = {
     window.scrollTo(0,0);
   },
   finish(){
-    clearInterval(App.tick); App.clock("");
+    clearInterval(App.tick); App.clock(""); App.clockPlain();
     const n=this.S.qs.length;
     let right=0, done=0;
     this.S.qs.forEach((q,i)=>{ if(this.answers[i]!=null){ done++; if(this.answers[i]===q[2]) right++; } });
     const secs=Math.round((Date.now()-this.t0)/1000);
-    App.done("trp1", Math.round(right/n*100), false, "%", this.S.title);
+    App.done("trp1", Math.round(right/n*100), false, "%", this.S.title+" · "+(this.exam?"exam":"practice"));
     const coach = (done<n && this.timedOut)
       ? "You ran out of time with "+(n-done)+" unanswered. That is the shape of this test: it is not hard to answer, it is hard to answer quickly enough. Read the passage for the numbers and the exceptions on the first pass — those are what nearly every question turns on."
       : done<n
       ? "You left "+(n-done)+" unanswered with time still on the clock. There is no penalty for a wrong answer here, so a guess between the two you cannot rule out is worth more than a blank."
+      : (!this.exam && secs>this.ANSWER)
+      ? "Everything answered, but it took you "+mmss(secs)+" and the real one allows "+mmss(this.ANSWER)+
+        ". Untimed, that is a score you would not have been given: "+(n-Math.floor(this.ANSWER/(secs/n)))+
+        " of these would still have been blank when the paper went. Sit it in exam mode and see what survives the clock."
       : right/n<0.6
       ? "Under 60% with everything answered means the study time is the problem, not the clock. Three minutes is not long enough to read it twice, so read it once properly: numbers, orders of action, and the word 'unless'."
       : "Strong. The questions that catch people out are the ones about exceptions — the single case where the usual rule does not apply. Go back over the ones you missed and check whether they were all of that kind.";
     const w=App.results("Scores",[
       ["Passage", this.S.title],
+      ["Conditions", this.exam ? "Exam · "+mmss(this.STUDY)+" study, "+mmss(this.ANSWER)+" limit"
+                               : "Practice · "+mmss(this.STUDY)+" study, questions untimed"],
       ["Answered", done+" / "+n],
       ["Correct", right+" / "+n],
-      ["Time on the questions", mmss(secs)+" of "+mmss(this.ANSWER)]
-    ], coach, right+"/"+n);
+      ["Time on the questions", this.exam
+        ? (this.timedOut ? "clock ran out at "+mmss(this.ANSWER)
+                         : mmss(secs)+", with "+mmss(this.ANSWER-secs)+" left")
+        : mmss(secs)+" against the "+mmss(this.ANSWER)+" allowed"],
+      ["Seconds a question", done?(secs/done).toFixed(1)+" against "+(this.ANSWER/n).toFixed(1):"—"]
+    ], coach+(this.exam?"":" Practice runs do not set your best."), right+"/"+n+(this.exam?"":" · practice"));
     this.S.qs.forEach((q,i)=>{
       const got=this.answers[i];
       if(got===q[2]) return;
@@ -3601,30 +3675,31 @@ function trp2Question(){
   return {panels, correct, opts};
 }
 
-const TRP2_LENGTHS={full:[43,480], practice:[7,180]};
+/* the exam is 43 in eight minutes; practice is seven of them with no clock */
+const TRP2_LENGTHS={exam:[43,480], practice:[7,null]};
 const TRP2 = {
-  start(count){
-    const full=(count||43)>=43;
-    const [n,secs]=full?TRP2_LENGTHS.full:TRP2_LENGTHS.practice;
-    this.N=n; this.LIMIT=secs; this.full=full;
-    this.paper=n+" questions";
+  EXAM_LIMIT:480, EXAM_N:43,
+  start(mode){
+    const full=mode!=="practice";
+    const [n,secs]=full?TRP2_LENGTHS.exam:TRP2_LENGTHS.practice;
+    this.N=n; this.LIMIT=secs; this.full=full; this.ranOut=false;
+    this.paper=n+" questions · "+(full?"exam":"practice");
     this.qs=[]; for(let i=0;i<n;i++) this.qs.push(trp2Question());
     this.i=0; this.answers=new Array(n).fill(null);
     App.open("TRP2 — "+(full?"the full 43":"7-question practice"), el("div"));
     App.active=this;
     this.t0=Date.now();
     this.render();
-    App.tick=setInterval(()=>{
-      const left=this.LIMIT-(Date.now()-this.t0)/1000;
-      App.clock(left>0?mmss(left):"0:00");
-      if(left<=0){ clearInterval(App.tick); this.finish(); }
-    },250);
+    if(full) App.countLimit(this.LIMIT, ()=>{ this.ranOut=true; this.finish(); });
+    else App.countUp();
   },
   render(){
     const q=this.qs[this.i];
     const box=el("div");
-    box.appendChild(el("div","chainbar","Question "+(this.i+1)+" of "+this.N+
-      " · white is checked first, black second, grey last. Give the order."));
+    box.appendChild(el("div","chainbar","<b>"+(this.full?"Exam conditions":"Practice")+".</b> Question "+(this.i+1)+" of "+this.N+
+      (this.full ? " · "+mmss(this.LIMIT)+" for all 43, about eleven seconds each, and it hands itself in at zero."
+                 : " · no clock, so you can learn the rule before you sit it against one.")+
+      " White is checked first, black second, grey last. Give the order."));
     const p=el("div","paper");
     const row=el("div","dials");
     q.panels.forEach((pn,k)=>{
@@ -3650,29 +3725,34 @@ const TRP2 = {
     window.scrollTo(0,0);
   },
   finish(){
-    clearInterval(App.tick); App.clock("");
+    clearInterval(App.tick); App.clock(""); App.clockPlain();
     let right=0, done=0;
     this.qs.forEach((q,i)=>{ if(this.answers[i]!=null){ done++; if(this.answers[i]===q.correct) right++; } });
     const secs=Math.round((Date.now()-this.t0)/1000);
     App.done("trp2", Math.round(right/this.N*100), false, "%", this.paper);
     const rate=done?(secs/done):0;
+    const examRate=this.EXAM_LIMIT/this.EXAM_N;
     const lengthNote=this.full
       ? "Forty-three questions in eight minutes, which is the real thing — about eleven seconds each."
-      : "A seven-question practice run. The real test is 43 in eight minutes and the difficulty is entirely in that rate, so this will not set your best.";
+      : "A seven-question practice run with no clock on it. The real test is 43 in eight minutes and the difficulty is entirely in that rate, so this will not set your best"+
+        (rate>examRate ? ", and at "+rate.toFixed(1)+" seconds a question you would have reached about "+
+          Math.floor(this.EXAM_LIMIT/rate)+" of the 43." : ".");
     const acc = done<this.N
       ? "You got through "+done+" of "+this.N+". Nobody is expected to finish, but the further you get at the same accuracy the better you score. Read the arrow, not the dial: the only thing that matters is which background it sits over."
       : right/done<0.8
       ? "Accuracy is the problem rather than speed. The order is always white, then black, then grey — say it to yourself as you look at each panel rather than working it out fresh each time."
       : "Good rate at good accuracy. Keep the same routine every question: left panel, middle, right, then read off the order.";
     $("#t-body").appendChild(App.results("Scores",[
-      ["Length", this.N+" questions"+(this.full?"":" — practice")],
+      ["Conditions", this.full ? "Exam · 43 questions, "+mmss(this.LIMIT)+" limit" : "Practice · 7 questions, untimed"],
       ["Answered", done+" / "+this.N],
       ["Correct", right+" / "+done],
-      ["Seconds a question", rate?rate.toFixed(1):"—"],
-      ["Time", mmss(secs)+" of "+mmss(this.LIMIT)]
-    ], lengthNote+" "+acc, right+"/"+this.N+(this.full?"":" · practice")));
+      ["Seconds a question", (rate?rate.toFixed(1):"—")+" against "+examRate.toFixed(1)],
+      ["Time", this.full
+        ? (this.ranOut ? "clock ran out at "+mmss(this.LIMIT) : mmss(secs)+", with "+mmss(this.LIMIT-secs)+" left")
+        : mmss(secs)+", untimed"]
+    ], lengthNote+" "+acc, right+"/"+this.N+(this.full?(this.ranOut?" · time up":""):" · practice")));
   },
-  stop(){ clearInterval(App.tick); }
+  stop(){ clearInterval(App.tick); App.clockPlain(); }
 };
 
 /* ---------------------------------------------------------------- MMI data */
@@ -3924,11 +4004,11 @@ const MMI = {
 /* ---------------------------------------------------------------- DAY MODE */
 const DAY_ORDERS={
   "1":[
-    ["Group Bourdon",()=>GB.start()],
-    ["Tea-Occ",()=>TEA.start()],
-    ["TRP1b",()=>TRP1.start()],
-    ["TRP2, 43 questions",()=>TRP2.start(43)],
-    ["DFFT, 20 questions",()=>DFFT.start(20)]
+    ["Group Bourdon, exam",()=>GB.start("exam")],
+    ["Tea-Occ, exam",()=>TEA.start("exam")],
+    ["TRP1b, exam",()=>TRP1.start("exam")],
+    ["TRP2, exam",()=>TRP2.start("exam")],
+    ["DFFT, exam",()=>DFFT.start("exam")]
   ],
   "2":[
     ["VSE task 1, exam",()=>VSE1.start("exam")],
