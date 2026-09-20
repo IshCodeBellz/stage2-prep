@@ -377,7 +377,7 @@
     <span class="lamp" id="l-hand"></span>
     <div class="body">
       <h2>2-Hand — co-ordination</h2>
-      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel. A different channel shape each attempt. Ten runs is the length the real test is set at and the only one that sets your best — six is a warm-up.</p>
+      <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel. A different channel shape each attempt. Ten runs is the length the real test is set at and the only one that sets your best — six is a warm-up. A gamepad works too: left stick sideways, right stick up and down.</p>
       <div class="meta">10 runs is the one that counts · 5 tracks · buzzer on contact</div>
     </div>
     <div class="row">
@@ -1860,6 +1860,10 @@ function buzzer(on){
   }catch(e){}
 }
 
+const HAND_KEY_HINT = "On a laptop you can use A and D for sideways, and the up and down arrow keys.";
+const HAND_PAD_HINT = "Gamepad connected. Left stick for sideways, right stick for up and down — two proportional sticks are closer to the knobs on the real apparatus than thumbs on glass.";
+const HAND_DEAD = 0.12;
+
 /* Five channel shapes. One is picked per attempt and held for all six runs,
    because the real test is repeated runs of one shape — what changes is which shape. */
 const HAND_TRACKS = [
@@ -1889,7 +1893,7 @@ const HAND = {
     this.padV=el("div","pad v","<span>RIGHT — up and down</span>"); this.knobV=el("b"); this.padV.appendChild(this.knobV);
     pads.appendChild(this.padH); pads.appendChild(this.padV);
     box.appendChild(pads);
-    box.appendChild(el("p","sub","On a laptop you can use A and D for sideways, and the up and down arrow keys."));
+    this.hint=el("p","sub",HAND_KEY_HINT); box.appendChild(this.hint);
 
     App.open("2-Hand co-ordination — "+this.trackName, box);
     App.active=this;
@@ -1902,6 +1906,11 @@ const HAND = {
       if(["a","d","arrowup","arrowdown","arrowleft","arrowright"].includes(k)){e.preventDefault();this.keys[k]=1;}};
     this.ku=e=>{this.keys[e.key.toLowerCase()]=0;};
     window.addEventListener("keydown",this.kd); window.addEventListener("keyup",this.ku);
+    this.gx_=null; this.gy_=null;
+    this.gp=()=>this.padHint();
+    window.addEventListener("gamepadconnected",this.gp);
+    window.addEventListener("gamepaddisconnected",this.gp);
+    this.padHint();
 
     this.size(); this.makePath(); this.reset();
     this.last=performance.now(); this.tOut=0; this.t0=performance.now();
@@ -1933,6 +1942,8 @@ const HAND = {
   bindPad(pad,knob,horiz){
     const set=(e)=>{
       const r=pad.getBoundingClientRect();
+      // a thumb has the knob now, so forget where the stick last put it
+      if(horiz) this.gx_=null; else this.gy_=null;
       if(horiz){
         const dx=(e.clientX-r.left-r.width/2)/(r.width/2);
         this.vx=Math.max(-1,Math.min(1,dx));
@@ -1945,9 +1956,29 @@ const HAND = {
     };
     pad.addEventListener("pointerdown",e=>{pad.setPointerCapture(e.pointerId);set(e);});
     pad.addEventListener("pointermove",e=>{if(e.buttons||e.pointerType==="touch")set(e);});
-    const end=()=>{ if(horiz){this.vx=0;knob.style.left="50%";} else {this.vy=0;knob.style.top="50%";} };
+    const end=()=>{ if(horiz){this.vx=0;this.gx_=null;knob.style.left="50%";} else {this.vy=0;this.gy_=null;knob.style.top="50%";} };
     pad.addEventListener("pointerup",end); pad.addEventListener("pointercancel",end);
     pad.addEventListener("pointerleave",e=>{ if(!e.buttons) end(); });
+  },
+  /* First connected gamepad, or null. Standard mapping puts left stick X at
+     axes[0] and right stick Y at axes[3], which is how a DualShock reports;
+     the axes[1] fallback is for a pad that only exposes one stick. */
+  gamepad(){
+    if(!navigator.getGamepads) return null;
+    let g=null;
+    for(const p of navigator.getGamepads()||[]){ if(p&&p.connected&&p.axes){ g=p; break; } }
+    if(!g) return null;
+    const a=g.axes;
+    return {x:this.dead(a.length>0?a[0]:0), y:this.dead(a.length>3?a[3]:(a.length>1?a[1]:0))};
+  },
+  /* Past the deadzone, rescale to the full 0..1 so the stick still reaches the
+     stops. The drill wants proportional control, so a D-pad's on/off is no use. */
+  dead(v){
+    if(!(Math.abs(v)>HAND_DEAD)) return 0;
+    return (v<0?-1:1)*Math.min(1,(Math.abs(v)-HAND_DEAD)/(1-HAND_DEAD));
+  },
+  padHint(){
+    if(this.hint) this.hint.textContent = this.gamepad()?HAND_PAD_HINT:HAND_KEY_HINT;
   },
   distToPath(x,y){
     let best=1e9;
@@ -1968,7 +1999,12 @@ const HAND = {
     if(this.keys["d"]||this.keys["arrowright"])kx+=1;
     if(this.keys["arrowup"])ky-=1;
     if(this.keys["arrowdown"])ky+=1;
-    const vx=this.vx||kx, vy=this.vy||ky;
+    const g=this.gamepad();
+    if(g){
+      if(!this.vx && g.x!==this.gx_){ this.gx_=g.x; this.knobH.style.left=(50+g.x*34)+"%"; }
+      if(!this.vy && g.y!==this.gy_){ this.gy_=g.y; this.knobV.style.top=(50+g.y*34)+"%"; }
+    }
+    const vx=this.vx||(g?g.x:0)||kx, vy=this.vy||(g?g.y:0)||ky;
     this.ball.x=Math.max(4,Math.min(this.W-4,this.ball.x+vx*this.SPEED*dt));
     this.ball.y=Math.max(4,Math.min(this.H-4,this.ball.y+vy*this.SPEED*dt));
 
@@ -2011,7 +2047,7 @@ const HAND = {
   finish(){
     this.done_=true; buzzer(false);
     cancelAnimationFrame(this.raf);
-    window.removeEventListener("keydown",this.kd); window.removeEventListener("keyup",this.ku);
+    this.unbind();
     const tot=this.log.reduce((a,b)=>a+b.t,0), out=this.log.reduce((a,b)=>a+b.out,0);
     App.done("hand", tot? out/tot*100 : null, true, "% out", this.trackName+" · "+this.RUNS+" runs");
     const h=Math.floor(this.RUNS/2);
@@ -2036,8 +2072,12 @@ const HAND = {
       ["Last "+h+" runs, outside", last.toFixed(1)+" s"]
     ], lengthNote+" "+acc, Math.round(out/tot*100)+"% out"+(short?" · warm-up":"")));
   },
-  stop(){ this.done_=true; buzzer(false); cancelAnimationFrame(this.raf);
-          window.removeEventListener("keydown",this.kd); window.removeEventListener("keyup",this.ku); }
+  unbind(){
+    window.removeEventListener("keydown",this.kd); window.removeEventListener("keyup",this.ku);
+    window.removeEventListener("gamepadconnected",this.gp);
+    window.removeEventListener("gamepaddisconnected",this.gp);
+  },
+  stop(){ this.done_=true; buzzer(false); cancelAnimationFrame(this.raf); this.unbind(); }
 };
 
 /* ---------------------------------------------------------------- SJT data */
