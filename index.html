@@ -38,12 +38,15 @@
   .num{font-variant-numeric:tabular-nums}
 
   /* drill list — hairline rows, not cards */
-  .drill{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--line)}
+  /* on a narrow screen the start buttons drop under the description rather than squeezing it */
+  .drill{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--line);
+         flex-wrap:wrap}
   .drill:last-of-type{border-bottom:1px solid var(--line)}
   .lamp{width:11px;height:11px;border-radius:50%;flex:0 0 11px;margin-top:7px;
         background:#2A3A47;box-shadow:inset 0 0 0 1px #0008}
   .lamp.done{background:var(--green)}
-  .drill .body{flex:1;min-width:0}
+  .drill .body{flex:1 1 210px;min-width:0}
+  .drill>.row,.drill>.go{margin-left:25px}   /* wrapped buttons line up with the text above them */
   .drill p{margin:3px 0 0;color:var(--muted);font-size:.88rem}
   .meta{color:var(--muted);font-size:.78rem;margin-top:6px;font-variant-numeric:tabular-nums}
   button{font:inherit;cursor:pointer;border-radius:7px;border:1px solid var(--line);
@@ -60,6 +63,7 @@
   .bar{position:sticky;top:0;z-index:10;background:var(--desk);border-bottom:1px solid var(--line);
        display:flex;gap:12px;align-items:center;padding:12px 18px;margin:0 -18px 18px}
   .bar .t{margin-left:auto;font-variant-numeric:tabular-nums;font-size:1.05rem;color:var(--amber)}
+  .bar .t.late{color:var(--red);font-weight:650}   /* last thirty seconds of a paper with a hard limit */
   .note{background:var(--panel);border-left:3px solid var(--amber);padding:12px 14px;border-radius:0 7px 7px 0;
         font-size:.9rem;margin:16px 0}
   ul{padding-left:20px;margin:10px 0}
@@ -162,7 +166,7 @@
   .chainbar{background:var(--panel);border:1px solid var(--amber);border-radius:8px;
             padding:10px 13px;font-size:.86rem;margin-bottom:14px}
 
-  .res{border-top:1px solid var(--line);margin-top:20px;padding-top:16px}
+  .res{border-top:1px solid var(--line);margin-top:20px;padding-top:16px;scroll-margin-top:76px}
   .stat{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);
         font-variant-numeric:tabular-nums}
   .stat b{font-weight:620}
@@ -264,30 +268,39 @@
     <span class="lamp" id="l-vse1"></span>
     <div class="body">
       <h2>VSE task 1 — dot sequence</h2>
-      <p>The dot steps round the corners one at a time. Mark every square where the sequence breaks — a skipped corner, a step back, or no move at all. Alternate runs go the other way round.</p>
-      <div class="meta">180 squares · 2 papers · target 3 min</div>
+      <p>The dot steps round the corners one at a time. Mark every square where the sequence breaks — a skipped corner, a step back, or no move at all. Alternate runs go the other way round. Exam counts down from 3:00 and takes the paper away at zero; practice is untimed.</p>
+      <div class="meta">180 squares · 1 s a square · exam ends at 3:00 · 2 papers</div>
     </div>
-    <button class="go" onclick="VSE1.start()">Start</button>
+    <div class="row">
+      <button onclick="VSE1.start('practice')">Practice</button>
+      <button class="go" onclick="VSE1.start('exam')">Exam</button>
+    </div>
   </div>
 
   <div class="drill" data-stage="2">
     <span class="lamp" id="l-vse2"></span>
     <div class="body">
       <h2>VSE task 2 — letter columns</h2>
-      <p>Mark each box where the two columns hold different letters. Order does not matter, and a letter can appear twice. Alternate runs use lookalike letters.</p>
-      <div class="meta">96 boxes · 2 papers · target 3 min 12 s</div>
+      <p>Mark each box where the two columns hold different letters. Order does not matter, and a letter can appear twice. Alternate runs use lookalike letters. Exam counts down from 3:12 — two seconds a box — and takes the paper away at zero; practice is untimed.</p>
+      <div class="meta">96 boxes · 2 s a box · exam ends at 3:12 · 2 papers</div>
     </div>
-    <button class="go" onclick="VSE2.start()">Start</button>
+    <div class="row">
+      <button onclick="VSE2.start('practice')">Practice</button>
+      <button class="go" onclick="VSE2.start('exam')">Exam</button>
+    </div>
   </div>
 
   <div class="drill" data-stage="2">
     <span class="lamp" id="l-vse3"></span>
     <div class="body">
       <h2>VSE task 3 — both at once</h2>
-      <p>Four seconds a pair, auto-advancing. The dot sequence is the primary task.</p>
-      <div class="meta">45 pairs · 4 papers · 3 min</div>
+      <p>Four seconds a pair, auto-advancing, and it ends itself at the last pair. The dot sequence is the primary task. Forty-five pairs is the exam length and the only one that sets your best; practice runs fifteen at the same pace.</p>
+      <div class="meta">45 pairs · 4 s a pair · exam ends at 3:00 · 4 papers</div>
     </div>
-    <button class="go" onclick="VSE3.start()">Start</button>
+    <div class="row">
+      <button onclick="VSE3.start('practice')">Practice</button>
+      <button class="go" onclick="VSE3.start('exam')">Exam</button>
+    </div>
   </div>
 
   <div class="drill" data-stage="1">
@@ -519,21 +532,37 @@ const Rot = (()=>{
 
 const DRILL_NAMES={};
 /* The pace the real papers are set at. Accuracy at half speed is not a pass:
-   the sheet is taken off you at the target whether you have finished or not. */
+   the sheet is taken off you at the target whether you have finished or not.
+   Exam mode enforces it — the clock counts down and hands the paper in at zero.
+   Practice mode counts up instead and reports where you landed against it. */
 const TARGET_SECS={vse1:180, vse2:192};
 
 /* What makes an attempt the real thing rather than a warm-up. A short run still
    counts as practice — it just has no business setting the standard you judge
    yourself by, because it is not the test you are going to sit. */
+/* Which way a saved VSE attempt was sat. Runs from before the two modes existed say
+   neither, and are judged the old way — on whether they came in inside the target. */
+const vseMode = r => /\bexam\b/.test(r.p||"") ? "exam"
+                   : /\bpractice\b/.test(r.p||"") ? "practice" : null;
+const vseFull = (target, clock) => ({
+  known:r=>r.sec!=null,
+  ok:r=>{ const m=vseMode(r); return m==="exam" || (m===null && r.sec<=target); },
+  tag:"under exam timing", pass:"exam conditions",
+  miss:r=>vseMode(r)==="practice" ? "practice run"
+        : mmss(Math.max(0, Math.round(r.sec-target)))+" over",
+  quickest:true,
+  rawRow:"Best in either mode", row:"Sat under the "+clock+" clock",
+  bestRow:"Best under exam timing",
+  faded:"faded bars were practice runs, or ran over the target"
+});
+
 const FULL_RUN={
-  vse1:{ known:r=>r.sec!=null, ok:r=>r.sec<=TARGET_SECS.vse1, tag:"at pace", pass:"at pace",
-         miss:r=>mmss(r.sec-TARGET_SECS.vse1)+" over", quickest:true,
-         rawRow:"Best at any speed", row:"Inside the 3:00 target", bestRow:"Best score set at that pace",
-         faded:"faded bars ran over the target" },
-  vse2:{ known:r=>r.sec!=null, ok:r=>r.sec<=TARGET_SECS.vse2, tag:"at pace", pass:"at pace",
-         miss:r=>mmss(r.sec-TARGET_SECS.vse2)+" over", quickest:true,
-         rawRow:"Best at any speed", row:"Inside the 3:12 target", bestRow:"Best score set at that pace",
-         faded:"faded bars ran over the target" },
+  vse1:vseFull(TARGET_SECS.vse1, "3:00"),
+  vse2:vseFull(TARGET_SECS.vse2, "3:12"),
+  vse3:{ known:r=>/\d+ pairs/.test(r.p||""), ok:r=>/\b45 pairs/.test(r.p||""),
+         tag:"at full length", pass:"exam length", miss:()=>"practice run", hideTime:true,
+         rawRow:"Best at any length", row:"Run at the full 45", bestRow:"Best over the full 45",
+         faded:"faded bars were practice runs" },
   hand:{ known:r=>/\d+ runs/.test(r.p||""), ok:r=>parseInt(/(\d+) runs/.exec(r.p)[1],10)>=10,
          tag:"at 10 runs", pass:"full set", miss:()=>"warm-up set", hideTime:true,
          rawRow:"Lowest at any length", row:"Run at the full ten", bestRow:"Lowest over the full ten",
@@ -909,6 +938,7 @@ const App = {
   open(title, node){
     $("#menu").classList.remove("on");
     $("#test").classList.add("on");
+    this.clockPlain();
     $("#t-title").textContent = title;
     $("#t-body").replaceChildren(node);
     window.scrollTo(0,0);
@@ -922,7 +952,7 @@ const App = {
     if(this.active && this.active.stop) this.active.stop();
     this.active=null;
     $("#test").classList.remove("on"); $("#menu").classList.add("on");
-    this.clock("");
+    this.clock(""); this.clockPlain();
   },
   done(id, score, low, unit, paper){
     const sec = this.tStart ? Math.round((Date.now()-this.tStart)/1000) : null;
@@ -967,6 +997,20 @@ const App = {
       else this.clock(mmss(left));
     },250);
   },
+  /* a paper with a hard limit: counts down, goes red for the last thirty seconds,
+     and hands itself in at zero. Returns how long the run actually took. */
+  countLimit(secs, onEnd){
+    const t0=Date.now(), c=$("#t-clock");
+    this.clock(mmss(secs));
+    this.tick=setInterval(()=>{
+      const left=secs-(Date.now()-t0)/1000;
+      if(left<=30) c.classList.add("late");
+      if(left<=0){ clearInterval(this.tick); this.clock("0:00"); onEnd(); }
+      else this.clock(mmss(left));
+    },250);
+    return ()=>(Date.now()-t0)/1000;
+  },
+  clockPlain(){ $("#t-clock").classList.remove("late"); },
   results(title, rows, coach, headline){
     const w=el("div","res");
     if(headline){ w.appendChild(el("div","big",headline)); }
@@ -1016,36 +1060,51 @@ const DOT_DIRS = [[1,"clockwise"],[-1,"anticlockwise"]];
 
 const VSE1 = {
   N:180,
-  start(){
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam; this.frozen=false; this.ranOut=false; this.reach=0;
     const v=Rot.next("vse1", DOT_DIRS.length);
     this.dir=DOT_DIRS[v][0]; this.way=DOT_DIRS[v][1];
     const s=dotStream(this.N, 0.085, this.dir);
     this.seq=s.seq; this.err=s.err; this.marked=new Array(this.N).fill(false);
 
     const box=el("div");
-    box.appendChild(el("p","sub","On this paper the dot should step <b>"+this.way+"</b> round the corners, one corner at a time. Work left to right, line after line, and tap any square where it has skipped a corner, gone back, or stayed put. About one second a square."));
+    box.appendChild(el("div","chainbar", exam
+      ? "<b>Exam conditions.</b> "+this.N+" squares, one second a square, <b>"+mmss(TARGET_SECS.vse1)+
+        "</b> on the clock counting down. At zero the paper is taken off you and scored as it stands — squares you never reached count as missed, exactly as they would on the day."
+      : "<b>Practice.</b> No limit: the clock counts up and you finish when you are ready. The real paper allows "+
+        mmss(TARGET_SECS.vse1)+" for the "+this.N+" squares, one second a square, and stops there whether you have finished or not. Practice runs are saved but never set your best."));
+    box.appendChild(el("p","sub","On this paper the dot should step <b>"+this.way+"</b> round the corners, one corner at a time. Work left to right, line after line, and tap any square where it has skipped a corner, gone back, or stayed put."));
     const paper=el("div","paper");
     const g=el("div","grid1");
     this.seq.forEach((corner,i)=>{
       const s=el("div","sq"); s.appendChild(el("i","c"+corner));
-      s.onclick=()=>{ this.marked[i]=!this.marked[i]; s.classList.toggle("mk"); };
+      s.onclick=()=>{
+        if(this.frozen) return;
+        this.marked[i]=!this.marked[i]; s.classList.toggle("mk");
+        if(i+1>this.reach) this.reach=i+1;   // how far down the paper you had got
+      };
       g.appendChild(s);
     });
     paper.appendChild(g); box.appendChild(paper);
     this.grid=g;
 
-    const b=el("button","go","Finish and score");
-    b.onclick=()=>this.finish();
+    const b=el("button","go", exam?"Hand it in now":"Finish and score");
+    b.onclick=()=>this.finish(false);
     const r=el("div","row"); r.style.marginTop="16px"; r.appendChild(b);
     box.appendChild(r);
 
-    App.open("VSE task 1 — "+this.way, box);
-    this.getT = App.countUp();
+    App.open("VSE task 1 — "+this.way+(exam?"":" · practice"), box);
+    this.getT = exam
+      ? App.countLimit(TARGET_SECS.vse1, ()=>{ this.ranOut=true; this.finish(true); })
+      : App.countUp();
     App.active=this;
   },
-  finish(){
-    clearInterval(App.tick);
-    const t=this.getT();
+  finish(ranOut){
+    clearInterval(App.tick); App.clockPlain();
+    if(this.frozen) return;                 // the clock and the button cannot both hand it in
+    this.frozen=true;
+    const t = ranOut ? TARGET_SECS.vse1 : this.getT();
     let hit=0,miss=0,fa=0;
     for(let i=0;i<this.N;i++){
       const sq=this.grid.children[i];
@@ -1054,27 +1113,46 @@ const VSE1 = {
       else if(!this.err[i] && this.marked[i]){fa++; sq.classList.add("fa");}
     }
     const total=hit+miss;
-    App.done("vse1", total? hit/total*100 : null, false, "%", this.way);
-    const pace = App.paceNote("vse1", t, this.N, "square");
+    App.done("vse1", total? hit/total*100 : null, false, "%", this.way+" · "+(this.exam?"exam":"practice"));
     const acc = fa>hit*0.25
       ? "Your false marks are high relative to your hits. You are marking on suspicion rather than on a confirmed break in the sequence. Hold the previous corner in mind and compare — do not mark because a square merely looks wrong."
       : miss>total*0.3
       ? "You are missing more than you are catching. The usual cause is reading each square in isolation. The error only exists in the transition, so keep the previous corner live in your head as you move. The dot that has not moved at all is the one people sail straight past."
       : "Solid. Now work on holding this accuracy while speeding up — the real test paces you at about a second a square. Your next run comes the other way round, which is where a trained thumb rhythm stops helping you.";
-    $("#t-body").appendChild(App.results("Scores",[
+
+    const rows=[
       ["Paper", this.way],
+      ["Conditions", this.exam ? "Exam · "+mmss(TARGET_SECS.vse1)+" limit" : "Practice · untimed"],
       ["Errors present", total],
       ["Caught", hit],
       ["Missed", miss],
-      ["Marked in error", fa],
-      ["Time", mmss(t)],
-      ["Target time", mmss(TARGET_SECS.vse1)],
-      ["Against the target", pace.row],
-      ["Seconds per square", (t/this.N).toFixed(2)+" against 1.00"]
-    ], pace.note+" "+acc, hit+"/"+total+(pace.over?" · over time":"")));
+      ["Marked in error", fa]
+    ];
+    let note, headline;
+    if(this.exam){
+      const left=TARGET_SECS.vse1-t;
+      rows.push(["Time", ranOut ? "clock ran out at "+mmss(TARGET_SECS.vse1) : mmss(t)+", with "+mmss(left)+" left"]);
+      rows.push(["Marked as far as", this.reach ? "square "+this.reach+" of "+this.N : "nothing marked"]);
+      rows.push(["Seconds per square", (t/this.N).toFixed(2)+" against 1.00"]);
+      note = (ranOut
+        ? "The clock beat you. You were still around square "+(this.reach||1)+" of "+this.N+
+          " when the paper went, and everything past that scored as missed — which is precisely what the real paper does to you. Coverage first: get to the end at "+
+          (TARGET_SECS.vse1/this.N).toFixed(2)+" seconds a square, then let the accuracy climb back."
+        : "You got through the paper with "+mmss(left)+" to spare, which is the whole paper scored rather than the part you reached. That is the run that counts.")+" "+acc;
+      headline = hit+"/"+total+(ranOut?" · time up":" · "+mmss(t));
+    }else{
+      const pace = App.paceNote("vse1", t, this.N, "square");
+      rows.push(["Time", mmss(t)]);
+      rows.push(["Target time", mmss(TARGET_SECS.vse1)]);
+      rows.push(["Against the target", pace.row]);
+      rows.push(["Seconds per square", (t/this.N).toFixed(2)+" against 1.00"]);
+      note = pace.note+" "+acc+" This was a practice run, so it does not set your best — sit it in exam mode for that.";
+      headline = hit+"/"+total+(pace.over?" · over time":"");
+    }
+    $("#t-body").appendChild(App.results("Scores", rows, note, headline));
     $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
   },
-  stop(){}
+  stop(){ App.clockPlain(); }
 };
 
 /* ---------------------------------------------------------------- VSE 2 */
@@ -1119,7 +1197,9 @@ function boxNode(b, big){
 const VSE2_PAPERS = [["mixed letters",null],["lookalike letters",LOOKALIKE]];
 const VSE2 = {
   N:96,
-  start(){
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam; this.frozen=false; this.ranOut=false; this.reach=0;
     const v=Rot.next("vse2", VSE2_PAPERS.length);
     this.paper=VSE2_PAPERS[v][0];
     const fams=VSE2_PAPERS[v][1];
@@ -1129,23 +1209,38 @@ const VSE2 = {
       this.items.push({...makeBox(e, fams?pick(fams):null), err:e});
     }
     const box=el("div");
-    box.appendChild(el("p","sub","Tap every box where the two columns hold different letters. The same letters in a different order still match, and a letter can turn up twice. No more than two seconds a box."
+    box.appendChild(el("div","chainbar", exam
+      ? "<b>Exam conditions.</b> "+this.N+" boxes, two seconds a box, <b>"+mmss(TARGET_SECS.vse2)+
+        "</b> on the clock counting down. At zero the paper is taken off you and scored as it stands — boxes you never reached count as missed, exactly as they would on the day."
+      : "<b>Practice.</b> No limit: the clock counts up and you finish when you are ready. The real paper allows "+
+        mmss(TARGET_SECS.vse2)+" for the "+this.N+" boxes, two seconds a box, and stops there whether you have finished or not. Practice runs are saved but never set your best."));
+    box.appendChild(el("p","sub","Tap every box where the two columns hold different letters. The same letters in a different order still match, and a letter can turn up twice."
       + (fams?" This paper is built from lookalike letters, so it is slower going than the last one.":"")));
     const paper=el("div","paper"); const g=el("div","grid2");
     this.items.forEach((it,i)=>{
       const n=boxNode(it);
-      n.onclick=()=>{ this.marked[i]=!this.marked[i]; n.classList.toggle("mk"); };
+      n.onclick=()=>{
+        if(this.frozen) return;
+        this.marked[i]=!this.marked[i]; n.classList.toggle("mk");
+        if(i+1>this.reach) this.reach=i+1;   // how far down the paper you had got
+      };
       g.appendChild(n);
     });
     paper.appendChild(g); box.appendChild(paper); this.grid=g;
-    const b=el("button","go","Finish and score"); b.onclick=()=>this.finish();
+    const b=el("button","go", exam?"Hand it in now":"Finish and score"); b.onclick=()=>this.finish(false);
     const r=el("div","row"); r.style.marginTop="16px"; r.appendChild(b); box.appendChild(r);
-    App.open("VSE task 2 — "+this.paper, box);
-    this.getT=App.countUp(); App.active=this;
+    App.open("VSE task 2 — "+this.paper+(exam?"":" · practice"), box);
+    this.getT = exam
+      ? App.countLimit(TARGET_SECS.vse2, ()=>{ this.ranOut=true; this.finish(true); })
+      : App.countUp();
+    App.active=this;
   },
-  finish(){
-    clearInterval(App.tick);
-    const t=this.getT(); let hit=0,miss=0,fa=0;
+  finish(ranOut){
+    clearInterval(App.tick); App.clockPlain();
+    if(this.frozen) return;                 // the clock and the button cannot both hand it in
+    this.frozen=true;
+    const t = ranOut ? TARGET_SECS.vse2 : this.getT();
+    let hit=0,miss=0,fa=0;
     this.items.forEach((it,i)=>{
       const n=this.grid.children[i];
       if(it.err&&this.marked[i]){hit++;n.classList.add("hit");}
@@ -1153,31 +1248,53 @@ const VSE2 = {
       else if(!it.err&&this.marked[i]){fa++;n.classList.add("fa");}
     });
     const total=hit+miss;
-    App.done("vse2", total? hit/total*100 : null, false, "%", this.paper);
-    const pace = App.paceNote("vse2", t, this.N, "box");
+    App.done("vse2", total? hit/total*100 : null, false, "%", this.paper+" · "+(this.exam?"exam":"practice"));
     const acc = fa>3
       ? "Most of your false marks will be boxes where the letters matched but sat in a different order. Compare the sets, not the rows — read the left column, then check each letter off against the right."
       : "Read the left column as a whole rather than letter by letter, then sweep the right for anything that is not in that set. It is faster than four separate comparisons. The box that slips through is the doubled one, where every letter on the right does appear on the left, but one of them twice.";
-    $("#t-body").appendChild(App.results("Scores",[
+
+    const rows=[
       ["Paper", this.paper],
+      ["Conditions", this.exam ? "Exam · "+mmss(TARGET_SECS.vse2)+" limit" : "Practice · untimed"],
       ["Mismatched boxes", total],["Caught", hit],["Missed", miss],
-      ["Marked in error", fa],
-      ["Time", mmss(t)],
-      ["Target time", mmss(TARGET_SECS.vse2)],
-      ["Against the target", pace.row],
-      ["Seconds per box",(t/this.N).toFixed(2)+" against 2.00"]
-    ], pace.note+" "+acc, hit+"/"+total+(pace.over?" · over time":"")));
+      ["Marked in error", fa]
+    ];
+    let note, headline;
+    if(this.exam){
+      const left=TARGET_SECS.vse2-t;
+      rows.push(["Time", ranOut ? "clock ran out at "+mmss(TARGET_SECS.vse2) : mmss(t)+", with "+mmss(left)+" left"]);
+      rows.push(["Marked as far as", this.reach ? "box "+this.reach+" of "+this.N : "nothing marked"]);
+      rows.push(["Seconds per box",(t/this.N).toFixed(2)+" against 2.00"]);
+      note = (ranOut
+        ? "The clock beat you. You were still around box "+(this.reach||1)+" of "+this.N+
+          " when the paper went, and everything past that scored as missed — which is precisely what the real paper does to you. Coverage first: hold two seconds a box all the way to the end, then let the accuracy climb back."
+        : "You got through the paper with "+mmss(left)+" to spare, which is the whole paper scored rather than the part you reached. That is the run that counts.")+" "+acc;
+      headline = hit+"/"+total+(ranOut?" · time up":" · "+mmss(t));
+    }else{
+      const pace = App.paceNote("vse2", t, this.N, "box");
+      rows.push(["Time", mmss(t)]);
+      rows.push(["Target time", mmss(TARGET_SECS.vse2)]);
+      rows.push(["Against the target", pace.row]);
+      rows.push(["Seconds per box",(t/this.N).toFixed(2)+" against 2.00"]);
+      note = pace.note+" "+acc+" This was a practice run, so it does not set your best — sit it in exam mode for that.";
+      headline = hit+"/"+total+(pace.over?" · over time":"");
+    }
+    $("#t-body").appendChild(App.results("Scores", rows, note, headline));
     $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
   },
-  stop(){}
+  stop(){ App.clockPlain(); }
 };
 
 /* ---------------------------------------------------------------- VSE 3 (dual, paced) */
 /* four papers: each direction of the dot stream against each letter pool */
 const VSE3_PAPERS = [[0,0],[1,0],[0,1],[1,1]];
+const VSE3_LENGTHS = {exam:45, practice:15};
 const VSE3 = {
   N:45, PACE:4000,
-  start(){
+  start(mode){
+    const exam = mode!=="practice";
+    this.exam=exam;
+    this.N = exam?VSE3_LENGTHS.exam:VSE3_LENGTHS.practice;
     const v=Rot.next("vse3", VSE3_PAPERS.length);
     const combo=VSE3_PAPERS[v];
     this.dir=DOT_DIRS[combo[0]][0]; this.way=DOT_DIRS[combo[0]][1];
@@ -1195,7 +1312,12 @@ const VSE3 = {
     this.repDot=new Array(this.N).fill(false); this.repBox=new Array(this.N).fill(false);
 
     const box=el("div");
-    box.appendChild(el("p","sub","Four seconds a pair, advancing on its own. The dot should step <b>"+this.way+
+    box.appendChild(el("div","chainbar", exam
+      ? "<b>Exam conditions.</b> "+this.N+" pairs, four seconds each, advancing on their own — "+
+        mmss(this.N*this.PACE/1000)+" in all, and it scores itself the moment the last pair goes. A pair you have not flagged by then is a pair you have passed."
+      : "<b>Practice.</b> The same four seconds a pair, but only "+this.N+" of them — "+
+        mmss(this.N*this.PACE/1000)+" to warm up. Only the full "+VSE3_LENGTHS.exam+" sets your best."));
+    box.appendChild(el("p","sub","The dot should step <b>"+this.way+
       "</b> — skipping a corner, going back, or staying put all count as errors. The dot sequence is the primary task; protect it."));
     const stage=el("div","paper");
     const d=el("div","dual");
@@ -1211,7 +1333,7 @@ const VSE3 = {
     f.appendChild(this.bD); f.appendChild(this.bB); box.appendChild(f);
     const p=el("div","prog"); this.pb=el("b"); p.appendChild(this.pb); box.appendChild(p);
 
-    App.open("VSE task 3 — "+this.way+", "+this.paper, box);
+    App.open("VSE task 3 — "+this.way+", "+this.paper+(exam?"":" · practice"), box);
     App.active=this;
     this.render(); this.loop();
   },
@@ -1238,16 +1360,19 @@ const VSE3 = {
     const sc=(errs,reps)=>{let h=0,m=0,f=0;errs.forEach((e,i)=>{if(e&&reps[i])h++;else if(e&&!reps[i])m++;else if(!e&&reps[i])f++;});return{h,m,f};};
     const D=sc(this.dotErr,this.repDot);
     const B=sc(this.boxes.map(b=>b.err),this.repBox);
-    App.done("vse3", (D.h+D.m)? D.h/(D.h+D.m)*100 : null, false, "% dots", this.way+", "+this.paper);
+    App.done("vse3", (D.h+D.m)? D.h/(D.h+D.m)*100 : null, false, "% dots",
+      this.way+", "+this.paper+", "+this.N+" pairs");
     const dropped = D.m > B.m;
     const coach = dropped
       ? "You protected the letters at the expense of the dots. That is the wrong trade: the dot sequence is the primary task, and it is also the one you cannot recover, because each judgement depends on the square before it. Let the letters slip first."
       : "Right priority — the dots held up. Now close the gap on the letters without letting the dot accuracy fall.";
     $("#t-body").appendChild(App.results("Scores",[
       ["Paper", this.way+", "+this.paper],
+      ["Conditions", (this.exam?"Exam · ":"Practice · ")+this.N+" pairs at 4 s, "+mmss(this.N*this.PACE/1000)],
       ["Dot errors present", D.h+D.m],["Dots caught", D.h],["Dots missed", D.m],["Dots marked in error", D.f],
       ["Letter errors present", B.h+B.m],["Letters caught", B.h],["Letters missed", B.m],["Letters marked in error", B.f]
-    ], coach, D.h+"/"+(D.h+D.m)+" · "+B.h+"/"+(B.h+B.m)));
+    ], coach+(this.exam?"":" This was a practice run at "+this.N+" pairs, so it does not set your best — the full "+VSE3_LENGTHS.exam+" does."),
+      D.h+"/"+(D.h+D.m)+" · "+B.h+"/"+(B.h+B.m)));
     $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
   },
   stop(){ clearTimeout(App.timer); }
@@ -3806,9 +3931,9 @@ const DAY_ORDERS={
     ["DFFT, 20 questions",()=>DFFT.start(20)]
   ],
   "2":[
-    ["VSE task 1",()=>VSE1.start()],
-    ["VSE task 2",()=>VSE2.start()],
-    ["VSE task 3",()=>VSE3.start()],
+    ["VSE task 1, exam",()=>VSE1.start("exam")],
+    ["VSE task 2, exam",()=>VSE2.start("exam")],
+    ["VSE task 3, exam",()=>VSE3.start("exam")],
     ["M7-SJT",()=>SJT.start()],
     ["WAFV, 30 minutes",()=>WAFV.start(30)],
     ["ATAVT",()=>ATAVT.start()],
