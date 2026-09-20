@@ -364,7 +364,7 @@
     <span class="lamp" id="l-atavt"></span>
     <div class="body">
       <h2>ATAVT — perception</h2>
-      <p>A traffic scene flashes for one second. Report which objects you saw. Comes with fifteen tagged photographs; add your own and it uses those too. The real test uses photographs and they are harder than anything drawn.</p>
+      <p>A traffic scene flashes for one second. Report which objects you saw. Comes with twenty-two tagged photographs; add your own and it uses those too. The real test uses photographs and they are harder than anything drawn.</p>
       <div class="meta">20 scenes · about 6 min · 15 photographs included</div>
     </div>
     <div class="row">
@@ -1571,8 +1571,8 @@ const SCENELIB = {
     window.scrollTo(0,0);
     Photos.all().then(rows=>{
       if(!rows.length){
-        holder.appendChild(el("p","sub","Nothing added yet. Load the starter set below for fifteen tagged road scenes, and add your own on top — dashcam stills or shots out of a train or car window. Aim for twenty or more, and the more cluttered they are the better the practice."));
-        holder.appendChild(el("div","note","The starter set is light on scenes with no motor vehicles in them — fourteen of the fifteen have traffic. Your own pictures are the way to fix that, so include a few quiet ones."));
+        holder.appendChild(el("p","sub","Nothing added yet. Load the starter set below for twenty-two tagged road scenes, and add your own on top — dashcam stills or shots out of a train or car window. Aim for thirty or more, and the more cluttered they are the better the practice."));
+        holder.appendChild(el("div","note","Fourteen of the twenty-two have motor vehicles in them and eighteen have people, so those two boxes are still ticked more often than not. Traffic lights are the rarest, at eight. Your own pictures are what evens that up."));
         return;
       }
       holder.appendChild(el("p","sub",rows.length+(rows.length===1?" scene":" scenes")+" saved."));
@@ -1591,6 +1591,17 @@ const SCENELIB = {
         g.appendChild(c);
       });
       holder.appendChild(g);
+      /* the starter set grows now and then, so tell anyone who loaded an
+         earlier version that there is more to pick up */
+      const got={}; rows.forEach(h=>{ if(h.starter) got[h.starter]=1; });
+      if(Object.keys(got).length){
+        fetch("scenes/scenes.json").then(r=>r.json()).then(list=>{
+          const n=list.filter(m=>!got[m.file]).length;
+          if(n) holder.appendChild(el("div","note",n===1
+            ? "One more starter scene has been added since you loaded the set. Press Load the starter set again to pick it up."
+            : n+" more starter scenes have been added since you loaded the set. Press Load the starter set again to pick them up."));
+        }).catch(()=>{});
+      }
     }).catch(()=>{
       holder.appendChild(el("div","note","Could not read the saved scenes on this device."));
     });

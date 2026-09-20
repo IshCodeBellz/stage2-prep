@@ -54,7 +54,7 @@
    "sign": true,
    "light": false
   },
-  "credit": "Erik Z\u00fcnder ezunder",
+  "credit": "Erik Zünder ezunder",
   "lic": "CC0",
   "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
   "source": "https://commons.wikimedia.org/wiki/File:Urban_cityscape_shot_(Unsplash).jpg"
@@ -189,7 +189,7 @@
    "sign": false,
    "light": false
   },
-  "credit": "Jorge L\u00e1scar from Australia",
+  "credit": "Jorge Láscar from Australia",
   "lic": "CC BY 2.0",
   "licurl": "https://creativecommons.org/licenses/by/2.0",
   "source": "https://commons.wikimedia.org/wiki/File:Street_and_canal_at_dusk,_Oudezijds_Voorburgwal_%27blue_hour%27,_7_januari_2011_(5821465439).jpg"
@@ -223,5 +223,110 @@
   "lic": "CC0",
   "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
   "source": "https://commons.wikimedia.org/wiki/File:New_Regent_Street._Christchurch._NZ._(49312698126).jpg"
+ },
+ {
+  "file": "s16.jpg",
+  "caption": "Pedestrian street, Cienfuegos",
+  "tags": {
+   "ped": true,
+   "veh": false,
+   "bike": false,
+   "sign": false,
+   "light": false
+  },
+  "credit": "Marek Ślusarczyk (Tupungato)",
+  "lic": "CC BY 3.0",
+  "licurl": "https://creativecommons.org/licenses/by/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:015_Cienfuegos,_Cuba_-_San_Fernando_pedestrian_street.jpg"
+ },
+ {
+  "file": "s17.jpg",
+  "caption": "Shopping street, Cienfuegos",
+  "tags": {
+   "ped": true,
+   "veh": false,
+   "bike": true,
+   "sign": false,
+   "light": false
+  },
+  "credit": "Anagoria",
+  "lic": "CC BY 3.0",
+  "licurl": "https://creativecommons.org/licenses/by/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:2012-Fussgaengerzone_Cienfuegos_anagoria.JPG"
+ },
+ {
+  "file": "s18.jpg",
+  "caption": "Pedestrianised centre, Bardolino",
+  "tags": {
+   "ped": true,
+   "veh": false,
+   "bike": true,
+   "sign": false,
+   "light": false
+  },
+  "credit": "Avisadehh",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:BARDOLINO.PEDESTERIAN_STREET.%D7%9E%D7%93%D7%A8%D7%97%D7%95%D7%91_%D7%91%D7%90%D7%A8%D7%93%D7%95%D7%9C%D7%99%D7%A0%D7%95.jpg"
+ },
+ {
+  "file": "s19.jpg",
+  "caption": "Walking street, Changde",
+  "tags": {
+   "ped": true,
+   "veh": false,
+   "bike": false,
+   "sign": false,
+   "light": false
+  },
+  "credit": "Metal.lunchbox",
+  "lic": "CC BY 3.0",
+  "licurl": "https://creativecommons.org/licenses/by/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Changde_Walking_Street.jpg"
+ },
+ {
+  "file": "s20.jpg",
+  "caption": "Footpath between houses",
+  "tags": {
+   "ped": false,
+   "veh": false,
+   "bike": true,
+   "sign": true,
+   "light": false
+  },
+  "credit": "1998alexkane",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:A_designated_footpath.jpg"
+ },
+ {
+  "file": "s21.jpg",
+  "caption": "Narrow street, Saint-Étienne",
+  "tags": {
+   "ped": true,
+   "veh": false,
+   "bike": false,
+   "sign": false,
+   "light": false
+  },
+  "credit": "Wikijoe",
+  "lic": "Public domain",
+  "licurl": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Rue_pietone_G._Dupr%C3%A9.jpg"
+ },
+ {
+  "file": "s22.jpg",
+  "caption": "Rue Pointe Cadet, Saint-Étienne",
+  "tags": {
+   "ped": true,
+   "veh": false,
+   "bike": false,
+   "sign": true,
+   "light": false
+  },
+  "credit": "Wikijoe",
+  "lic": "Public domain",
+  "licurl": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Rue_pietone_Pointe_Cadet.jpg"
  }
 ]
