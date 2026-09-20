@@ -192,7 +192,8 @@
   .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-top:12px}
   .thumb{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
   .thumb img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-  .thumb span{display:block;padding:7px 9px;font-size:.76rem;color:var(--muted)}
+  .thumb span{display:block;padding:7px 9px;font-size:.76rem;color:var(--muted);line-height:1.35}
+  .rev a{color:var(--amber)}
   .tdel{width:100%;border:0;border-top:1px solid var(--line);border-radius:0;font-size:.8rem;padding:7px}
   .tagshot{background:#000;border-radius:8px;overflow:hidden;margin-top:12px;aspect-ratio:4/3;
            display:flex;align-items:center;justify-content:center}
@@ -363,8 +364,8 @@
     <span class="lamp" id="l-atavt"></span>
     <div class="body">
       <h2>ATAVT — perception</h2>
-      <p>A traffic scene flashes for one second. Report which objects you saw. Add your own photographs and it will use those instead — the real test uses photographs, and they are harder than anything drawn.</p>
-      <div class="meta">20 scenes · about 6 min · add your own</div>
+      <p>A traffic scene flashes for one second. Report which objects you saw. Comes with fifteen tagged photographs; add your own and it uses those too. The real test uses photographs and they are harder than anything drawn.</p>
+      <div class="meta">20 scenes · about 6 min · 15 photographs included</div>
     </div>
     <div class="row">
       <button onclick="SCENELIB.open()">Scenes</button>
@@ -1570,7 +1571,8 @@ const SCENELIB = {
     window.scrollTo(0,0);
     Photos.all().then(rows=>{
       if(!rows.length){
-        holder.appendChild(el("p","sub","Nothing added yet. Dashcam stills, photographs out of a train or car window, or anything that looks like a road scene will do. Aim for twenty or so — the more cluttered they are, the better the practice."));
+        holder.appendChild(el("p","sub","Nothing added yet. Load the starter set below for fifteen tagged road scenes, and add your own on top — dashcam stills or shots out of a train or car window. Aim for twenty or more, and the more cluttered they are the better the practice."));
+        holder.appendChild(el("div","note","The starter set is light on scenes with no motor vehicles in them — fourteen of the fifteen have traffic. Your own pictures are the way to fix that, so include a few quiet ones."));
         return;
       }
       holder.appendChild(el("p","sub",rows.length+(rows.length===1?" scene":" scenes")+" saved."));
@@ -1582,7 +1584,7 @@ const SCENELIB = {
         im.onload=()=>URL.revokeObjectURL(im.src);
         c.appendChild(im);
         const tags=CATS.filter(([k])=>r.tags[k]).map(([k])=>CAT_SHORT[k]).join(" · ");
-        c.appendChild(el("span",null,tags||"nothing marked"));
+        c.appendChild(el("span",null,(r.caption?r.caption+" — ":"")+(tags||"nothing marked")));
         const x=el("button","tdel","Remove");
         x.onclick=()=>Photos.del(r.id).then(()=>this.list());
         c.appendChild(x);
@@ -1593,6 +1595,49 @@ const SCENELIB = {
       holder.appendChild(el("div","note","Could not read the saved scenes on this device."));
     });
   },
+  loadStarter(btn){
+    const was=btn.textContent;
+    btn.disabled=true; btn.textContent="Loading…";
+    const fail=()=>{ btn.disabled=false; btn.textContent=was;
+      alert("Could not load the starter set. It needs a connection the first time — after that the pictures live on this device."); };
+    Promise.all([fetch("scenes/scenes.json").then(r=>r.json()), Photos.all()])
+      .then(([list, have])=>{
+        const got={}; have.forEach(h=>{ if(h.starter) got[h.starter]=1; });
+        const todo=list.filter(m=>!got[m.file]);
+        if(!todo.length){ btn.textContent=was; btn.disabled=false; alert("The starter set is already loaded."); return; }
+        return todo.reduce((p,m)=>p.then(()=>
+          fetch("scenes/"+m.file).then(r=>{ if(!r.ok) throw 0; return r.blob(); })
+            .then(b=>Photos.add({blob:b, tags:m.tags, added:Date.now(), starter:m.file,
+                                 caption:m.caption, credit:m.credit, lic:m.lic,
+                                 licurl:m.licurl, source:m.source}))
+        ), Promise.resolve()).then(()=>this.list());
+      }).catch(fail);
+  },
+  credits(){
+    App.open("Picture credits", el("div"));
+    App.active=this;
+    const box=el("div");
+    box.appendChild(el("div","chainbar","Where the starter pictures came from. Everything in the set is CC0 or CC BY, and the CC BY ones ask to be credited — so here they are."));
+    const holder=el("div"); box.appendChild(holder);
+    const r=el("div","row"); r.style.marginTop="18px";
+    const b=el("button","go","Back to the scenes"); b.onclick=()=>this.open();
+    r.appendChild(b); box.appendChild(r);
+    $("#t-body").replaceChildren(box);
+    Photos.all().then(rows=>{
+      const st=rows.filter(x=>x.starter).sort((a,b)=>a.starter<b.starter?-1:1);
+      if(!st.length){ holder.appendChild(el("p","sub","The starter set is not loaded.")); return; }
+      st.forEach(x=>{
+        const d=el("div","rev");
+        d.appendChild(el("h4",null,x.caption||x.starter));
+        d.appendChild(el("p",null,"By "+(x.credit||"unknown")+" · "+(x.lic||"")));
+        const p=el("p",null,"");
+        if(x.source) p.innerHTML='<a href="'+x.source+'" target="_blank" rel="noopener">source</a>'+
+          (x.licurl?' · <a href="'+x.licurl+'" target="_blank" rel="noopener">licence</a>':"");
+        d.appendChild(p);
+        holder.appendChild(d);
+      });
+    });
+  },
   buttons(box){
     const r=el("div","row"); r.style.marginTop="18px";
     const inp=document.createElement("input");
@@ -1600,8 +1645,12 @@ const SCENELIB = {
     inp.onchange=()=>{ const f=Array.from(inp.files||[]); inp.value=""; if(f.length) this.tagQueue(f,0); };
     const add=el("button","go","Add photographs");
     add.onclick=()=>inp.click();
+    const starter=el("button",null,"Load the starter set");
+    starter.onclick=()=>this.loadStarter(starter);
+    const cred=el("button",null,"Credits");
+    cred.onclick=()=>this.credits();
     const back=el("button","ghost","Back"); back.onclick=()=>App.quit();
-    r.appendChild(add); r.appendChild(inp); r.appendChild(back);
+    r.appendChild(add); r.appendChild(inp); r.appendChild(starter); r.appendChild(cred); r.appendChild(back);
     box.appendChild(r);
   },
   tagQueue(files, i){

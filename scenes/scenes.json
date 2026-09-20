@@ -1,0 +1,227 @@
+[
+ {
+  "file": "s01.jpg",
+  "caption": "Pedestrian crossing, Chatham",
+  "tags": {
+   "ped": false,
+   "veh": true,
+   "bike": false,
+   "sign": false,
+   "light": true
+  },
+  "credit": "OathOn",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:The_Brook_pedestrian_crossing_-_Chatham.jpg"
+ },
+ {
+  "file": "s02.jpg",
+  "caption": "Mersey tunnel at speed",
+  "tags": {
+   "ped": false,
+   "veh": true,
+   "bike": false,
+   "sign": false,
+   "light": false
+  },
+  "credit": "Terry  Kearney from liverpool, merseyside",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:THE_ROAD_BENEATH_THE_MERSEY_-_Flickr_-_Terry_Kearney.jpg"
+ },
+ {
+  "file": "s03.jpg",
+  "caption": "Approaching a junction, Mestre",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": true,
+   "sign": true,
+   "light": true
+  },
+  "credit": "SIG SG 510",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:Mestre_(VE)_82.jpg"
+ },
+ {
+  "file": "s04.jpg",
+  "caption": "No entry, building site",
+  "tags": {
+   "ped": false,
+   "veh": true,
+   "bike": false,
+   "sign": true,
+   "light": false
+  },
+  "credit": "Erik Z\u00fcnder ezunder",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:Urban_cityscape_shot_(Unsplash).jpg"
+ },
+ {
+  "file": "s05.jpg",
+  "caption": "After a collision, Caracas",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": true,
+   "sign": true,
+   "light": false
+  },
+  "credit": "Wilfredor",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:Traffic_Accident_in_Avenue_Los_Teques-Caracas.jpg"
+ },
+ {
+  "file": "s06.jpg",
+  "caption": "Avenue Mohammed V, Marrakech",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": true,
+   "sign": true,
+   "light": false
+  },
+  "credit": "DimiTalen",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:Traffic_on_Avenue_Mohamed_V,_Marrakech,_2008.jpg"
+ },
+ {
+  "file": "s07.jpg",
+  "caption": "Traffic queue, Southampton",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": false,
+   "sign": true,
+   "light": true
+  },
+  "credit": "Charlie from United Kingdom",
+  "lic": "CC BY 2.0",
+  "licurl": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:1983_Ford_Cortina_Carousel_(11842064083).jpg"
+ },
+ {
+  "file": "s08.jpg",
+  "caption": "Broadway at 151st, New York",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": true,
+   "sign": true,
+   "light": true
+  },
+  "credit": "SWinxy",
+  "lic": "CC BY 4.0",
+  "licurl": "https://creativecommons.org/licenses/by/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:2025_Summer_Streets,_August_9,_151st_St_%26_Broadway_02.jpg"
+ },
+ {
+  "file": "s09.jpg",
+  "caption": "Broadway at 158th, New York",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": true,
+   "sign": true,
+   "light": true
+  },
+  "credit": "SWinxy",
+  "lic": "CC BY 4.0",
+  "licurl": "https://creativecommons.org/licenses/by/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:2025_Summer_Streets,_August_9,_158th_St_%26_Broadway_01.jpg"
+ },
+ {
+  "file": "s10.jpg",
+  "caption": "Columbus Circle at night",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": true,
+   "sign": true,
+   "light": true
+  },
+  "credit": "Billie Grace Ward from New York, USA",
+  "lic": "CC BY 2.0",
+  "licurl": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Reckless_Domino%27s_Cyclist_(16020774083).jpg"
+ },
+ {
+  "file": "s11.jpg",
+  "caption": "Main street, Maynooth",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": false,
+   "sign": true,
+   "light": true
+  },
+  "credit": "Leimanbhradain",
+  "lic": "CC BY 4.0",
+  "licurl": "https://creativecommons.org/licenses/by/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Signs-1160719,_Maynooth,_Co._Kildare,_Ireland.jpg"
+ },
+ {
+  "file": "s12.jpg",
+  "caption": "Princes Street, Edinburgh",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": false,
+   "sign": false,
+   "light": true
+  },
+  "credit": "Reading Tom from Reading, UK",
+  "lic": "CC BY 2.0",
+  "licurl": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Princes_Street_%26_Castle_Street_junction,_Edinburgh,_26_May_2014.jpg"
+ },
+ {
+  "file": "s13.jpg",
+  "caption": "Canal at dusk, Amsterdam",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": true,
+   "sign": false,
+   "light": false
+  },
+  "credit": "Jorge L\u00e1scar from Australia",
+  "lic": "CC BY 2.0",
+  "licurl": "https://creativecommons.org/licenses/by/2.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Street_and_canal_at_dusk,_Oudezijds_Voorburgwal_%27blue_hour%27,_7_januari_2011_(5821465439).jpg"
+ },
+ {
+  "file": "s14.jpg",
+  "caption": "Crossing at Pike Place, 1960s",
+  "tags": {
+   "ped": true,
+   "veh": true,
+   "bike": false,
+   "sign": false,
+   "light": false
+  },
+  "credit": "Seattle Municipal Archives from Seattle, WA",
+  "lic": "CC BY 4.0",
+  "licurl": "https://creativecommons.org/licenses/by/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Pedestrian_crossing_Pike_Place,_circa_1960s_-_Flickr_-_Seattle_Municipal_Archives.jpg"
+ },
+ {
+  "file": "s15.jpg",
+  "caption": "New Regent Street, Christchurch",
+  "tags": {
+   "ped": true,
+   "veh": false,
+   "bike": false,
+   "sign": true,
+   "light": false
+  },
+  "credit": "Bernard Spragg. NZ from Christchurch, New Zealand",
+  "lic": "CC0",
+  "licurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:New_Regent_Street._Christchurch._NZ._(49312698126).jpg"
+ }
+]
