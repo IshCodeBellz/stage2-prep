@@ -52,6 +52,20 @@
   .sitebar .guides:hover{color:var(--ink);border-color:#3A4C5C}
   .sitebar a:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:4px}
 
+  /* On a large monitor the drill list is a narrow strip stranded mid-screen, so
+     the menu gets more room. The tests deliberately do not: how many squares
+     fit on a line is part of the paper, and the type sizes on the test surfaces
+     are tuned to the real thing. They keep the width they were built at. */
+  @media (min-width:1700px){
+    .wrap{max-width:960px}
+    /* 724px is what .wrap gave a test before this rule existed — 760 less its
+       18px of padding either side. Anything else and the squares per line move. */
+    #test{max-width:724px;margin-left:auto;margin-right:auto}
+  }
+  @media (min-width:2300px){
+    .wrap{max-width:1080px}
+  }
+
   /* drill list — hairline rows, not cards */
   /* on a narrow screen the start buttons drop under the description rather than squeezing it */
   .drill{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--line);
