@@ -1,0 +1,49 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ATAVT — perception</title>
+<meta name="description" content="ATAVT player — a flashed street scene, then recall.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/design.css">
+
+<body data-nav="none">
+
+<main class="shell w1000">
+
+  <div class="playerbar">
+    <div class="who">
+      <span class="name">ATAVT perception</span>
+      <span class="tag practice">PRACTICE · SCENE 3 OF 8</span>
+    </div>
+    <a class="quit" href="/design">Quit</a>
+  </div>
+
+  <!-- The scene is shown for a second and then taken away. It is left on the
+       page here because the mock is of the moment it is up. -->
+  <div class="stagewrap atavt-stage">
+    <div class="atavt-shot">
+      <img src="/scenes/s03.jpg" alt="A street scene, shown for one second">
+      <span class="flashed">flashed for 1s</span>
+    </div>
+  </div>
+
+  <div class="atavt-ask">
+    <p class="q" id="atavt-q">What did the scene contain? Tick everything you saw.</p>
+    <div class="chips" data-pick="multi" role="group" aria-labelledby="atavt-q">
+      <button class="chip" type="button" aria-pressed="true">Pedestrians</button>
+      <button class="chip" type="button" aria-pressed="true">Vehicles</button>
+      <button class="chip" type="button">Cyclists</button>
+      <button class="chip" type="button" aria-pressed="true">Road signs</button>
+      <button class="chip" type="button">Traffic lights</button>
+    </div>
+    <div class="centre">
+      <button class="btn xl go" type="button">Confirm → next scene</button>
+    </div>
+  </div>
+
+</main>
+
+<script src="/assets/design.js"></script>

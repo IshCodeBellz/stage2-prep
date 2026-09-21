@@ -1,0 +1,90 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>My scores</title>
+<meta name="description" content="Readiness across the whole assessment day.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/design.css">
+
+<body data-nav="scores">
+
+<main class="shell w1000 page">
+
+  <div class="pagehead" style="margin-bottom:20px">
+    <h1>My scores</h1>
+    <p class="dek" style="font-size:13px">Stored on this device · works offline</p>
+  </div>
+
+  <!-- A grid rather than a table: on a phone each test folds into a block,
+       which a table cannot do without losing its header association. -->
+  <div class="scoretable" role="table" aria-label="Best score for each test">
+
+    <div class="scorerow head" role="row">
+      <span role="columnheader"><span class="vh">Status lamp</span></span>
+      <span role="columnheader">TEST</span>
+      <span role="columnheader">BEST</span>
+      <span role="columnheader">CONDITIONS</span>
+      <span role="columnheader">STATUS</span>
+    </div>
+
+    <div class="scorerow" role="row">
+      <span class="lamp lg pass" role="cell"><span class="vh">At exam standard</span></span>
+      <span role="cell">Group Bourdon</span>
+      <span class="best" role="cell">91%</span>
+      <span class="cond" role="cell">exam length</span>
+      <span class="state ok" role="cell">EXAM STANDARD</span>
+    </div>
+
+    <div class="scorerow" role="row">
+      <span class="lamp lg pass" role="cell"><span class="vh">At exam standard</span></span>
+      <span role="cell">TRP1b — rules recall</span>
+      <span class="best" role="cell">100%</span>
+      <span class="cond" role="cell">seven-minute clock</span>
+      <span class="state ok" role="cell">EXAM STANDARD</span>
+    </div>
+
+    <div class="scorerow" role="row">
+      <span class="lamp lg part" role="cell"><span class="vh">Attempted</span></span>
+      <span role="cell">DFFT — fault finding</span>
+      <span class="best" role="cell">16/20</span>
+      <span class="cond" role="cell">5-question practice</span>
+      <span class="state part" role="cell">PRACTICE ONLY</span>
+    </div>
+
+    <div class="scorerow" role="row">
+      <span class="lamp lg part" role="cell"><span class="vh">Attempted</span></span>
+      <span role="cell">SJE — rating</span>
+      <span class="best" role="cell">1.2 pts off</span>
+      <span class="cond" role="cell">set 2 · 6 scenarios</span>
+      <span class="state part" role="cell">PRACTICE ONLY</span>
+    </div>
+
+    <div class="scorerow" role="row">
+      <span class="lamp lg part" role="cell"><span class="vh">Attempted</span></span>
+      <span role="cell">WAFV — vigilance</span>
+      <span class="best" role="cell">94%</span>
+      <span class="cond" role="cell">10 minutes</span>
+      <span class="state part" role="cell">NEEDS 30 MIN</span>
+    </div>
+
+    <div class="scorerow none" role="row">
+      <span class="lamp lg" role="cell"><span class="vh">Not attempted</span></span>
+      <span role="cell">TRP2, Tea-Occ, VSE, ATAVT, 2-Hand, M7-SJT</span>
+      <span class="best" role="cell">—</span>
+      <span class="cond" role="cell">—</span>
+      <span class="state" role="cell">NOT ATTEMPTED</span>
+    </div>
+
+  </div>
+
+  <p class="note-amber" style="margin-top:16px">
+    <strong>Before the day:</strong> get every test to exam conditions at least once — a practice-length
+    best does not predict the real clock. WAFV in particular is only meaningful at the full 30 minutes.
+  </p>
+
+</main>
+
+<script src="/assets/design.js"></script>

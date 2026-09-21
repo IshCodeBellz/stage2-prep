@@ -1,0 +1,84 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MMI — rehearse</title>
+<meta name="description" content="MMI rehearse — question bank and STAR answer frames.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/design.css">
+
+<body data-nav="tests">
+
+<main class="shell w1000" style="padding:0">
+  <div class="mmi">
+
+    <!-- The bank. Picking a question swaps the frame on the right. -->
+    <div class="bank">
+      <h2>Question bank</h2>
+      <div class="banklist" data-pick="current" data-bank role="group" aria-label="Question bank">
+
+        <div class="bankgroup">SAFETY &amp; RULES</div>
+        <button class="bankq" type="button" aria-current="true"
+          data-group="SAFETY &amp; RULES"
+          data-star='["Where were you, what was the rule, why did it grate? One or two sentences.","What you were responsible for at that moment.","Followed the rule first, challenged it through the right channel after. That order matters to the panel.","What changed — even if the answer was \"the rule stayed and I now understand why\"."]'
+        >Tell us about a time you followed a rule you disagreed with.</button>
+        <button class="bankq" type="button"
+          data-group="SAFETY &amp; RULES"
+          data-star='["The job, the shift, and what you noticed that was not right.","Whether it was yours to report, and who it needed to go to.","That you reported it at the time rather than at the end of the turn.","What was done about it, and whether you followed it up."]'
+        >When did you last report something unsafe?</button>
+
+        <div class="bankgroup">WORKING ALONE</div>
+        <button class="bankq" type="button"
+          data-group="WORKING ALONE"
+          data-star='["The kind of repetitive work, and how long a stretch of it.","Staying accurate at the end of the stretch, not just the start.","The routine you use — a fixed order, a check at set points, a way of resetting.","How you know it works: the errors that did not happen."]'
+        >How do you keep focus doing repetitive work?</button>
+        <button class="bankq" type="button"
+          data-group="WORKING ALONE"
+          data-star='["The shift, and the point at which it went wrong.","What you were accountable for once it had.","What you did first, and who you told — in that order.","How it ended, and what you now do differently."]'
+        >Describe a shift that went wrong.</button>
+
+        <div class="bankgroup">CUSTOMERS &amp; PRESSURE</div>
+        <button class="bankq" type="button"
+          data-group="CUSTOMERS &amp; PRESSURE"
+          data-star='["Where it happened, and what they were angry about.","Your job in that moment — usually safety first, then the person.","Listening before explaining, and what you could and could not offer.","How it was left, and what you did afterwards."]'
+        >A time you dealt with an angry member of the public.</button>
+
+      </div>
+    </div>
+
+    <!-- The frame. Four prompts, not four answers — the panel wants yours. -->
+    <div class="rehearse" data-rehearse>
+      <div class="eyebrow">REHEARSING · SAFETY &amp; RULES</div>
+      <h1>Tell us about a time you followed a rule you disagreed with.</h1>
+
+      <div class="star">
+        <div class="star-part">
+          <div class="letter">S — SITUATION</div>
+          <p>Where were you, what was the rule, why did it grate? One or two sentences.</p>
+        </div>
+        <div class="star-part">
+          <div class="letter">T — TASK</div>
+          <p>What you were responsible for at that moment.</p>
+        </div>
+        <div class="star-part">
+          <div class="letter">A — ACTION</div>
+          <p>Followed the rule first, challenged it through the right channel after. That order matters to the panel.</p>
+        </div>
+        <div class="star-part">
+          <div class="letter">R — RESULT</div>
+          <p>What changed — even if the answer was “the rule stayed and I now understand why”.</p>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn" type="button">⏱ Rehearse aloud — 2 min timer</button>
+        <button class="btn go" type="button">Show model answer</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="/assets/design.js"></script>

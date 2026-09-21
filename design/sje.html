@@ -1,0 +1,85 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SJE — rating</title>
+<meta name="description" content="SJE player — rate each response from 1 to 5.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/design.css">
+
+<body data-nav="none">
+
+<main class="shell w1000">
+
+  <div class="playerbar">
+    <span class="name">SJE rating — set 2 of 4 · practice</span>
+    <span style="font:500 13px var(--mono);color:rgba(243,245,242,.7)">scenario 3 / 6 · untimed</span>
+  </div>
+
+  <div class="sje-body">
+
+    <div class="scenario">
+      <p>Driving home from an early turn you realise you cannot remember the last mile of the journey.</p>
+    </div>
+
+    <p class="sje-how">Rate each response from 1 (counterproductive) to 5 (very effective). You may give the same rating twice.</p>
+
+    <div class="rates">
+
+      <div class="rate">
+        <span id="sje-r1">Pull over somewhere safe, get out, walk for a minute before continuing.</span>
+        <div class="scale" data-pick="single" role="group" aria-labelledby="sje-r1">
+          <button type="button" aria-label="1 — counterproductive">1</button>
+          <button type="button" aria-label="2">2</button>
+          <button type="button" aria-label="3">3</button>
+          <button type="button" aria-label="4">4</button>
+          <button type="button" aria-label="5 — very effective" aria-pressed="true">5</button>
+        </div>
+      </div>
+
+      <div class="rate">
+        <span id="sje-r2">Windows down, radio up, press on — you are nearly home.</span>
+        <div class="scale" data-pick="single" role="group" aria-labelledby="sje-r2">
+          <button type="button" aria-label="1 — counterproductive" aria-pressed="true">1</button>
+          <button type="button" aria-label="2">2</button>
+          <button type="button" aria-label="3">3</button>
+          <button type="button" aria-label="4">4</button>
+          <button type="button" aria-label="5 — very effective">5</button>
+        </div>
+      </div>
+
+      <div class="rate">
+        <span id="sje-r3">Report it to your manager so your turns can be looked at.</span>
+        <div class="scale" data-pick="single" role="group" aria-labelledby="sje-r3">
+          <button type="button" aria-label="1 — counterproductive">1</button>
+          <button type="button" aria-label="2">2</button>
+          <button type="button" aria-label="3">3</button>
+          <button type="button" aria-label="4" aria-pressed="true">4</button>
+          <button type="button" aria-label="5 — very effective">5</button>
+        </div>
+      </div>
+
+      <div class="rate">
+        <span id="sje-r4">Say nothing — everyone zones out on the drive home occasionally.</span>
+        <div class="scale" data-pick="single" role="group" aria-labelledby="sje-r4">
+          <button type="button" aria-label="1 — counterproductive">1</button>
+          <button type="button" aria-label="2" aria-pressed="true">2</button>
+          <button type="button" aria-label="3">3</button>
+          <button type="button" aria-label="4">4</button>
+          <button type="button" aria-label="5 — very effective">5</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="endrow">
+      <button class="btn lg go" type="button" style="padding:12px 28px">Next scenario</button>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="/assets/design.js"></script>

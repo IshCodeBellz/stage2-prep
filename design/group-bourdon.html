@@ -1,0 +1,68 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Group Bourdon — dot groups</title>
+<meta name="description" content="Group Bourdon player — mark every group of exactly four dots.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/design.css">
+
+<body data-nav="none">
+
+<main class="shell w1100">
+
+  <div class="playerbar">
+    <div class="who">
+      <span class="name">Group Bourdon</span>
+      <span class="tag practice">PRACTICE · PAGE 3 OF 5</span>
+    </div>
+    <span class="clock live">04:37</span>
+  </div>
+
+  <div style="background:var(--bg);padding:28px 28px 8px">
+    <p class="gb-help">Mark every group containing exactly <strong>4 dots</strong>. Work left to right, row by row.</p>
+
+    <!-- The braille glyphs are the mockup's placeholder for the dot groups.
+         The live app draws the real thing on a canvas, where how many fit on
+         a line is part of the paper. -->
+    <div class="gb-sheet" data-pick="multi" id="gb-sheet" role="group" aria-label="Dot groups — mark the groups of exactly four">
+      <button type="button">⠇</button>
+      <button type="button" aria-pressed="true">⠭</button>
+      <button type="button">⠿</button>
+      <button type="button">⠓</button>
+      <button type="button" aria-pressed="true">⠪</button>
+      <button type="button">⠷</button>
+      <button type="button">⠆</button>
+      <button type="button">⠗</button>
+      <button type="button" aria-pressed="true">⠣</button>
+      <button type="button">⠾</button>
+      <button type="button">⠑</button>
+      <button type="button">⠧</button>
+      <button type="button" aria-pressed="true">⠫</button>
+      <button type="button">⠛</button>
+      <button type="button">⠹</button>
+      <button type="button">⠼</button>
+      <button type="button">⠃</button>
+      <button type="button">⠞</button>
+      <button type="button">⠺</button>
+      <button type="button">⠸</button>
+    </div>
+
+    <p class="gb-caption">[ dot groups rendered as canvas in build — braille glyphs are placeholders ]</p>
+  </div>
+
+  <div class="gb-foot">
+    <div class="gb-stats">
+      <span class="p-wide">Marked: <strong data-count-of="#gb-sheet">4</strong></span>
+      <span class="p-wide">Accuracy so far: <strong class="good">96%</strong></span>
+      <span class="p-wide">Target speed: <strong>1 row / 12s</strong></span>
+      <span class="p-phone">page 3/5 · acc 96%</span>
+    </div>
+    <button class="btn lg go" type="button">Next page →</button>
+  </div>
+
+</main>
+
+<script src="/assets/design.js"></script>

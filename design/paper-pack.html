@@ -1,0 +1,59 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Paper pack — print preview</title>
+<meta name="description" content="The stage 1 paper pack, as it will come out of the printer.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/design.css">
+
+<body data-nav="tests">
+
+<main class="shell w900">
+  <div class="pack">
+
+    <div class="packmain">
+      <!-- The cover sheet. The preview is the printed page, not a picture of
+           it, so what is on screen is what comes out. -->
+      <div class="sheet">
+        <h2>Stage 1 paper pack</h2>
+        <p class="when">Generated fresh · 21 Sep 2026 · answers on the last sheets</p>
+        <div class="runorder">
+          <div><span>1 · Group Bourdon</span><span>10 min</span></div>
+          <div><span>2 · TRP1b — rules recall</span><span>7 min</span></div>
+          <div><span>3 · TRP2 — order of checking</span><span>30 min</span></div>
+          <div><span>4 · DFFT — fault finding</span><span>45 min</span></div>
+        </div>
+        <p class="foot">Cover sheet shows the running order and the clock each paper is given.
+          Tea-Occ is not included — it comes through headphones.</p>
+      </div>
+      <p class="pagecount">[ page 1 of 14 — preview IS the printed page ]</p>
+    </div>
+
+    <div class="packside">
+      <div class="packbox">
+        <div class="lbl">Included papers</div>
+        <div class="packlist">
+          <label><input type="checkbox" checked> Group Bourdon</label>
+          <label><input type="checkbox" checked> TRP1b</label>
+          <label><input type="checkbox" checked> TRP2</label>
+          <label><input type="checkbox" checked> DFFT</label>
+        </div>
+      </div>
+
+      <div class="packbox row">
+        <span style="font:600 12.5px var(--body)" id="ans-lbl">Answers: printed</span>
+        <button class="switch" type="button" aria-checked="true" aria-labelledby="ans-lbl"></button>
+      </div>
+
+      <button class="btn lg go block" type="button">🖨 Print · Save as PDF</button>
+
+      <p class="packnote">Every print is generated fresh — printing twice gives two different papers.</p>
+    </div>
+
+  </div>
+</main>
+
+<script src="/assets/design.js"></script>
