@@ -1547,7 +1547,7 @@ const WAFV = {
     this.exam=exam;
     this.mins = exam ? WAFV_MINS.exam : (mode==="quick" ? WAFV_MINS.quick : WAFV_MINS.practice);
     this.hits=0;this.miss=0;this.fa=0;this.rts=[];this.trials=0;
-    this.live=[];this.ended=false;
+    this.live=[];this.ended=false;this.gen=(this.gen||0)+1;
     const box=el("div");
     box.appendChild(el("div","chainbar","<b>"+(exam?"Exam conditions":"Practice")+".</b> "+
       this.mins+" minutes, counting down, and it ends itself at zero."+
@@ -1597,9 +1597,12 @@ const WAFV = {
        once — on a single shared flag the second one wiped the first one's answer, which
        scored the pair as one hit, one miss and one false alarm instead of two hits */
     if(target){
-      const trial={onset:performance.now(), done:false};
+      const trial={onset:performance.now(), done:false}, gen=this.gen;
       this.live.push(trial);
+      // gen is checked because quitting and starting again inside the window would
+      // otherwise drop the old run's expiring target into the new run's tally
       setTimeout(()=>{
+        if(this.gen!==gen) return;
         const i=this.live.indexOf(trial);
         if(i>=0) this.live.splice(i,1);
         if(!this.ended && !trial.done){ this.miss++; this.tally(); }
