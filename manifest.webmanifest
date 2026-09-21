@@ -1,7 +1,7 @@
 {
   "name": "Stage 2 Test Simulators",
   "short_name": "Stage 2",
-  "start_url": "/",
+  "start_url": "/simulators",
   "display": "standalone",
   "background_color": "#0F151B",
   "theme_color": "#0F151B",

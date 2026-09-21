@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Visual search: dot sequences and letter columns — Cab Ready</title>
+<meta name="description" content="The visual search papers: spotting breaks in a dot sequence, comparing letter columns, and then running both at once — what the combined part actually measures.">
+<meta name="theme-color" content="#0F151B">
+<link rel="icon" href="/icon-180.png">
+<link rel="stylesheet" href="/assets/site.css">
+
+<article class="doc" data-slug="vse" data-tier="starter">
+  <p class="crumbs"><a href="/">Home</a> · <a href="/resources">Resources</a> · Visual search</p>
+  <header>
+    <h1>Visual search: dot sequences and letter columns</h1>
+    <p class="lede">Two search papers that look mechanical and are not, and then a third part that
+      runs both together. The third part is the one being read most closely.</p>
+    <div class="docmeta">
+      <span class="tag starter">starter</span>
+      <span class="tag stage">Stage 2</span>
+      <span class="muted" style="font-size:.84rem">6 min read</span>
+    </div>
+  </header>
+
+  <p>Two tasks, then both at once:</p>
+  <ul>
+    <li><strong>The dot sequence.</strong> A dot steps around the corners of a square, one position at
+      a time, square after square. You mark every square where the sequence breaks — a skipped corner,
+      a step backwards, or no movement at all.</li>
+    <li><strong>The letter columns.</strong> Each box holds two short columns of letters. You mark the
+      box if the columns contain different letters. Order does not matter, and a letter can appear
+      twice.</li>
+    <li><strong>Both.</strong> Pairs presented together, auto-advancing, with the dot sequence as the
+      primary task.</li>
+  </ul>
+
+  <dl class="spec">
+    <dt>Dot sequence</dt><dd>About a second a square</dd>
+    <dt>Letter columns</dt><dd>About two seconds a box</dd>
+    <dt>Combined</dt><dd>About four seconds a pair, auto-advancing</dd>
+    <dt>Scoring</dt><dd>Hits, misses and false marks, all three</dd>
+  </dl>
+
+  <h2>The dot sequence is a chain, not a list</h2>
+  <p>This is the thing to understand and most people never state it: each square can only be judged
+    against the one before it. The task is not "look at this square" but "is this square the correct
+    successor of the last one?"</p>
+  <p>Three consequences follow, and they are the whole technique:</p>
+  <ol>
+    <li><strong>Carry exactly one thing forward: the last corner.</strong> Not the sequence so far, not
+      the direction, not a count. One position, refreshed every square.</li>
+    <li><strong>Know which way round this run goes, and confirm it on the first two squares.</strong>
+      Runs alternate direction. Half the errors people make in the opening ten squares are the
+      previous run's direction still running in their head.</li>
+    <li><strong>After a break, re-anchor on the square you are looking at.</strong> The next square is
+      judged against the broken one, not against where the sequence "should" have been. Candidates who
+      keep tracking the ideal sequence produce a cascade of false marks after every genuine break.</li>
+  </ol>
+
+  <h2>The letter columns are a comparison, not a reading</h2>
+  <ul>
+    <li><strong>Compare as sets, and do not read the letters as words.</strong> Look for a letter in
+      one column that has no partner in the other. That is the only question.</li>
+    <li><strong>Order does not matter, so ignore position entirely.</strong> People lose items by
+      matching top-to-top and bottom-to-bottom out of habit.</li>
+    <li><strong>Duplicates are legal.</strong> The same letter twice in one column is not, by itself,
+      a difference.</li>
+    <li><strong>Lookalikes are the trap.</strong> Some runs use letters that look similar on purpose.
+      When a run feels harder than the last one, it is, and the answer is to slow by a fraction rather
+      than to squint harder.</li>
+  </ul>
+
+  <h2>What the combined part really measures</h2>
+  <p>Everybody's score drops in the third part. That is expected, and the drop itself is the
+    measurement: how much accuracy survives when a second stream arrives, and whether you shed it
+    gracefully or collapse.</p>
+  <p>The plan that works is the same as on <a href="/resources/tea-occ">TEA-Occ</a>: protect the
+    fragile task. The dot sequence is the chain, so it breaks badly if you drop it and cannot be
+    rebuilt. The letter comparison is independent box to box, so a slower rate there costs you a
+    little and nothing more. Give the sequence the priority and let the comparison run at whatever
+    speed is left.</p>
+
+  <div class="drillcta">
+    <div>
+      <b>Drill it: the three visual search tasks</b>
+      <p>Each one separately, then the combined paper at four seconds a pair. Exam mode takes the
+        paper away when the clock hits zero, which is the part that changes how you work.</p>
+    </div>
+    <a class="btn go" href="/simulators">Open the drills</a>
+  </div>
+
+  <h2>Where people lose it</h2>
+  <ul class="mistakes">
+    <li><strong>Losing the chain and hiding it.</strong> If the dot sequence gets away from you, take
+      the next square as your new anchor immediately rather than trying to reconstruct.</li>
+    <li><strong>Marking every square after a break.</strong> The classic cascade. One break is one mark.</li>
+    <li><strong>Reading letters instead of matching them.</strong> Slower channel, same answer.</li>
+    <li><strong>Practising on a phone.</strong> These two tests in particular are flattered by a small
+      bright screen held close. Sit them on a laptop or a desktop, at arm's length, like the real one.</li>
+    <li><strong>Treating the combined part as a warm-up.</strong> It is the finale, and it is where the
+      informative variance is.</li>
+  </ul>
+
+  <h2>How to practise it</h2>
+  <ul>
+    <li>Drill the dot sequence alone until the "carry one corner" habit is automatic. Everything else
+      depends on it.</li>
+    <li>Then the letter columns alone, until you have stopped reading them.</li>
+    <li>Then the combined paper, timed, twice a week. Compare your dot-sequence accuracy alone against
+      your dot-sequence accuracy in the combined part — closing that gap is the actual goal.</li>
+  </ul>
+</article>
+
+<script src="/assets/resources.js"></script>
+<script src="/assets/site.js"></script>
+<script src="/assets/tiers.js"></script>

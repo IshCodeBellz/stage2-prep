@@ -1,11 +1,35 @@
-/* Offline cache for the Stage 2 simulators.
-   Bump CACHE after you change index.html so phones pick up the new version. */
+/* Offline cache for Cab Ready.
+
+   The simulators are the part that has to work with no signal — on the
+   Underground, between stations, in a depot mess room. The marketing and
+   resource pages are cached opportunistically: whatever you have read once is
+   readable again offline, but nothing is precached beyond the app itself.
+
+   Bump CACHE whenever simulators.html or the shared assets change, or phones
+   that already installed the app keep serving the old copy. */
+
 const CACHE = "stage2-v29";
-const ASSETS = ["/", "/index.html", "/manifest.webmanifest", "/icon-180.png", "/icon-512.png"];
+const APP = "/simulators";
+const ASSETS = [
+  APP,
+  "/",
+  "/manifest.webmanifest",
+  "/icon-180.png",
+  "/icon-512.png",
+  "/assets/site.css",
+  "/assets/site.js",
+  "/assets/tiers.js",
+  "/assets/resources.js"
+];
 // scene photographs are fetched once into IndexedDB, so they are not precached
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE)
+      // one missing file must not fail the whole install
+      .then((c) => Promise.all(ASSETS.map((a) => c.add(a).catch(() => {}))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (e) => {
@@ -18,19 +42,37 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
-  const isPage = e.request.mode === "navigate";
-  if (isPage) {
-    // Network first for the page, so a redeploy shows up as soon as you have signal.
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
+
+  if (e.request.mode === "navigate") {
+    // Network first for pages, so a redeploy shows up as soon as you have signal.
     e.respondWith(
       fetch(e.request)
         .then((r) => {
           const copy = r.clone();
-          caches.open(CACHE).then((c) => c.put("/index.html", copy));
+          caches.open(CACHE).then((c) => c.put(url.pathname, copy));
           return r;
         })
-        .catch(() => caches.match("/index.html"))
+        .catch(() =>
+          caches.match(url.pathname).then((r) => r || caches.match(APP))
+        )
     );
   } else {
-    e.respondWith(caches.match(e.request).then((r) => r || fetch(e.request)));
+    // Cache first for assets, refreshing in the background.
+    e.respondWith(
+      caches.match(e.request).then((hit) => {
+        const live = fetch(e.request)
+          .then((r) => {
+            if (r && r.ok) {
+              const copy = r.clone();
+              caches.open(CACHE).then((c) => c.put(e.request, copy));
+            }
+            return r;
+          })
+          .catch(() => hit);
+        return hit || live;
+      })
+    );
   }
 });
