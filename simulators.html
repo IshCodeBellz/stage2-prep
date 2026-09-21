@@ -37,9 +37,20 @@
   h2{font-size:1.15rem;letter-spacing:-.01em;margin:0 0 2px;font-weight:620}
   .num{font-variant-numeric:tabular-nums}
   /* back to the site around the simulators */
-  .sitelink{margin:0 0 10px;font-size:.84rem;color:var(--muted)}
-  .sitelink a{color:var(--amber);text-decoration:none}
-  .sitelink a:hover{text-decoration:underline}
+  /* The way back to the site. The lamp and the name are the site's own mark, so
+     this reads as the header it is rather than two loose amber links. */
+  .sitebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+           margin:0 0 18px;padding-bottom:13px;border-bottom:1px solid var(--line)}
+  .sitebar a{text-decoration:none;font-size:.86rem;white-space:nowrap}
+  .sitebar .home{display:inline-flex;align-items:center;gap:8px;color:var(--ink);
+                 font-weight:640;letter-spacing:-.01em}
+  .sitebar .home .mark{width:9px;height:9px;border-radius:50%;background:var(--amber);
+                       box-shadow:0 0 0 3px rgba(224,161,27,.16)}
+  .sitebar .home:hover{color:var(--amber)}
+  .sitebar .guides{margin-left:auto;color:var(--muted);background:var(--panel);
+                   border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+  .sitebar .guides:hover{color:var(--ink);border-color:#3A4C5C}
+  .sitebar a:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:4px}
 
   /* drill list — hairline rows, not cards */
   /* on a narrow screen the start buttons drop under the description rather than squeezing it */
@@ -360,7 +371,10 @@
 
 <!-- ================= MENU ================= -->
 <section id="menu" class="screen on">
-  <p class="sitelink"><a href="/">← Cab Ready</a> · <a href="/resources">Guides for every test</a></p>
+  <div class="sitebar">
+    <a class="home" href="/"><span class="mark"></span>Cab Ready</a>
+    <a class="guides" href="/resources">Guides for every test</a>
+  </div>
   <h1>Stage 2 test simulators</h1>
   <p class="sub" id="countdown">GTS trainee train driver · assessment 22 September, Watford</p>
 
