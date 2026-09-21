@@ -6,6 +6,8 @@
    Changing a tier here changes it everywhere, including the pricing table. */
 
 window.GROUPS = [
+  { id:"career",    name:"Getting in",
+    blurb:"The route into the job itself: who can apply, how vacancies work, what the training and the licence are, and what it pays." },
   { id:"process",   name:"The process",
     blurb:"What the day is, which tests your operator is likely to use, and where these notes come from." },
   { id:"stage1",    name:"Stage 1 — the paper and screen battery",
@@ -19,6 +21,26 @@ window.GROUPS = [
 ];
 
 window.RESOURCES = [
+  { slug:"becoming-a-train-driver", group:"career", tier:"starter", minutes:12,
+    stage:"All stages",
+    title:"How to become a train driver in the UK",
+    dek:"The whole route in seven steps: eligibility, finding the vacancy, the form, the assessment centre, the interview, the medical, and the eighteen months of training that follow." },
+
+  { slug:"eligibility", group:"career", tier:"starter", minutes:9,
+    stage:"All stages",
+    title:"Can you actually apply?",
+    dek:"Age — now 18 — education, eyesight, colour vision, hearing and depot distance. What the law requires, what operators add, and which common worries are not disqualifying at all." },
+
+  { slug:"applying", group:"career", tier:"gold", minutes:9,
+    stage:"All stages",
+    title:"Applying: windows, forms and the attempts you get",
+    dek:"How vacancies open and close, what the form screens for, the national database behind it, and the three-attempt rule with a five-year gap almost nobody knows about." },
+
+  { slug:"training-and-pay", group:"career", tier:"gold", minutes:9,
+    stage:"All stages",
+    title:"Training, licensing and what the job pays",
+    dek:"Rules school, traction and route learning, the ORR licence against the employer's certificate, the medicals that never stop, and honest numbers on trainee and qualified pay." },
+
   { slug:"assessment-day", group:"process", tier:"starter", minutes:8,
     stage:"All stages",
     title:"The assessment day, start to finish",
@@ -86,8 +108,8 @@ window.RESOURCES = [
 
   { slug:"mmi-interview", group:"interview", tier:"platinum", minutes:11,
     stage:"Interview", drill:"MMI",
-    title:"The interview: six examples that carry the whole thing",
-    dek:"The pre-interview form, the follow-ups it invites, and how to build examples that survive being probed three levels deep." },
+    title:"The interviews: MMI and DMI",
+    dek:"Two interviews that want different things: the multi-modal interview at the assessment centre, with its form and six probed examples, and the drivers' manager interview that usually decides the offer." },
 
   { slug:"four-week-plan", group:"plan", tier:"platinum", minutes:9,
     stage:"All stages",
@@ -97,7 +119,7 @@ window.RESOURCES = [
   { slug:"scoring", group:"plan", tier:"platinum", minutes:8,
     stage:"All stages",
     title:"Reading your own scores",
-    dek:"Speed against error, what a percentile means, the two-attempt rule, and how to tell a bad sitting from a real weakness." },
+    dek:"Speed against error, what a percentile means, the attempts rule as it stands since December 2024, and how to tell a bad sitting from a real weakness." },
 
   { slug:"sources", group:"process", tier:"starter", minutes:4,
     stage:"All stages",

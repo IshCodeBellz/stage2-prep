@@ -1,5 +1,5 @@
 /* Shared chrome for every marketing and resource page.
-   The header and footer are injected rather than copied into seventeen files;
+   The header and footer are injected rather than copied into twenty-odd files;
    the page content itself is static HTML so it still reads without JavaScript. */
 
 window.SITE = {

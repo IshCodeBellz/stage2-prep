@@ -7,7 +7,7 @@ driver assessment. Static: no build step, no dependencies, no framework.
 index.html              the landing page                    →  /
 pricing.html            Starter / Gold / Platinum           →  /pricing
 resources/index.html    the library, filterable             →  /resources
-resources/*.html        17 guides, one per test or topic    →  /resources/<slug>
+resources/*.html        21 guides, one per test or topic    →  /resources/<slug>
 simulators.html         the app (was index.html)            →  /simulators
 assets/site.css         one stylesheet for the whole site
 assets/site.js          header, footer, cards, prev/next
