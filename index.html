@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cab Ready — train driver assessment practice and guides</title>
-<meta name="description" content="Fourteen working simulators and a written guide to every test in the trainee train driver assessment: Group Bourdon, TEA-Occ, TRP, DFFT, ATAVT, WAFV, 2HAND, situational judgement and the interview.">
+<meta name="description" content="How to become a train driver in the UK, plus fourteen working simulators and a written guide to every test in the trainee driver assessment: Group Bourdon, TEA-Occ, TRP, DFFT, ATAVT, WAFV, 2HAND, situational judgement and the interview.">
 <meta name="theme-color" content="#0F151B">
 <link rel="icon" href="/icon-180.png">
 <link rel="apple-touch-icon" href="/icon-180.png">
@@ -27,7 +27,7 @@
     </div>
     <div class="heroStats">
       <div><b class="num">14</b><span>drills, plus a full day sitting</span></div>
-      <div><b class="num">17</b><span>written guides</span></div>
+      <div><b class="num">21</b><span>written guides</span></div>
       <div><b class="num">30</b><span>minute vigilance run, in full</span></div>
       <div><b>Offline</b><span>installs to your home screen</span></div>
     </div>
@@ -73,7 +73,7 @@
         <h3>Guides written for one test each</h3>
         <p>What the test measures, how it is scored, the method that works under time, and the
           mistakes that quietly cost people a sitting. Each guide ends at the drill that trains it.</p>
-        <span class="more">17 guides, free ones open to everybody</span>
+        <span class="more">21 guides, free ones open to everybody</span>
       </div>
       <div class="card">
         <h3>Day mode, for the bit nobody rehearses</h3>
@@ -81,6 +81,40 @@
           day that catches people out, and the only way to prepare for it is to feel it once at home.</p>
         <span class="more">Worth doing twice before the day</span>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="section flat">
+  <div class="wrap">
+    <div class="sechead">
+      <h2>New to this? Start with the job, not the tests.</h2>
+      <p>How you get in, what stops people, and what happens after you pass. Four guides written
+        against the ORR regulations, the rail industry standard behind the assessment and the Rail
+        Delivery Group's own material — not against somebody's memory of 2014.</p>
+    </div>
+    <div class="cards">
+      <a class="card" href="/resources/becoming-a-train-driver">
+        <div class="cardmeta"><span class="tag starter">starter</span></div>
+        <h3>The route, in seven steps</h3>
+        <p>Eligibility, finding a vacancy, the form, the assessment centre, the interview, the
+          medical, and twelve to eighteen months of paid training. Two to three years, realistically.</p>
+        <span class="more">How to become a train driver →</span>
+      </a>
+      <a class="card" href="/resources/eligibility">
+        <div class="cardmeta"><span class="tag starter">starter</span></div>
+        <h3>The minimum age is now 18</h3>
+        <p>It was 20 until 30 June 2026. That, the education requirement that is far lower than
+          people think, and the eyesight test worth taking before you apply rather than after.</p>
+        <span class="more">The eligibility checklist →</span>
+      </a>
+      <a class="card" href="/resources/applying">
+        <div class="cardmeta"><span class="tag gold">gold</span></div>
+        <h3>You get three attempts. Ever.</h3>
+        <p>Three since December 2024, two if you sat anything before it, a year between the first
+          and second and five years before the third. Results are held on a national database.</p>
+        <span class="more">Applying, and the attempts rule →</span>
+      </a>
     </div>
   </div>
 </section>
@@ -104,11 +138,11 @@
   <div class="wrap">
     <div class="sechead">
       <h2>Straight from the library</h2>
-      <p>Seventeen guides, grouped by the stage they belong to. These four are the ones people read first.</p>
+      <p>Twenty-one guides, grouped by the stage they belong to. These four are the ones people read first.</p>
     </div>
     <div class="cards" id="featured"></div>
     <div class="btnrow" style="margin-top:22px">
-      <a class="btn" href="/resources">Browse all 17 guides</a>
+      <a class="btn" href="/resources">Browse all 21 guides</a>
     </div>
   </div>
 </section>
@@ -154,6 +188,26 @@
   <div class="wrap">
     <div class="sechead"><h2>Questions people actually ask</h2></div>
     <div class="faq">
+      <details>
+        <summary>What do I actually need to become a train driver?</summary>
+        <p>Less than you think. By law: nine years of primary and secondary education, a medical, a
+          psychological assessment and a professional knowledge exam — no degree, no GCSE requirement
+          and no car licence. The minimum age dropped from 20 to 18 on 30 June 2026. Operators add
+          their own conditions, and the ones that actually stop people are colour vision and how far
+          you live from the depot. There is
+          <a href="/resources/eligibility">a checklist</a>, and
+          <a href="/resources/becoming-a-train-driver">the whole route written out in order</a>.</p>
+      </details>
+      <details>
+        <summary>How many goes do I get at the assessment?</summary>
+        <p>Three, if you started the standardised process on or after 7 December 2024; two if you sat
+          any part of it before then. After that, no more, permanently. The second attempt is at least
+          a year after the first and the third is gated on being five years past the first. Results
+          are checked against a national database, so applying to several operators at once does not
+          give you more chances — it spends the same ones faster.
+          <a href="/resources/applying">The detail is here</a>, and it is the whole reason to practise
+          before the first sitting rather than after it.</p>
+      </details>
       <details>
         <summary>Are these the real tests?</summary>
         <p>No, and nobody selling practice material has them. The real tests are licensed instruments
@@ -231,7 +285,7 @@
          <a class="btn sm ghost" href="/resources/${slug}">Guide</a></div>
      </div>`).join("");
 
-  const pick = ["assessment-day", "group-bourdon", "wafv", "mmi-interview"];
+  const pick = ["becoming-a-train-driver", "assessment-day", "group-bourdon", "mmi-interview"];
   document.getElementById("featured").innerHTML =
     pick.map(s => RES.bySlug(s)).filter(Boolean).map(Site.card).join("");
 })();

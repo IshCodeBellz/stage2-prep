@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>The resource library — Cab Ready</title>
-<meta name="description" content="Seventeen guides to the trainee train driver assessment: the day itself, every test in the Stage 1 and Stage 2 batteries, situational judgement, the interview, and how to prepare.">
+<meta name="description" content="Twenty-one guides to becoming a train driver in the UK: how to get in, the assessment day itself, every test in the Stage 1 and Stage 2 batteries, situational judgement, the interview, and how to prepare.">
 <meta name="theme-color" content="#0F151B">
 <link rel="icon" href="/icon-180.png">
 <link rel="stylesheet" href="/assets/site.css">
@@ -14,7 +14,8 @@
     <h1>Every test, written up once and properly.</h1>
     <p class="lede">One guide per test: what it measures, how it runs, the method that holds up under
       the clock, and the mistakes that quietly cost people a sitting. Each one ends at the drill that
-      trains it.</p>
+      trains it. And ahead of all of them, the route into the job itself — who can apply, how the
+      vacancies work, and what happens after you pass.</p>
   </div>
 </section>
 
@@ -38,6 +39,7 @@
   const lib = document.getElementById("library"), bar = document.getElementById("filters");
   const FILTERS = [
     { id: "all",       label: "All guides",  test: () => true },
+    { id: "career",    label: "Getting in",  test: r => r.group === "career" },
     { id: "process",   label: "The day",     test: r => r.group === "process" },
     { id: "stage1",    label: "Stage 1",     test: r => r.group === "stage1" },
     { id: "stage2",    label: "Stage 2",     test: r => r.group === "stage2" },
