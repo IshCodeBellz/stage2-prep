@@ -108,8 +108,8 @@ window.RESOURCES = [
 
   { slug:"mmi-interview", group:"interview", tier:"platinum", minutes:11,
     stage:"Interview", drill:"MMI",
-    title:"The interview: six examples that carry the whole thing",
-    dek:"The pre-interview form, the follow-ups it invites, and how to build examples that survive being probed three levels deep." },
+    title:"The interviews: MMI and DMI",
+    dek:"Two interviews that want different things: the multi-modal interview at the assessment centre, with its form and six probed examples, and the drivers' manager interview that usually decides the offer." },
 
   { slug:"four-week-plan", group:"plan", tier:"platinum", minutes:9,
     stage:"All stages",
