@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pricing — Cab Ready</title>
+<meta name="description" content="Starter, Gold and Platinum. One payment per tier, no subscription. Every simulator is free; the tiers open the written guides.">
+<meta name="theme-color" content="#0F151B">
+<link rel="icon" href="/icon-180.png">
+<link rel="stylesheet" href="/assets/site.css">
+
+<section class="hero" style="padding:54px 0 40px">
+  <div class="wrap">
+    <p class="eyebrow">Pricing</p>
+    <h1>Three tiers. One payment each.</h1>
+    <p class="lede">The simulators are free and stay free — they are no use to anyone locked. What you
+      pay for is the written half: the method for each test, and the material for the interview.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="note">
+      <strong>Not charging yet.</strong> The library is still being written, so everything on the site
+      is open. The tiers below are what it will look like when it is finished, and anyone using it
+      during early access keeps full access to what exists today.
+    </div>
+
+    <div class="plans">
+      <div class="plan">
+        <span class="tag starter ribbon">Starter</span>
+        <h3>Starter</h3>
+        <div class="price">Free</div>
+        <p class="why">Enough to find out whether you are slow, and on which test.</p>
+        <ul>
+          <li>All 14 simulators, practice and exam versions</li>
+          <li>Day mode — the whole stage in one sitting</li>
+          <li>Score history and personal bests, kept on your device</li>
+          <li>Works offline, installs to your home screen</li>
+          <li>The free guides: the assessment day, which tests you will sit, Group Bourdon,
+              visual search, and where this all comes from</li>
+          <li class="no">The rest of the written guides</li>
+        </ul>
+        <a class="btn block" href="/simulators">Start practising</a>
+      </div>
+
+      <div class="plan feature">
+        <span class="tag gold ribbon">Gold</span>
+        <h3>Gold</h3>
+        <div class="price">£19 <small>once</small></div>
+        <p class="why">The obvious one. Every test in the battery, explained properly.</p>
+        <ul>
+          <li>Everything in Starter</li>
+          <li>The guide to every Stage 1 test — TEA-Occ, TRP1b, TRP2, DFFT</li>
+          <li>The guide to every Stage 2 test — WAFV, ATAVT, 2HAND</li>
+          <li>Situational judgement: the ranking and rating exercises</li>
+          <li>The scoring shape of each test, and what examiners do with speed against error</li>
+          <li class="no">Interview material and the preparation plan</li>
+        </ul>
+        <a class="btn go block" href="/resources">Read what is in them</a>
+      </div>
+
+      <div class="plan">
+        <span class="tag platinum ribbon">Platinum</span>
+        <h3>Platinum</h3>
+        <div class="price">£29 <small>once</small></div>
+        <p class="why">For the sitting you cannot afford to get wrong — usually the second one.</p>
+        <ul>
+          <li>Everything in Gold</li>
+          <li>The interview guide: the pre-interview form, six examples, and the follow-ups</li>
+          <li>The Determination Test, which most material ignores entirely</li>
+          <li>A four-week plan that says what to do on which day</li>
+          <li>Reading your own scores: percentiles, cut-offs, and the two-attempt rule</li>
+          <li>Every guide added later, at no extra cost</li>
+        </ul>
+        <a class="btn block" href="/resources">Read what is in them</a>
+      </div>
+    </div>
+
+    <div id="tierswitch"></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="sechead">
+      <h2>Line by line</h2>
+      <p>The library is tiered guide by guide, so this table is generated from the library itself
+        rather than typed out by hand. If a guide moves tier, it moves here too.</p>
+    </div>
+    <div class="tablescroll">
+      <table class="ptable">
+        <thead>
+          <tr><th>What you get</th><th>Starter</th><th>Gold</th><th>Platinum</th></tr>
+        </thead>
+        <tbody id="ptbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="refund">
+  <div class="wrap">
+    <div class="sechead"><h2>The small print, in plain words</h2></div>
+    <div class="faq">
+      <details open>
+        <summary>Is it really one payment?</summary>
+        <p>Yes. No subscription, no renewal, no card kept on file for later. You buy a tier and it
+          stays bought, through both of your attempts and however long the gap between them is.</p>
+      </details>
+      <details>
+        <summary>What is the refund policy?</summary>
+        <p>Fourteen days, no questions, even if you have read every guide. Practice material that
+          needs a hostage policy is not confident about being worth the money.</p>
+      </details>
+      <details>
+        <summary>Do I need Gold or Platinum to use the simulators?</summary>
+        <p>No. Every drill, both modes, the full exam lengths and Day mode are free and will stay
+          free. Locking the practice would make the thing pointless.</p>
+      </details>
+      <details>
+        <summary>Can you guarantee I will pass?</summary>
+        <p>No, and be careful with anyone who does. Cut-off scores are set by the operator, are not
+          published, and move. What preparation reliably fixes is pace, method and surprise — which
+          is where most of the avoidable failures are.</p>
+      </details>
+      <details>
+        <summary>I have my assessment in four days.</summary>
+        <p>Then do not buy anything yet. Open the simulators, sit the exam version of Group Bourdon
+          and the vigilance test tonight, and read the two free guides that go with them. If what you
+          find worries you, come back for the rest.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<script src="/assets/resources.js"></script>
+<script src="/assets/site.js"></script>
+<script>
+(function () {
+  const yes = '<td class="y">Yes</td>', no = '<td class="n">—</td>';
+  const row = (label, from) => {
+    const rank = ["starter", "gold", "platinum"].indexOf(from);
+    return `<tr><th scope="row">${Site.esc(label)}</th>` +
+      [0, 1, 2].map(i => (i >= rank ? yes : no)).join("") + "</tr>";
+  };
+  const rows = [
+    row("All 14 simulators, practice and exam", "starter"),
+    row("Day mode, score history, offline use", "starter")
+  ].concat(RESOURCES.map(r => row(r.title, r.tier)));
+  document.getElementById("ptbody").innerHTML = rows.join("");
+})();
+</script>
+<script src="/assets/tiers.js"></script>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DFFT: fault finding against a guide — Cab Ready</title>
+<meta name="description" content="The Diagnostic Fault Finding Test: how to read a panel of indications against a fault finder guide, pick the right first action, and stop your own mechanical intuition from answering for you.">
+<meta name="theme-color" content="#0F151B">
+<link rel="icon" href="/icon-180.png">
+<link rel="stylesheet" href="/assets/site.css">
+
+<article class="doc" data-slug="dfft" data-tier="gold">
+  <p class="crumbs"><a href="/">Home</a> · <a href="/resources">Resources</a> · DFFT</p>
+  <header>
+    <h1>DFFT: fault finding against a guide</h1>
+    <p class="lede">Twenty questions in forty-five minutes. It is the most generous clock of the day,
+      and the only test where slowing down reliably scores better.</p>
+    <div class="docmeta">
+      <span class="tag gold">gold</span>
+      <span class="tag stage">Stage 1</span>
+      <span class="muted" style="font-size:.84rem">7 min read</span>
+    </div>
+  </header>
+
+  <p>You are given a display panel showing indications — lights, readings, states — and a fault finder
+    guide that maps combinations of indications to fault codes and the action each one requires. The
+    question is which fault to deal with first, and what to do about it.</p>
+
+  <dl class="spec">
+    <dt>Items</dt><dd>Around twenty</dd>
+    <dt>Clock</dt><dd>Commonly forty-five minutes</dd>
+    <dt>Per item</dt><dd>Just over two minutes</dd>
+    <dt>Materials</dt><dd>A panel and a reference guide, both in front of you</dd>
+  </dl>
+
+  <h2>What it is measuring</h2>
+  <p>Not mechanical knowledge. You are not expected to know anything about the equipment, and the
+    guide contains everything needed. What is being measured is whether you can work systematically
+    through a reference document under mild time pressure without taking shortcuts — which is exactly
+    what a driver does with a fault book at two in the morning with a train full of people behind them.</p>
+  <p>The test is therefore designed so that intuition gives the wrong answer often enough to catch
+    people who trust it. The most alarming-looking indication is frequently not the highest priority
+    one. The obvious fault is frequently a symptom of another.</p>
+
+  <h2>The method</h2>
+  <ol>
+    <li><strong>Read the whole panel before the guide.</strong> Thirty seconds, listing every
+      indication that is not normal. Every one. The most common error in this test is answering a
+      question about the first abnormality you noticed while a second one sits unread.</li>
+    <li><strong>Take the indications to the guide, not the other way round.</strong> Find the row that
+      matches the full set of what you observed. A row that matches most of your indications is not
+      your row.</li>
+    <li><strong>Check priority explicitly.</strong> When more than one fault is live, the guide, not
+      your judgement, decides which comes first. If the guide gives an order, use it as written even
+      if it feels wrong.</li>
+    <li><strong>Read the action off the same row as the code.</strong> Sliding a line while moving
+      between columns is a mundane, frequent, entirely avoidable way to get an item wrong. Put a
+      finger or the cursor on the row.</li>
+    <li><strong>Verify once, in one direction.</strong> Take your chosen code and check backwards that
+      its conditions are all present on the panel. One pass. If it holds, commit.</li>
+  </ol>
+  <p>That whole cycle takes ninety seconds with practice, inside a two-minute budget. Use the slack;
+    it is there deliberately and finishing early buys you nothing.</p>
+
+  <div class="drillcta">
+    <div>
+      <b>Drill it: DFFT</b>
+      <p>The exam version is the full twenty in forty-five minutes and ends at zero. The practice
+        version is five with no clock — use it to build the cycle before you time it.</p>
+    </div>
+    <a class="btn go" href="/simulators">Open the drill</a>
+  </div>
+
+  <h2>Where people lose it</h2>
+  <ul class="mistakes">
+    <li><strong>Answering from mechanical intuition.</strong> If you have a trade background this is
+      your main risk. The guide is the authority, including where it contradicts how the real thing
+      would behave.</li>
+    <li><strong>Stopping at the first abnormal indication.</strong> Read the whole panel first, every
+      time, even when the answer looks obvious after two seconds.</li>
+    <li><strong>Partial matches.</strong> A guide row that covers three of your four indications is
+      the distractor, and it is placed there on purpose.</li>
+    <li><strong>Column slip.</strong> Right fault, wrong action, because the eye moved a row while
+      crossing the table.</li>
+    <li><strong>Rushing because the other tests were rushed.</strong> You arrive at DFFT with the pace
+      of Group Bourdon still in you. Consciously change gear.</li>
+  </ul>
+
+  <h2>How to practise it</h2>
+  <ul>
+    <li>Practise the cycle, not the content: panel sweep, full match, priority, same-row read, one
+      verification. Say the five steps out loud until they are boring.</li>
+    <li>Time yourself per item rather than overall. If you are averaging well under two minutes and
+      getting items wrong, you are skipping the sweep.</li>
+    <li>When you get one wrong, work out which of the five steps you skipped. It will be one of them,
+      and it will usually be the same one each time.</li>
+    <li>Sit the full twenty at least once before the day. Forty-five minutes of careful table-reading
+      is more tiring than it sounds, and the last five items are where the errors live.</li>
+  </ul>
+</article>
+
+<script src="/assets/resources.js"></script>
+<script src="/assets/site.js"></script>
+<script src="/assets/tiers.js"></script>

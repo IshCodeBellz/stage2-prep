@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The resource library — Cab Ready</title>
+<meta name="description" content="Seventeen guides to the trainee train driver assessment: the day itself, every test in the Stage 1 and Stage 2 batteries, situational judgement, the interview, and how to prepare.">
+<meta name="theme-color" content="#0F151B">
+<link rel="icon" href="/icon-180.png">
+<link rel="stylesheet" href="/assets/site.css">
+
+<section class="hero" style="padding:54px 0 38px">
+  <div class="wrap">
+    <p class="eyebrow">Resource library</p>
+    <h1>Every test, written up once and properly.</h1>
+    <p class="lede">One guide per test: what it measures, how it runs, the method that holds up under
+      the clock, and the mistakes that quietly cost people a sitting. Each one ends at the drill that
+      trains it.</p>
+  </div>
+</section>
+
+<section class="section flat">
+  <div class="wrap">
+    <div class="filters" id="filters"></div>
+    <div id="library"></div>
+    <div class="note quiet">
+      Every guide here is written against published descriptions of the tests, candidate accounts and
+      the open material listed in <a href="/resources/sources" style="color:var(--amber)">where this
+      comes from</a>. None of it reproduces a licensed test, and none of it claims to know a pass mark
+      your operator has not published.
+    </div>
+  </div>
+</section>
+
+<script src="/assets/resources.js"></script>
+<script src="/assets/site.js"></script>
+<script>
+(function () {
+  const lib = document.getElementById("library"), bar = document.getElementById("filters");
+  const FILTERS = [
+    { id: "all",       label: "All guides",  test: () => true },
+    { id: "process",   label: "The day",     test: r => r.group === "process" },
+    { id: "stage1",    label: "Stage 1",     test: r => r.group === "stage1" },
+    { id: "stage2",    label: "Stage 2",     test: r => r.group === "stage2" },
+    { id: "interview", label: "Interview",   test: r => r.group === "interview" },
+    { id: "plan",      label: "Preparing",   test: r => r.group === "plan" },
+    { id: "free",      label: "Free",        test: r => r.tier === "starter" }
+  ];
+  let current = "all";
+
+  function draw() {
+    const f = FILTERS.find(x => x.id === current);
+    bar.innerHTML = FILTERS.map(x =>
+      `<button data-f="${x.id}" class="${x.id === current ? "on" : ""}">${x.label}</button>`).join("");
+    bar.querySelectorAll("button").forEach(b => b.onclick = () => { current = b.dataset.f; draw(); });
+
+    const shown = RESOURCES.filter(f.test);
+    lib.innerHTML = GROUPS.map(g => {
+      const items = shown.filter(r => r.group === g.id);
+      if (!items.length) return "";
+      return `<div class="libgroup">
+        <h2>${Site.esc(g.name)}</h2>
+        <p>${Site.esc(g.blurb)}</p>
+        <div class="cards">${items.map(Site.card).join("")}</div>
+      </div>`;
+    }).join("");
+    if (window.Access) Access.markCards(lib);
+  }
+  draw();
+})();
+</script>
+<script src="/assets/tiers.js"></script>
