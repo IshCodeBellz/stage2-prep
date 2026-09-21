@@ -8,7 +8,7 @@
    Bump CACHE whenever simulators.html or the shared assets change, or phones
    that already installed the app keep serving the old copy. */
 
-const CACHE = "stage2-v32";
+const CACHE = "stage2-v33";
 const APP = "/simulators";
 const ASSETS = [
   APP,

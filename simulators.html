@@ -52,18 +52,28 @@
   .sitebar .guides:hover{color:var(--ink);border-color:#3A4C5C}
   .sitebar a:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:4px}
 
-  /* On a large monitor the drill list is a narrow strip stranded mid-screen, so
-     the menu gets more room. The tests deliberately do not: how many squares
-     fit on a line is part of the paper, and the type sizes on the test surfaces
-     are tuned to the real thing. They keep the width they were built at. */
+  /* On a large monitor the drill list is a small strip stranded mid-screen.
+     The menu is scaled up whole with zoom rather than by raising the root font
+     size: a test surface mixes rem text with px squares and boxes, so growing
+     the type alone would burst the letter boxes and leave the squares behind.
+     Zoom takes the lot — type, rows, buttons — in proportion, and the line
+     length in characters stays exactly where it was.
+
+     The tests are left alone deliberately. How many squares fit on a line is
+     part of the paper, so #test keeps 724px, which is what .wrap gave it before
+     any of these rules existed (760 less 18px of padding either side). */
   @media (min-width:1700px){
-    .wrap{max-width:960px}
-    /* 724px is what .wrap gave a test before this rule existed — 760 less its
-       18px of padding either side. Anything else and the squares per line move. */
+    .wrap{max-width:900px}
+    #menu{zoom:1.12}
     #test{max-width:724px;margin-left:auto;margin-right:auto}
   }
   @media (min-width:2300px){
-    .wrap{max-width:1080px}
+    .wrap{max-width:1000px}
+    #menu{zoom:1.22}
+  }
+  @media (min-width:3000px){
+    .wrap{max-width:1100px}
+    #menu{zoom:1.32}
   }
 
   /* drill list — hairline rows, not cards */

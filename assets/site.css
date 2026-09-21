@@ -29,7 +29,7 @@
   html{font-size:19px}
 }
 @media (min-width:3000px){
-  :root{--shell:1020px;--wide:1680px}
+  :root{--shell:1040px;--wide:1800px}
   html{font-size:21px}
 }
 
@@ -221,7 +221,11 @@ a.card:hover{border-color:#3A4C5C;background:var(--panel2)}
 .tablescroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
 /* ---------- notes, faq ---------- */
-.note{background:var(--panel);border-left:3px solid var(--amber);padding:13px 15px;
+/* a line of prose the width of an ultrawide is unreadable whatever the type
+   size, so the boxed notes keep a measure like everything else. The box itself
+   is capped rather than its contents — a note is prose, not a banner. */
+.note{max-width:62ch;
+      background:var(--panel);border-left:3px solid var(--amber);padding:13px 15px;
       border-radius:0 8px 8px 0;font-size:.92rem;margin:20px 0}
 .note.quiet{border-left-color:var(--line)}
 .faq{border-top:1px solid var(--line)}
@@ -241,7 +245,7 @@ a.card:hover{border-color:#3A4C5C;background:var(--panel2)}
 .filters button.on{background:var(--amber);border-color:var(--amber);color:#171003;font-weight:620}
 .libgroup{margin-bottom:34px}
 .libgroup h2{margin-bottom:4px}
-.libgroup>p{color:var(--muted);font-size:.92rem;margin:0 0 16px}
+.libgroup>p{color:var(--muted);font-size:.92rem;margin:0 0 16px;max-width:64ch}
 
 /* ---------- article ---------- */
 .doc{max-width:var(--shell);margin:0 auto;padding:34px 18px 10px}
