@@ -1547,7 +1547,7 @@ const WAFV = {
     this.exam=exam;
     this.mins = exam ? WAFV_MINS.exam : (mode==="quick" ? WAFV_MINS.quick : WAFV_MINS.practice);
     this.hits=0;this.miss=0;this.fa=0;this.rts=[];this.trials=0;
-    this.armed=false;this.onset=0;this.ended=false;
+    this.live=[];this.ended=false;
     const box=el("div");
     box.appendChild(el("div","chainbar","<b>"+(exam?"Exam conditions":"Practice")+".</b> "+
       this.mins+" minutes, counting down, and it ends itself at zero."+
@@ -1592,20 +1592,32 @@ const WAFV = {
     this.trials++;
     this.sq.style.background = target ? "#6E6E6E" : "#9A9A9A";
     this.sq.style.visibility="visible";
-    if(target){ this.armed=true; this.onset=performance.now(); this.counted=false; }
+    /* every target carries its own record. The window to answer in (1400ms) is longer than
+       a flash and the gap after it (1000ms), so two darker squares in a row are both live at
+       once — on a single shared flag the second one wiped the first one's answer, which
+       scored the pair as one hit, one miss and one false alarm instead of two hits */
+    if(target){
+      const trial={onset:performance.now(), done:false};
+      this.live.push(trial);
+      setTimeout(()=>{
+        const i=this.live.indexOf(trial);
+        if(i>=0) this.live.splice(i,1);
+        if(!this.ended && !trial.done){ this.miss++; this.tally(); }
+      }, this.WINDOW);
+    }
     App.timer=setTimeout(()=>{
       this.sq.style.visibility="hidden";
       App.timer=setTimeout(()=>{ this.cycle(); }, this.OFF);
     }, this.ON);
-    if(target){
-      setTimeout(()=>{ if(!this.ended && this.armed && !this.counted){ this.miss++; this.armed=false; this.tally(); } }, this.WINDOW);
-    }
   },
   respond(){
     if(this.ended) return;
-    if(this.armed && !this.counted){
-      this.counted=true; this.armed=false;
-      this.hits++; this.rts.push(performance.now()-this.onset);
+    // answer the oldest target still inside its window, so a response is never credited to a
+    // later flash while an earlier one is left sitting there to expire as a miss
+    const trial=this.live.find(t=>!t.done);
+    if(trial){
+      trial.done=true;
+      this.hits++; this.rts.push(performance.now()-trial.onset);
     } else {
       this.fa++;
     }
