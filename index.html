@@ -3384,7 +3384,8 @@ function dotCell(n){
 
 const GB_PARTS={exam:5, practice:2};
 const GB = {
-  PARTS:5, PER_PART:60, N:150,
+  /* MIN_PART: a part never falls below this, however long you took at the change */
+  PARTS:5, PER_PART:60, MIN_PART:10, N:150,
   start(mode){
     const exam = mode!=="practice";
     this.exam=exam;
@@ -3393,6 +3394,7 @@ const GB = {
     this.build();
     App.open("Group Bourdon — part 1 of "+this.PARTS+(exam?"":" · practice"), el("div"));
     App.active=this;
+    this.t0=Date.now();       // the sitting is anchored once, and every part ends off it
     this.render();
   },
   build(){
@@ -3408,7 +3410,7 @@ const GB = {
     box.appendChild(el("div","chainbar","<b>"+(this.exam?"Exam conditions":"Practice")+".</b> Part "+
       (this.part+1)+" of "+this.PARTS+
       " — work left to right, line by line, and mark every group of exactly four dots. "+
-      "One minute a part, then it changes whether or not you have finished. At the change you tap the last group you got to — everything up to there is scored, the rest is not, so it costs you nothing to be honest about it. Errors count against you."+
+      "One minute a part, then it changes whether or not you have finished. At the change you tap the last group you got to — everything up to there is scored, the rest is not, so it costs you nothing to be honest about it. The clock does not stop while you answer: the next part is already running down, so be quick. Errors count against you."+
       (this.exam?"":" Two parts rather than five, so the fade the real test is looking for will not show and this does not set your best.")));
     const p=el("div","paper");
     const g=el("div","bgrid");
@@ -3423,18 +3425,32 @@ const GB = {
     $("#t-body").replaceChildren(box);
     window.scrollTo(0,0);
     this.marks=0;                       // the seed for "where did you get to", nothing more
-    this.t0=Date.now();
+    this.began=Date.now();
+    /* this part is due to end when the sitting says it is, not a minute from now —
+       so whatever you spent answering the last change comes out of this part rather
+       than being a rest. The floor keeps a part from vanishing if you really dawdle. */
+    this.due=Math.max(this.began+this.MIN_PART*1000, this.t0+(this.part+1)*this.PER_PART*1000);
     clearInterval(App.tick);
     App.tick=setInterval(()=>{
-      const left=this.PER_PART-(Date.now()-this.t0)/1000;
+      const left=(this.due-Date.now())/1000;
       App.clock(left>0?Math.ceil(left)+"s":"change");
       App.late(left<=10);
       if(left<=0) this.change();
     },200);
   },
   change(){
-    clearInterval(App.tick); App.clockPlain();
-    // the part is over, so ask where you got to before scoring it
+    clearInterval(App.tick);
+    this.worked=Math.round((Date.now()-this.began)/1000);   // what this part actually got
+    /* the clock is not stopped to ask the question. After the last part there is
+       nothing left to run down, but otherwise the next part is already going. */
+    if(this.part<this.PARTS-1){
+      const due=this.t0+(this.part+2)*this.PER_PART*1000;
+      App.late(true);
+      App.tick=setInterval(()=>{
+        const left=(due-Date.now())/1000;
+        App.clock(left>0?Math.ceil(left)+"s":"0s");
+      },200);
+    } else { App.clockPlain(); App.clock("change"); }
     App.askReach(this.nodes, "group", this.marks||0,
       "Part "+(this.part+1)+" of "+this.PARTS+" — change.", r=>this.score(r));
   },
@@ -3447,7 +3463,7 @@ const GB = {
       else if(four&&!this.marked[i])miss++;
       else if(!four&&this.marked[i])fa++;
     }
-    this.log.push({reach,fours,hit,miss,fa});
+    this.log.push({reach,fours,hit,miss,fa,secs:this.worked});
     this.part++;
     if(this.part>=this.PARTS){ this.finish(); return; }
     $("#t-title").textContent="Group Bourdon — part "+(this.part+1)+" of "+this.PARTS+(this.exam?"":" · practice");
@@ -3462,9 +3478,14 @@ const GB = {
     const net = tot.hit - tot.fa;
     App.done("gb", tot.fours? acc : null, false, "%",
       this.PARTS+" parts · "+(this.exam?"exam":"practice"));
-    const first=this.log.slice(0,2).reduce((a,b)=>a+b.reach,0)/2;
-    const last=this.log.slice(-2).reduce((a,b)=>a+b.reach,0)/2;
+    /* parts are no longer all the same length — answering the change question eats
+       into the one after it — so the fade is read off the rate, not off raw coverage */
+    const rate=p=>p.secs?p.reach/p.secs*60:0;
+    const mean=a=>a.length?a.reduce((x,p)=>x+rate(p),0)/a.length:0;
+    const first=mean(this.log.slice(0,2)), last=mean(this.log.slice(-2));
     const faded=this.exam && last<first*0.8;
+    const worked=this.log.reduce((a,b)=>a+b.secs,0);
+    const lost=Math.max(0, this.PARTS*this.PER_PART-worked);
     const coach = tot.fa>tot.hit*0.15
       ? "Your false marks are high. On this test an error costs you more than a group you never reached, so the answer is not to speed up — it is to stop marking anything you have not actually counted. Three and five look like four when you are moving."
       : faded
@@ -3482,16 +3503,21 @@ const GB = {
       ["Net", net],
       ["Of the marks you made, right", marks?Math.round(tot.hit/marks*100)+"%":"—"],
       ["Worked as far as", tot.reach+" groups"],
+      ["Groups a minute", worked?Math.round(tot.reach/worked*60):"—"],
       ["Fours you passed over", tot.miss],
       ["Fours caught in that stretch", acc+"%"]
-    ], coach+lengthNote, net+"");
+    ].concat(lost>2 ? [["Working time lost at the changes", lost+"s of "+
+        mmss(this.PARTS*this.PER_PART)]] : []),
+      coach+lengthNote+(lost>2
+        ? " You spent "+lost+"s of the sitting answering the change question. The clock does not stop for it, so that came out of your working time — set the line and move on."
+        : ""), net+"");
     const r=el("div","rev");
     r.appendChild(el("h4",null,"Part by part"));
     this.log.forEach((p,i)=>{
       const row=el("div","hrow");
       const l=el("div");
       l.appendChild(el("div",null,"Part "+(i+1)));
-      l.appendChild(el("div","paper-name",p.reach+" groups covered · "+p.fa+" marked in error"));
+      l.appendChild(el("div","paper-name",p.reach+" groups in "+p.secs+"s · "+p.fa+" marked in error"));
       row.appendChild(l);
       row.appendChild(el("b",null,p.fours?Math.round(p.hit/p.fours*100)+"%":"—"));
       r.appendChild(row);
