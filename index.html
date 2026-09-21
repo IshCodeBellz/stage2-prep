@@ -245,7 +245,8 @@
   .stagebar{display:flex;gap:8px;margin:0 0 10px}
   .stagebar button{flex:1 1 0;padding:10px 12px;font-weight:600}
   .stagebar button.on{background:var(--amber);border-color:var(--amber);color:#171003}
-  #stagenote{margin:0 0 20px;font-size:.86rem}
+  #stagenote{margin:0 0 14px;font-size:.86rem}
+  #paperpack{margin:0 0 20px}
   .dials{display:flex;gap:14px;justify-content:center;align-items:center}
   .dial{text-align:center;flex:1 1 0;max-width:120px}
   .dial svg{width:100%;height:auto;display:block}
@@ -258,6 +259,85 @@
   .pifback{background:var(--panel);border:1px dashed var(--line);border-radius:8px;padding:11px 13px;
        margin-top:8px;font-size:.9rem;color:var(--muted);white-space:pre-wrap}
   .hrow .paper-name{color:var(--muted);font-size:.8rem}
+
+  /* ---- printed papers. Stage 1 is a paper afternoon, so the four pen-and-paper
+         drills are also laid out for A4. The preview on screen is the printed
+         page itself: what you see here is what comes out of the printer. */
+  #printout{display:none;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printout.on{display:block}
+  body.printing{background:#fff}
+  body.printing .wrap{display:none}
+  .pbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+        background:var(--desk);color:var(--ink);padding:11px 18px;border-bottom:1px solid var(--line)}
+  .pbar strong{font-size:.95rem;font-weight:620}
+  .pbar .sp{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .pbar button{padding:8px 13px;font-size:.9rem}
+  .pnote{background:var(--desk);color:var(--muted);font-size:.8rem;margin:0;padding:9px 18px 12px}
+  /* a real A4 page, scaled down to fit the screen rather than reflowed, so the
+     preview is the printed page and not an approximation of it */
+  #p-body{width:210mm;margin:0 auto;padding:12px 0 60px}
+  .pp-sheet{background:#fff;color:#000;padding:14mm;margin:0 auto 14px;box-shadow:0 0 0 1px #0003;
+            font-size:10.5pt;line-height:1.42}
+  .pp-head{display:flex;gap:14px;align-items:baseline;border-bottom:1.5px solid #000;padding-bottom:5px}
+  .pp-head h1{flex:1 1 auto;margin:0;font-size:13pt;font-weight:700;letter-spacing:0;color:#000}
+  .pp-head span{font-size:8pt;color:#444;white-space:nowrap}
+  .pp-instr{margin:8px 0 11px;font-size:9pt;color:#000}
+  .pp-para{margin:0 0 7px;font-size:10.5pt;color:#000}
+  .pp-h2{margin:9px 0 3px;font-size:10pt;font-weight:700;color:#000;break-after:avoid;page-break-after:avoid}
+  /* group bourdon: a numbered line of dot groups, fifteen to the line */
+  .pp-bgrid{display:grid;grid-template-columns:7mm repeat(15,1fr);gap:2.2mm 1.6mm;margin-top:4mm}
+  .pp-bnum{font-size:8pt;color:#555;align-self:center;text-align:right;padding-right:1mm}
+  .pp-bcell{aspect-ratio:1;border:.4pt solid #999}
+  .pp-bcell svg{display:block;width:100%;height:100%}
+  .pp-cols{column-count:2;column-gap:10mm;font-size:9pt}
+  .pp-kpart{break-inside:avoid;page-break-inside:avoid}
+  .pp-krow{break-inside:avoid;font-variant-numeric:tabular-nums}
+  .pp-krow b{display:inline-block;min-width:6mm;color:#555;font-weight:400}
+  .pp-krow i{color:#777;font-style:normal}
+  /* questions on paper: never split a question across a page */
+  .pp-qs{margin-top:3mm}
+  .pp-q{break-inside:avoid;page-break-inside:avoid;margin-bottom:5mm;padding-bottom:3mm;
+        border-bottom:.4pt solid #ccc}
+  .pp-qn{font-weight:650;margin-bottom:2mm}
+  .pp-opts{display:grid;grid-template-columns:1fr 1fr;gap:1mm 6mm;font-size:9.5pt}
+  .pp-opt{display:flex;gap:2mm;align-items:baseline}
+  .pp-opt b{display:inline-grid;place-items:center;flex:0 0 5mm;height:5mm;border:.6pt solid #000;
+            border-radius:50%;font-size:8pt;font-weight:600}
+  .pp-keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(26mm,1fr));gap:2mm;margin-top:4mm;
+           font-variant-numeric:tabular-nums}
+  .pp-keys b{display:inline-block;min-width:7mm;color:#666;font-weight:400}
+  /* trp2: three dials and four orders, two questions to a row */
+  .pp-qs2{display:grid;grid-template-columns:1fr 1fr;gap:4mm 8mm;margin-top:4mm}
+  .pp-q2{break-inside:avoid;page-break-inside:avoid;border:.4pt solid #bbb;padding:2mm}
+  .pp-qn2{font-size:9pt;font-weight:650}
+  .pp-dials{display:flex;gap:2mm;justify-content:center}
+  .pp-dial{flex:1 1 0;max-width:20mm;text-align:center}
+  .pp-dial svg{display:block;width:100%;height:auto}
+  .pp-dial span{font-size:7.5pt;color:#333}
+  .pp-opts2{display:flex;flex-wrap:wrap;gap:1mm 4mm;justify-content:center;margin-top:1.5mm;font-size:9pt}
+  .pp-opt2{white-space:nowrap}
+  .pp-opt2 b{font-size:8pt;color:#555;font-weight:400}
+  /* dfft: the fault finder guide, and the display panel on each question */
+  .pp-guide{margin-top:3mm}
+  .pp-grow{display:grid;grid-template-columns:6mm 1.2fr 12mm 1.6fr;gap:3mm;padding:1.6mm 0;
+           border-top:.4pt solid #bbb;font-size:9.5pt;align-items:baseline}
+  .pp-ghead{border-top:0;font-size:8pt;color:#555;text-transform:uppercase;letter-spacing:.04em}
+  .pp-plan{grid-template-columns:6mm 1fr 38mm 1.2fr}   /* the running order, not the guide */
+  .pp-panel{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5mm;margin-bottom:2mm}
+  .pp-pcell{display:flex;justify-content:space-between;gap:2mm;border:.4pt solid #999;padding:1.2mm 1.8mm;
+            font-size:8.5pt}
+  .pp-pcell b{font-variant-numeric:tabular-nums;white-space:nowrap}
+  @media print{
+    @page{size:A4 portrait;margin:12mm}
+    html,body{background:#fff}
+    /* only a paper takes the page over — Ctrl-P anywhere else still prints the app */
+    body.printing .wrap{display:none!important}
+    .no-print{display:none!important}
+    #p-body{width:auto;margin:0;padding:0;zoom:1!important}
+    /* one sheet, one page — anything longer than a page simply flows on */
+    .pp-sheet{padding:0;margin:0;box-shadow:none;break-after:page;page-break-after:always}
+    .pp-sheet:last-child{break-after:auto;page-break-after:auto}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -273,6 +353,10 @@
     <button data-s="2">Stage 2</button>
   </div>
   <p class="sub" id="stagenote"></p>
+
+  <div class="row" id="paperpack" hidden>
+    <button onclick="PAPER.open('pack')">Print the paper pack</button>
+  </div>
 
   <div class="drill" data-stage="2">
     <span class="lamp" id="l-vse1"></span>
@@ -321,6 +405,7 @@
       <div class="meta">5 parts · 1 min each · exam ends at 5:00 · errors penalised</div>
     </div>
     <div class="row">
+      <button onclick="PAPER.open('gb')">Paper</button>
       <button onclick="GB.start('practice')">Practice</button>
       <button class="go" onclick="GB.start('exam')">Exam</button>
     </div>
@@ -347,6 +432,7 @@
       <div class="meta">18 questions · 3 min study · exam ends at 7:00 · 3 passages</div>
     </div>
     <div class="row">
+      <button onclick="PAPER.open('trp1')">Paper</button>
       <button onclick="TRP1.start('practice')">Practice</button>
       <button class="go" onclick="TRP1.start('exam')">Exam</button>
     </div>
@@ -360,6 +446,7 @@
       <div class="meta">43 questions · 11 s each · exam ends at 8:00 · practice is 7, untimed</div>
     </div>
     <div class="row">
+      <button onclick="PAPER.open('trp2')">Paper</button>
       <button onclick="TRP2.start('practice')">Practice</button>
       <button class="go" onclick="TRP2.start('exam')">Exam</button>
     </div>
@@ -373,6 +460,7 @@
       <div class="meta">20 questions · 2:15 each · exam ends at 45:00 · practice is 5, untimed</div>
     </div>
     <div class="row">
+      <button onclick="PAPER.open('dfft')">Paper</button>
       <button onclick="DFFT.start('practice')">Practice</button>
       <button class="go" onclick="DFFT.start('exam')">Exam</button>
     </div>
@@ -493,6 +581,19 @@
 </section>
 
 </div>
+
+<!-- ================= PRINTED PAPERS ================= -->
+<!-- Outside the wrap, because when it is showing it is the whole page — on screen
+     as a preview, and on paper as itself. -->
+<section id="printout">
+  <div class="pbar no-print">
+    <button onclick="PAPER.close()">Back</button>
+    <strong id="p-title"></strong>
+    <span class="sp" id="p-tools"></span>
+  </div>
+  <p class="pnote no-print" id="p-note"></p>
+  <div id="p-body"></div>
+</section>
 
 <script>
 "use strict";
@@ -639,7 +740,7 @@ const FULL_RUN={
 const STAGES={
   "1":{ label:"Stage 1",
         when:new Date("2026-09-01T13:00:00+01:00"),
-        blurb:"Group Bourdon, Tea-Occ, TRP1b, TRP2 and the DFFT. An afternoon of paper tests, 13:00 to about 16:30.",
+        blurb:"Group Bourdon, Tea-Occ, TRP1b, TRP2 and the DFFT. An afternoon of paper tests, 13:00 to about 16:30. All of it is on paper on the day except the Tea-Occ, which comes through headphones, so the other four can be printed and sat with a pen.",
         missing:null },
   "2":{ label:"Stage 2",
         when:new Date("2026-09-22T09:00:00+01:00"),
@@ -670,6 +771,8 @@ function paintStage(){
   });
   const n=document.getElementById("stagenote");
   if(n) n.innerHTML = S.blurb + (S.missing?" <b>"+S.missing+"</b>":"");
+  const pp=document.getElementById("paperpack");
+  if(pp) pp.hidden = cur!=="1";      // only stage 1 has anything to print
   const h=document.querySelector("#menu h1");
   if(h) h.textContent = S.label+" test simulators";
 }
@@ -3846,6 +3949,283 @@ const TRP2 = {
     ], lengthNote+" "+acc, right+"/"+this.N+(this.full?(this.ranOut?" · time up":""):" · practice")));
   },
   stop(){ clearInterval(App.tick); App.clockPlain(); }
+};
+
+/* -------------------------------------------------------------- PAPER PRINTS */
+/* On the day, stage 1 is an afternoon of paper. The Tea-Occ is the exception —
+   it comes through headphones and cannot be printed — so the other four are
+   built here as A4 sheets from the same generators the screen versions use.
+   The preview is the printed page: what is on screen is what comes out of the
+   printer, or out of Save as PDF.
+   Every paper ends with its answers on separate sheets, so they can be left off
+   the print if someone else is marking it. */
+
+const PP_RULE = "Name ________________________   Date ____________";
+
+function ppSheet(title, instr, noRule){
+  const s=el("div","pp-sheet");
+  const h=el("div","pp-head");
+  h.appendChild(el("h1",null,title));
+  if(!noRule) h.appendChild(el("span",null,PP_RULE));   // nothing to sign on an answer sheet
+  s.appendChild(h);
+  if(instr) s.appendChild(el("p","pp-instr",instr));
+  return s;
+}
+/* a page of answers, laid out as a grid so a run of them stays readable */
+function ppAnswers(title, instr, items){
+  const s=ppSheet(title, instr, true);
+  const g=el("div","pp-keys");
+  items.forEach(t=>g.appendChild(el("div",null,t)));
+  s.appendChild(g);
+  return s;
+}
+function ppLetters(list, fn){ return list.map((x,i)=>"<b>"+(i+1)+"</b> "+fn(x,i)); }
+
+/* Group Bourdon — five parts of 150 groups, fifteen to a numbered line */
+const PP_GB={COLS:15, ROWS:10};
+function gbPaper(){
+  const sheets=[], parts=[];
+  for(let p=0;p<GB_PARTS.exam;p++){
+    const groups=[];
+    for(let i=0;i<PP_GB.COLS*PP_GB.ROWS;i++){
+      const r=Math.random();
+      groups.push(r<0.28 ? 4 : (r<0.64 ? 3 : 5));
+    }
+    parts.push(groups);
+    const s=ppSheet("Group Bourdon — part "+(p+1)+" of "+GB_PARTS.exam,
+      "One minute on this page. Work left to right, line after line, and put a line through every group of "+
+      "exactly four dots. When the minute is up stop where you are and rule a line under it, finished or not — "+
+      "very few people reach the end of a part. Errors count against you, so count the group rather than "+
+      "recognising its shape.");
+    const g=el("div","pp-bgrid");
+    groups.forEach((n,i)=>{
+      if(i%PP_GB.COLS===0) g.appendChild(el("div","pp-bnum",String(i/PP_GB.COLS+1)));
+      const c=el("div","pp-bcell"); c.innerHTML=dotCell(n); g.appendChild(c);
+    });
+    s.appendChild(g);
+    sheets.push(s);
+  }
+  const k=ppSheet("Group Bourdon — answers",
+    "The fours on each line, counted from the left, with how many there are. A line through a four is one "+
+    "caught; a line through a three or a five is an error. Score the ones you caught less the errors, as far "+
+    "as the line you ruled — how far you got at that accuracy is the whole of this test.", true);
+  const cols=el("div","pp-cols");
+  parts.forEach((groups,p)=>{
+    const part=el("div","pp-kpart");                    // a part never splits across a column
+    part.appendChild(el("h2","pp-h2","Part "+(p+1)));
+    for(let r=0;r<PP_GB.ROWS;r++){
+      const pos=[];
+      for(let c=0;c<PP_GB.COLS;c++) if(groups[r*PP_GB.COLS+c]===4) pos.push(c+1);
+      part.appendChild(el("div","pp-krow","<b>"+(r+1)+"</b> "+(pos.length?pos.join(" "):"—")+
+        " <i>("+pos.length+")</i>"));
+    }
+    cols.appendChild(part);
+  });
+  k.appendChild(cols);
+  return {sheets, keys:[k]};
+}
+
+/* TRP1b — the passage on its own sheet, so it can genuinely be turned face down */
+function trp1Paper(setIx){
+  const S=TRP1_SETS[setIx % TRP1_SETS.length];
+  const a=ppSheet("TRP1b — "+S.title,
+    "Three minutes to study this. Then turn it face down and answer the questions overleaf without looking "+
+    "back at it. You may take notes, but they go face down too — on the day the passage and your notes are "+
+    "both collected before the questions.");
+  S.passage.forEach(t=>a.appendChild(el("p","pp-para",t)));
+  a.appendChild(el("p","pp-instr","Practice material written in the register of the rules. The rules in it "+
+    "are invented — what is being drilled is taking dense procedure in once and holding on to it."));
+  const b=ppSheet("TRP1b — questions",
+    S.qs.length+" questions, "+mmss(TRP1.ANSWER)+". Ring one letter for each. The passage stays face down. "+
+    "There is no penalty for a wrong answer, so a guess beats a blank.");
+  const g=el("div","pp-qs");
+  S.qs.forEach((q,i)=>{
+    const box=el("div","pp-q");
+    box.appendChild(el("div","pp-qn",(i+1)+".  "+q[0]));
+    const o=el("div","pp-opts");
+    q[1].forEach((t,j)=>o.appendChild(el("div","pp-opt","<b>"+"ABCD"[j]+"</b> <span>"+t+"</span>")));
+    box.appendChild(o);
+    g.appendChild(box);
+  });
+  b.appendChild(g);
+  return {sheets:[a,b],
+          keys:[ppAnswers("TRP1b — answers · "+S.title, "One mark each.",
+                 ppLetters(S.qs, q=>"ABCD"[q[2]]))]};
+}
+
+/* TRP2 — forty-three sets of three dials, two to a row */
+function trp2Paper(){
+  const n=TRP2_LENGTHS.exam[0], qs=[];
+  const s=ppSheet("TRP2 — order of checking",
+    n+" questions, "+mmss(TRP2_LENGTHS.exam[1])+" — about eleven seconds each. Each dial has an arrow "+
+    "sitting over one of three backgrounds. White is checked first, black second, grey last. Ring the order. "+
+    "Nobody is expected to finish; rule a line under where you got to.");
+  const g=el("div","pp-qs2");
+  for(let i=0;i<n;i++){
+    const q=trp2Question(); qs.push(q);
+    const box=el("div","pp-q2");
+    box.appendChild(el("div","pp-qn2",String(i+1)));
+    const row=el("div","pp-dials");
+    q.panels.forEach((pn,k)=>{
+      const d=el("div","pp-dial");
+      const w=el("div"); w.innerHTML=pn.svg; d.appendChild(w);
+      d.appendChild(el("span",null,TRP2_POS[k]));
+      row.appendChild(d);
+    });
+    box.appendChild(row);
+    const o=el("div","pp-opts2");
+    q.opts.forEach((t,j)=>o.appendChild(el("span","pp-opt2","<b>"+"ABCD"[j]+"</b> "+t.split("").join(" "))));
+    box.appendChild(o);
+    g.appendChild(box);
+  }
+  s.appendChild(g);
+  return {sheets:[s],
+          keys:[ppAnswers("TRP2 — answers", "The order the three dials are checked in.",
+                 ppLetters(qs, q=>q.correct.split("").join(" ")))]};
+}
+
+/* DFFT — the fault finder guide on its own sheet, to be kept beside the questions */
+function dfftPaper(){
+  const n=DFFT_LENGTHS.exam[0], secs=DFFT_LENGTHS.exam[1], qs=[];
+  const guide=ppSheet("DFFT — fault finder guide",
+    "Keep this page beside you throughout. Deal with the highest priority fault showing on the panel. "+
+    "If the isolator is OFF, add one to the number in the code.");
+  const t=el("div","pp-guide");
+  const hd=el("div","pp-grow pp-ghead");
+  ["","Condition","Code","Further action"].forEach(x=>hd.appendChild(el("span",null,x)));
+  t.appendChild(hd);
+  DFFT_RULES.forEach(x=>{
+    const row=el("div","pp-grow");
+    row.appendChild(el("span",null,String(x.p)));
+    row.appendChild(el("span",null,x.cond));
+    row.appendChild(el("b",null,x.code));
+    row.appendChild(el("span",null,x.act));
+    t.appendChild(row);
+  });
+  guide.appendChild(t);
+  guide.appendChild(el("p","pp-instr",
+    "The system, the codes and the rules are invented, so that nobody's background with real trains helps. "+
+    "What is being tested is reading the guide and applying it exactly, at pace."));
+
+  const s=ppSheet("DFFT — questions",
+    n+" questions, "+mmss(secs)+" — about two and a quarter minutes each. Read each panel against the guide "+
+    "on the first page, and ring the code and action that go with it.");
+  const g=el("div","pp-qs");
+  for(let i=0;i<n;i++){
+    const q=dfftQuestion(); qs.push(q);
+    const box=el("div","pp-q");
+    box.appendChild(el("div","pp-qn",(i+1)+".  Display panel"));
+    const p=el("div","pp-panel");
+    [["Brake pipe",q.r.brake],["Main reservoir",q.r.res],["Line volts",q.r.line],["Traction current",q.r.trac],
+     ["Coolant",q.r.coolant],["Battery",q.r.batt],["Door interlock",q.r.door],["Isolator",q.r.isolator]
+    ].forEach(([k,v])=>{
+      const c=el("div","pp-pcell");
+      c.appendChild(el("span",null,k));
+      c.appendChild(el("b",null,v));
+      p.appendChild(c);
+    });
+    box.appendChild(p);
+    const o=el("div","pp-opts");
+    q.opts.forEach((t,j)=>o.appendChild(el("div","pp-opt","<b>"+"ABCD"[j]+"</b> <span>"+t[0]+"</span>")));
+    box.appendChild(o);
+    g.appendChild(box);
+  }
+  s.appendChild(g);
+  return {sheets:[guide,s],
+          keys:[ppAnswers("DFFT — answers",
+                 "The highest priority fault showing, with the isolator rule applied where it applies.",
+                 ppLetters(qs, q=>"ABCD"[q.opts.findIndex(o=>o[1]==="correct")]))]};
+}
+
+/* The whole afternoon in one print: a running order, then all four papers */
+function packPaper(setIx){
+  const cover=ppSheet("Stage 1 — the paper afternoon",
+    "Sit them in this order with a clock beside you, stopping on the bell whether or not you have finished. "+
+    "Everything on the day is on paper except the Tea-Occ, which comes through headphones — run that one in "+
+    "the app, in the gap where it sits below.");
+  const t=el("div","pp-guide");
+  const hd=el("div","pp-grow pp-plan pp-ghead");
+  ["","Test","Clock","Where"].forEach(x=>hd.appendChild(el("span",null,x)));
+  t.appendChild(hd);
+  [["Group Bourdon","5 parts of 1 minute","in this pack"],
+   ["Tea-Occ","3 parts, about 5 minutes","needs sound — in the app"],
+   ["TRP1b","3 minutes study, then "+mmss(TRP1.ANSWER),"in this pack"],
+   ["TRP2",mmss(TRP2_LENGTHS.exam[1]),"in this pack"],
+   ["DFFT",mmss(DFFT_LENGTHS.exam[1]),"in this pack"]
+  ].forEach((r,i)=>{
+    const row=el("div","pp-grow pp-plan");
+    row.appendChild(el("span",null,String(i+1)));
+    row.appendChild(el("b",null,r[0]));
+    row.appendChild(el("span",null,r[1]));
+    row.appendChild(el("span",null,r[2]));
+    t.appendChild(row);
+  });
+  cover.appendChild(t);
+  cover.appendChild(el("p","pp-instr",
+    "The answers to all four papers are on the last sheets. About an hour and a quarter of paper in total, "+
+    "which is the point of sitting it in one go rather than a test at a time — the afternoon is as much "+
+    "about lasting as it is about the tests."));
+  const parts=[gbPaper(), trp1Paper(setIx), trp2Paper(), dfftPaper()];
+  return {
+    sheets:parts.reduce((a,p)=>a.concat(p.sheets), [cover]),
+    keys:  parts.reduce((a,p)=>a.concat(p.keys), [])
+  };
+}
+
+const PAPER = {
+  id:"gb", set:0, keys:true,
+  defs:{
+    gb:  {title:"Group Bourdon — on paper", make:()=>gbPaper()},
+    trp1:{title:"TRP1b — on paper", again:"Next passage", make:()=>trp1Paper(PAPER.set)},
+    trp2:{title:"TRP2 — on paper", make:()=>trp2Paper()},
+    dfft:{title:"DFFT — on paper", make:()=>dfftPaper()},
+    pack:{title:"Stage 1 — the paper pack", again:"New pack", make:()=>packPaper(PAPER.set)}
+  },
+  open(id){
+    this.id=id;
+    document.body.classList.add("printing");
+    $("#printout").classList.add("on");
+    this.render();
+    if(!this.fitting){ this.fitting=()=>this.fit(); window.addEventListener("resize", this.fitting); }
+  },
+  /* the sheet is a real A4 page, so on anything narrower than one it is shrunk
+     whole rather than reflowed — a phone gets a small page, not a different one */
+  fit(){
+    const page=210/25.4*96, avail=document.documentElement.clientWidth-16;
+    $("#p-body").style.zoom = avail<page ? (avail/page).toFixed(3) : "";
+  },
+  /* a fresh set of questions. On the two that have passages, the next passage as well */
+  again(){
+    if(this.defs[this.id].again) this.set=(this.set+1)%TRP1_SETS.length;
+    this.render();
+  },
+  render(){
+    const d=this.defs[this.id], out=d.make();
+    $("#p-title").textContent=d.title;
+    const sheets=out.sheets.concat(this.keys?out.keys:[]);
+    $("#p-body").replaceChildren(...sheets);
+    const again=el("button",null,d.again||"New paper");
+    again.onclick=()=>this.again();
+    const keys=el("button",null,this.keys?"Answers: printed":"Answers: left off");
+    keys.onclick=()=>{ this.keys=!this.keys; this.render(); };
+    const go=el("button","go","Print · save as PDF");
+    go.onclick=()=>window.print();
+    $("#p-tools").replaceChildren(again, keys, go);
+    $("#p-note").textContent =
+      "A4. Print it, or choose Save as PDF in the same dialogue. Every paper is generated fresh, so a "+
+      "second print is a different paper"+(this.keys?", and the answers are on the last sheets.":".")+
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches
+        ? " Printing is sometimes blocked in the home-screen app — if nothing happens, open the site in the browser."
+        : "");
+    this.fit();
+    window.scrollTo(0,0);
+  },
+  close(){
+    document.body.classList.remove("printing");
+    $("#printout").classList.remove("on");
+    $("#p-body").replaceChildren();
+    $("#p-tools").replaceChildren();
+  }
 };
 
 /* ---------------------------------------------------------------- MMI data */
