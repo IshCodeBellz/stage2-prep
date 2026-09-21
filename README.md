@@ -102,8 +102,8 @@ node serve.js          # http://localhost:8000
 ## Deploying
 
 Push to `main`; Vercel redeploys. **Bump the `CACHE` constant in `sw.js`**
-whenever `simulators.html` or anything in `assets/` changes — `stage2-v29`
-becomes `stage2-v30` — or phones that installed the app keep serving the old
+whenever `simulators.html` or anything in `assets/` changes — `stage2-v30`
+becomes `stage2-v31` — or phones that installed the app keep serving the old
 copy.
 
 The app moved from `/` to `/simulators` when the marketing site took the root.

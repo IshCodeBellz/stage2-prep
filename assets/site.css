@@ -95,19 +95,54 @@ p{margin:0 0 14px}
 .tag.stage{text-transform:none;letter-spacing:0;font-weight:600}
 
 /* ---------- hero ---------- */
-.hero{padding:70px 0 52px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
-.hero:before{content:"";position:absolute;inset:-40% 40% 40% -20%;pointer-events:none;
-             background:radial-gradient(60% 60% at 50% 50%,rgba(224,161,27,.10),transparent 70%)}
-.hero .wrap{position:relative}
+/* The glow is painted on the section itself rather than an absolutely
+   positioned pseudo-element hanging off its left edge — one less thing that can
+   push a layout sideways on a very wide screen. */
+.hero{padding:70px 0 52px;border-bottom:1px solid var(--line);
+      background:radial-gradient(46% 120% at 24% 34%,rgba(224,161,27,.09),transparent 72%)}
 .hero .eyebrow{color:var(--amber);font-size:.8rem;font-weight:650;letter-spacing:.11em;
                text-transform:uppercase;margin:0 0 14px}
 .hero h1{max-width:17ch}
 .hero .lede{margin:18px 0 26px;font-size:1.12rem}
-.heroStats{display:flex;gap:30px;flex-wrap:wrap;margin-top:34px;padding-top:24px;
+/* min() on the track floor, so the grid cannot claim a min-content width of
+   four full columns and push the page wider than a phone */
+.heroStats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(142px,100%),1fr));
+           gap:18px 26px;margin-top:34px;padding-top:24px;
            border-top:1px solid var(--line);max-width:740px}
-.heroStats div{min-width:92px}
 .heroStats b{display:block;font-size:1.5rem;font-weight:650;font-variant-numeric:tabular-nums}
 .heroStats span{color:var(--muted);font-size:.84rem}
+
+/* On a wide screen the words alone leave half the hero empty, which reads as a
+   page pushed off to one side. A panel takes the other half. Below 1000px it is
+   hidden rather than stacked — on a phone it would just be a second thing to
+   scroll past before the buttons. */
+.heroGrid{display:grid;gap:46px;align-items:center}
+.heroGrid>*{min-width:0}   /* grid items default to min-width:auto and will not shrink */
+.heroPanel{display:none}
+@media (min-width:1000px){
+  .heroGrid{grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr)}
+  .heroPanel{display:block}
+  /* the text column is half as wide now, so four stats in a row would leave one
+     stranded underneath — two by two instead */
+  .heroGrid .heroStats{grid-template-columns:repeat(2,1fr)}
+}
+.heroPanel{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+           padding:8px 8px 6px;box-shadow:0 18px 50px -28px #000}
+.hp-bar{display:flex;align-items:center;gap:9px;padding:9px 12px 12px;
+        border-bottom:1px solid var(--line);font-size:.86rem}
+.hp-bar b{font-weight:620}
+.hp-bar .clock{margin-left:auto;color:var(--amber);font-variant-numeric:tabular-nums;font-size:1rem}
+.hp-row{display:flex;gap:11px;align-items:flex-start;padding:13px 12px;border-bottom:1px solid var(--line)}
+.hp-row:last-of-type{border-bottom:0}
+.hp-row .lamp{width:10px;height:10px;border-radius:50%;flex:0 0 10px;margin-top:6px;
+              background:#2A3A47;box-shadow:inset 0 0 0 1px #0008}
+.hp-row .lamp.on{background:var(--green)}
+.hp-row b{display:block;font-weight:600;font-size:.94rem}
+.hp-row span{color:var(--muted);font-size:.81rem}
+.hp-row .go{margin-left:auto;background:var(--amber);color:#171003;font-weight:620;font-size:.78rem;
+            border-radius:6px;padding:5px 11px;align-self:center}
+.hp-foot{padding:11px 12px 9px;color:var(--muted);font-size:.78rem;
+         font-variant-numeric:tabular-nums;border-top:1px solid var(--line)}
 
 /* ---------- sections ---------- */
 .section{padding:58px 0;border-bottom:1px solid var(--line)}
