@@ -176,6 +176,17 @@
   .chainbar{background:var(--panel);border:1px solid var(--amber);border-radius:8px;
             padding:10px 13px;font-size:.86rem;margin-bottom:14px}
 
+  /* "where did you get to" — the bar sticks to the top so the paper can be scrolled
+     under it, and everything past the line you set is dimmed to show what is not scored */
+  .askbar{position:sticky;top:0;z-index:15;background:var(--panel);border:1px solid var(--amber);
+          border-radius:8px;padding:11px 13px;font-size:.86rem;margin-bottom:14px}
+  .askbar .rd{display:block;margin-top:7px;color:var(--amber);font-weight:620;
+              font-variant-numeric:tabular-nums}
+  .askbar .row{margin-top:10px}
+  .askbar button{padding:9px 13px;font-size:.9rem}
+  .unscanned{opacity:.28}
+  .hereline{outline:2.5px solid #1A3C5E;outline-offset:1px;position:relative;z-index:1}
+
   .res{border-top:1px solid var(--line);margin-top:20px;padding-top:16px;scroll-margin-top:76px}
   .stat{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);
         font-variant-numeric:tabular-nums}
@@ -1170,6 +1181,49 @@ const App = {
   },
   late(on){ $("#t-clock").classList.toggle("late", !!on); },
   clockPlain(){ this.late(false); },
+  /* How far down the paper you actually got. A page only hears from you when you mark
+     something, so the items you scanned and correctly left blank leave no trace of
+     themselves — the only honest way to find the line is to ask for it, which is what
+     the real test does when the administrator says "change" and you draw one.
+     `from` seeds the line at the last thing you marked, so confirming without tapping
+     gives the old behaviour. Calls back with the number of items covered. */
+  askReach(nodes, noun, from, lead, then){
+    let line = Math.min(from||0, nodes.length);
+    const bar=el("div","askbar");
+    bar.appendChild(el("span",null,"<b>"+lead+"</b> Tap the last "+noun+" you got to — everything past it is dimmed and does not count. Scroll the paper under this bar."));
+    const rd=el("span","rd"); bar.appendChild(rd);
+    const row=el("div","row");
+    const ok=el("button","go","Score it to here");
+    const all=el("button",null,"I got to the end");
+    row.appendChild(ok); row.appendChild(all); bar.appendChild(row);
+
+    // the drill's own instructions are no use now and only push the paper down the screen
+    const hidden=[...$("#t-body").querySelectorAll(".chainbar, .sub, .row")];
+    hidden.forEach(n=>{ n.hidden=true; });
+
+    const paint=()=>{
+      nodes.forEach((n,i)=>{
+        n.classList.toggle("unscanned", i>=line);
+        n.classList.toggle("hereline", i===line-1);
+      });
+      rd.textContent = line
+        ? "Scored to "+noun+" "+line+" of "+nodes.length
+        : "Nothing scanned — nothing to score";
+    };
+    const finish=()=>{
+      nodes.forEach(n=>{ n.classList.remove("unscanned","hereline"); n.onclick=null; });
+      hidden.forEach(n=>{ n.hidden=false; });
+      bar.remove();
+      then(line);
+    };
+    nodes.forEach((n,i)=>{ n.onclick=()=>{ line=i+1; paint(); }; });
+    ok.onclick=finish;
+    all.onclick=()=>{ line=nodes.length; finish(); };
+
+    $("#t-body").prepend(bar);
+    paint();
+    window.scrollTo(0,0);
+  },
   results(title, rows, coach, headline){
     const w=el("div","res");
     if(headline){ w.appendChild(el("div","big",headline)); }
@@ -1230,7 +1284,7 @@ const VSE1 = {
     const box=el("div");
     box.appendChild(el("div","chainbar", exam
       ? "<b>Exam conditions.</b> "+this.N+" squares, one second a square, <b>"+mmss(TARGET_SECS.vse1)+
-        "</b> on the clock counting down. At zero the paper is taken off you and scored as it stands — squares you never reached count as missed, exactly as they would on the day."
+        "</b> on the clock counting down. At zero the paper is taken off you and scored as it stands — squares you never reached count as missed, exactly as they would on the day. It then asks how far down you had got, which goes in the report rather than the score."
       : "<b>Practice.</b> No limit: the clock counts up and you finish when you are ready. The real paper allows "+
         mmss(TARGET_SECS.vse1)+" for the "+this.N+" squares, one second a square, and stops there whether you have finished or not. Practice runs are saved but never set your best."));
     box.appendChild(el("p","sub","On this paper the dot should step <b>"+this.way+"</b> round the corners, one corner at a time. Work left to right, line after line, and tap any square where it has skipped a corner, gone back, or stayed put."));
@@ -1241,7 +1295,7 @@ const VSE1 = {
       s.onclick=()=>{
         if(this.frozen) return;
         this.marked[i]=!this.marked[i]; s.classList.toggle("mk");
-        if(i+1>this.reach) this.reach=i+1;   // how far down the paper you had got
+        if(i+1>this.reach) this.reach=i+1;   // seeds the line you are asked to confirm at the end
       };
       g.appendChild(s);
     });
@@ -1264,6 +1318,17 @@ const VSE1 = {
     if(this.frozen) return;                 // the clock and the button cannot both hand it in
     this.frozen=true;
     const t = ranOut ? TARGET_SECS.vse1 : this.getT();
+    /* the clock taking the paper off you is the only time how far you got is an open
+       question — handing it in yourself says you went through the whole paper */
+    if(ranOut && this.exam){
+      App.askReach(Array.from(this.grid.children), "square", this.reach||0,
+        "Time — the paper goes now.", r=>{ this.reach=r; this.score(t, ranOut); });
+      return;
+    }
+    if(!ranOut) this.reach=this.N;
+    this.score(t, ranOut);
+  },
+  score(t, ranOut){
     let hit=0,miss=0,fa=0;
     for(let i=0;i<this.N;i++){
       const sq=this.grid.children[i];
@@ -1291,10 +1356,10 @@ const VSE1 = {
     if(this.exam){
       const left=TARGET_SECS.vse1-t;
       rows.push(["Time", ranOut ? "clock ran out at "+mmss(TARGET_SECS.vse1) : mmss(t)+", with "+mmss(left)+" left"]);
-      rows.push(["Marked as far as", this.reach ? "square "+this.reach+" of "+this.N : "nothing marked"]);
+      rows.push(["Worked as far as", this.reach ? "square "+this.reach+" of "+this.N : "nothing covered"]);
       rows.push(["Seconds per square", (t/this.N).toFixed(2)+" against 1.00"]);
       note = (ranOut
-        ? "The clock beat you. You were still around square "+(this.reach||1)+" of "+this.N+
+        ? "The clock beat you. You had got to square "+(this.reach||1)+" of "+this.N+
           " when the paper went, and everything past that scored as missed — which is precisely what the real paper does to you. Coverage first: get to the end at "+
           (TARGET_SECS.vse1/this.N).toFixed(2)+" seconds a square, then let the accuracy climb back."
         : "You got through the paper with "+mmss(left)+" to spare, which is the whole paper scored rather than the part you reached. That is the run that counts.")+" "+acc;
@@ -1370,7 +1435,7 @@ const VSE2 = {
     const box=el("div");
     box.appendChild(el("div","chainbar", exam
       ? "<b>Exam conditions.</b> "+this.N+" boxes, two seconds a box, <b>"+mmss(TARGET_SECS.vse2)+
-        "</b> on the clock counting down. At zero the paper is taken off you and scored as it stands — boxes you never reached count as missed, exactly as they would on the day."
+        "</b> on the clock counting down. At zero the paper is taken off you and scored as it stands — boxes you never reached count as missed, exactly as they would on the day. It then asks how far down you had got, which goes in the report rather than the score."
       : "<b>Practice.</b> No limit: the clock counts up and you finish when you are ready. The real paper allows "+
         mmss(TARGET_SECS.vse2)+" for the "+this.N+" boxes, two seconds a box, and stops there whether you have finished or not. Practice runs are saved but never set your best."));
     box.appendChild(el("p","sub","Tap every box where the two columns hold different letters. The same letters in a different order still match, and a letter can turn up twice."
@@ -1381,7 +1446,7 @@ const VSE2 = {
       n.onclick=()=>{
         if(this.frozen) return;
         this.marked[i]=!this.marked[i]; n.classList.toggle("mk");
-        if(i+1>this.reach) this.reach=i+1;   // how far down the paper you had got
+        if(i+1>this.reach) this.reach=i+1;   // seeds the line you are asked to confirm at the end
       };
       g.appendChild(n);
     });
@@ -1399,6 +1464,16 @@ const VSE2 = {
     if(this.frozen) return;                 // the clock and the button cannot both hand it in
     this.frozen=true;
     const t = ranOut ? TARGET_SECS.vse2 : this.getT();
+    /* as on task 1: only the clock ending it leaves how far you got in doubt */
+    if(ranOut && this.exam){
+      App.askReach(Array.from(this.grid.children), "box", this.reach||0,
+        "Time — the paper goes now.", r=>{ this.reach=r; this.score(t, ranOut); });
+      return;
+    }
+    if(!ranOut) this.reach=this.N;
+    this.score(t, ranOut);
+  },
+  score(t, ranOut){
     let hit=0,miss=0,fa=0;
     this.items.forEach((it,i)=>{
       const n=this.grid.children[i];
@@ -1422,10 +1497,10 @@ const VSE2 = {
     if(this.exam){
       const left=TARGET_SECS.vse2-t;
       rows.push(["Time", ranOut ? "clock ran out at "+mmss(TARGET_SECS.vse2) : mmss(t)+", with "+mmss(left)+" left"]);
-      rows.push(["Marked as far as", this.reach ? "box "+this.reach+" of "+this.N : "nothing marked"]);
+      rows.push(["Worked as far as", this.reach ? "box "+this.reach+" of "+this.N : "nothing covered"]);
       rows.push(["Seconds per box",(t/this.N).toFixed(2)+" against 2.00"]);
       note = (ranOut
-        ? "The clock beat you. You were still around box "+(this.reach||1)+" of "+this.N+
+        ? "The clock beat you. You had got to box "+(this.reach||1)+" of "+this.N+
           " when the paper went, and everything past that scored as missed — which is precisely what the real paper does to you. Coverage first: hold two seconds a box all the way to the end, then let the accuracy climb back."
         : "You got through the paper with "+mmss(left)+" to spare, which is the whole paper scored rather than the part you reached. That is the run that counts.")+" "+acc;
       headline = hit+"/"+total+(ranOut?" · time up":" · "+mmss(t));
@@ -3333,21 +3408,21 @@ const GB = {
     box.appendChild(el("div","chainbar","<b>"+(this.exam?"Exam conditions":"Practice")+".</b> Part "+
       (this.part+1)+" of "+this.PARTS+
       " — work left to right, line by line, and mark every group of exactly four dots. "+
-      "One minute a part, then it changes whether or not you have finished, and it scores itself at the end of the last one. Errors count against you."+
+      "One minute a part, then it changes whether or not you have finished. At the change you tap the last group you got to — everything up to there is scored, the rest is not, so it costs you nothing to be honest about it. Errors count against you."+
       (this.exam?"":" Two parts rather than five, so the fade the real test is looking for will not show and this does not set your best.")));
     const p=el("div","paper");
     const g=el("div","bgrid");
     this.nodes=[];
     this.groups.forEach((n,i)=>{
       const c=el("div","bg"); c.innerHTML=dotCell(n);
-      c.onclick=()=>{ this.marked[i]=!this.marked[i]; c.classList.toggle("mk"); this.reach=Math.max(this.reach||0,i+1); };
+      c.onclick=()=>{ this.marked[i]=!this.marked[i]; c.classList.toggle("mk"); this.marks=Math.max(this.marks||0,i+1); };
       g.appendChild(c); this.nodes.push(c);
     });
     p.appendChild(g); box.appendChild(p);
     box.appendChild(el("p","sub","Very few people reach the end of a part. Getting further at the same accuracy is what scores, not finishing."));
     $("#t-body").replaceChildren(box);
     window.scrollTo(0,0);
-    this.reach=0;
+    this.marks=0;                       // the seed for "where did you get to", nothing more
     this.t0=Date.now();
     clearInterval(App.tick);
     App.tick=setInterval(()=>{
@@ -3359,8 +3434,11 @@ const GB = {
   },
   change(){
     clearInterval(App.tick); App.clockPlain();
-    // score only as far as the last group you marked — that is how far you got
-    const reach=this.reach||0;
+    // the part is over, so ask where you got to before scoring it
+    App.askReach(this.nodes, "group", this.marks||0,
+      "Part "+(this.part+1)+" of "+this.PARTS+" — change.", r=>this.score(r));
+  },
+  score(reach){
     let hit=0,miss=0,fa=0,fours=0;
     for(let i=0;i<reach;i++){
       const four=this.groups[i]===4;
@@ -3564,34 +3642,38 @@ const TEA = {
   search(part, secs, seq, next){
     const rows=teaDirectory(120);
     const marked=new Array(rows.length).fill(false);
-    let reach=0;
+    let marks=0;
     const box=el("div");
-    box.appendChild(el("div","chainbar", part===3
+    box.appendChild(el("div","chainbar", (part===3
       ? "Part 3 — tap the entries whose two symbols match, and count the high tones as you go."
-      : "Part 2 — tap the entries whose two symbols match."));
+      : "Part 2 — tap the entries whose two symbols match.")+
+      " When the time goes you say how far down the page you got, and that much is scored."));
     const p=el("div","paper");
     const d=el("div","dir");
+    const nodes=[];
     rows.forEach((r,i)=>{
       const row=el("div","dirrow");
       row.appendChild(el("span","dirname",r.name));
       row.appendChild(el("span","dirnum",r.num));
       row.appendChild(el("span","dirsym",r.a+" "+r.b));
-      row.onclick=()=>{ marked[i]=!marked[i]; row.classList.toggle("mk"); reach=Math.max(reach,i+1); };
-      d.appendChild(row);
+      row.onclick=()=>{ marked[i]=!marked[i]; row.classList.toggle("mk"); marks=Math.max(marks,i+1); };
+      d.appendChild(row); nodes.push(row);
     });
     p.appendChild(d); box.appendChild(p);
     $("#t-body").replaceChildren(box);
     window.scrollTo(0,0);
     App.countDown(secs, ()=>{
-      let hit=0,miss=0,fa=0,tot=0;
-      for(let i=0;i<reach;i++){
-        if(rows[i].match) tot++;
-        if(rows[i].match&&marked[i])hit++;
-        else if(rows[i].match&&!marked[i])miss++;
-        else if(!rows[i].match&&marked[i])fa++;
-      }
-      this.res["search"+part]={reach,tot,hit,miss,fa,secs};
-      next();
+      App.askReach(nodes, "entry", marks, "Part "+part+" — time.", reach=>{
+        let hit=0,miss=0,fa=0,tot=0;
+        for(let i=0;i<reach;i++){
+          if(rows[i].match) tot++;
+          if(rows[i].match&&marked[i])hit++;
+          else if(rows[i].match&&!marked[i])miss++;
+          else if(!rows[i].match&&marked[i])fa++;
+        }
+        this.res["search"+part]={reach,tot,hit,miss,fa,secs};
+        next();
+      });
     }, 10);
   },
   clearTimers(){ this.timers.forEach(clearTimeout); this.timers=[]; },
