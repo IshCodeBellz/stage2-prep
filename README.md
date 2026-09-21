@@ -65,6 +65,30 @@ find-and-replace across `*.html` and `assets/site.js` changes it everywhere.
 Before launch, also replace the placeholder contact details and confirm the
 prices on `/pricing` are the ones you mean.
 
+## Printing the stage 1 papers
+
+Stage 1 is an afternoon of paper. The Tea-Occ is the exception — it comes through
+headphones — so the other four have a **Paper** button beside Practice and Exam
+on `/simulators`: Group Bourdon, TRP1b, TRP2 and the DFFT. **Print the paper
+pack** above the list prints all four in one go, behind a cover sheet with the
+running order and the clock each one is given.
+
+The preview is the printed page rather than a picture of it, so what is on screen
+is what comes out. Print it, or choose Save as PDF in the same dialogue. Every
+paper is generated fresh, so printing the same one twice gives two different
+papers, and the answers are on the last sheets — **Answers: printed** toggles
+them off if someone else is marking it.
+
+Printing is sometimes blocked in a home-screen web app. If the button appears to
+do nothing, open the site in Safari or Chrome instead.
+
+## Put it on your home screen
+
+Open `/simulators` in Safari or Chrome on your phone, then **Share → Add to Home
+Screen**. It opens full screen with no browser chrome and works with no signal,
+which is the point — the Underground and most of the network between stations has
+nothing.
+
 ## Running it locally
 
 Any static server will do, but you want clean URLs, so plain
@@ -78,8 +102,8 @@ node serve.js          # http://localhost:8000
 ## Deploying
 
 Push to `main`; Vercel redeploys. **Bump the `CACHE` constant in `sw.js`**
-whenever `simulators.html` or anything in `assets/` changes — `stage2-v27`
-becomes `stage2-v28` — or phones that installed the app keep serving the old
+whenever `simulators.html` or anything in `assets/` changes — `stage2-v28`
+becomes `stage2-v29` — or phones that installed the app keep serving the old
 copy.
 
 The app moved from `/` to `/simulators` when the marketing site took the root.
