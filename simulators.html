@@ -10,106 +10,163 @@
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACtklEQVR42u3dMVbCQBRAUeHQW1m5CBdATcluXAa7oaRmAezIwgZBQmaAzM+f+zo8FHG4foYkBxfvH59v0n8tLYHgEByCQ3AIDsEhOASH4BAcEhyCQ3AIDsEhOASH4BAcgkOCQ3AIDsEhOASH4BAcgkNwSHAIDsEhOASHmraKcBCn3Z+HX9+dvhjrzfb84fGwb3s8i7bfJnjBolsiFyyCEGmGY4BFV0QGWDQnsowso+iZiWUUPdOGVElxlA6DrMOjdBhMPzxMDoXBUTcG8g2PujEw8fAwOXSzlSW4O6K6PSkHR7GYfqzAUW8lvZIGZ0grdpdtX4a7B1x3eBW7y4nPk5ocxTSvrfz+JN8gaXNtpWh4hF30x3evRcNj+ssrPso+NFGuKZx2ec7KuCr7ql9n5JFHvirrfo4QH3rdz9HLiYRnEen9TrCs5eAOx0RE5ujDp5XXfpyp+/QOBx9w8DFbH3DwAQcfcPABRwYfcOimj/jDA46WBfcBh80HHDYfcHhzgcPwgMPwgMPwMDk0s+EBh+EBh+CY9fCI9s4Ch+AQHN5Z4BAcgkNwCA5l2ZPCITgEh+AQHIJDMfPNPjI5BIfgEByCQ3AIDsEhOASHBIfgEByCQ3AIDsEhOASH4JDgEByCQ3AIDsEhOASH4BAcEhyCQ3Doma0iHMR6sz1/eDzs+3wxoq1D4699uliObonEXIdmOAaWoysikddhGXlFip6ZWEardbAhVSQcpX8EWYdH/HUwORQGRx3/fMNjFutgcggOwSE4lBFH3Zm+fOdJZ7EOJoci4Sjln/XySvx1MDkUDMf4P4LcV2WDr4P7OULkfo6xS+NOsCDr4B8AyoZUcAgOwSE4BIfgEByCQ3BIcAgOwSE4BIfgEByCQ3AIDgkOwSE4BIfgEByCQ3AIDsEhwSE4BIfgEBxq2w/PXLb0yN3MIwAAAABJRU5ErkJggg==">
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACtklEQVR42u3dMVbCQBRAUeHQW1m5CBdATcluXAa7oaRmAezIwgZBQmaAzM+f+zo8FHG4foYkBxfvH59v0n8tLYHgEByCQ3AIDsEhOASH4BAcEhyCQ3AIDsEhOASH4BAcgkOCQ3AIDsEhOASH4BAcgkNwSHAIDsEhOASHmraKcBCn3Z+HX9+dvhjrzfb84fGwb3s8i7bfJnjBolsiFyyCEGmGY4BFV0QGWDQnsowso+iZiWUUPdOGVElxlA6DrMOjdBhMPzxMDoXBUTcG8g2PujEw8fAwOXSzlSW4O6K6PSkHR7GYfqzAUW8lvZIGZ0grdpdtX4a7B1x3eBW7y4nPk5ocxTSvrfz+JN8gaXNtpWh4hF30x3evRcNj+ssrPso+NFGuKZx2ec7KuCr7ql9n5JFHvirrfo4QH3rdz9HLiYRnEen9TrCs5eAOx0RE5ujDp5XXfpyp+/QOBx9w8DFbH3DwAQcfcPABRwYfcOimj/jDA46WBfcBh80HHDYfcHhzgcPwgMPwgMPwMDk0s+EBh+EBh+CY9fCI9s4Ch+AQHN5Z4BAcgkNwCA5l2ZPCITgEh+AQHIJDMfPNPjI5BIfgEByCQ3AIDsEhOASHBIfgEByCQ3AIDsEhOASH4JDgEByCQ3AIDsEhOASH4BAcEhyCQ3Doma0iHMR6sz1/eDzs+3wxoq1D4699uliObonEXIdmOAaWoysikddhGXlFip6ZWEardbAhVSQcpX8EWYdH/HUwORQGRx3/fMNjFutgcggOwSE4lBFH3Zm+fOdJZ7EOJoci4Sjln/XySvx1MDkUDMf4P4LcV2WDr4P7OULkfo6xS+NOsCDr4B8AyoZUcAgOwSE4BIfgEByCQ3BIcAgOwSE4BIfgEByCQ3AIDgkOwSE4BIfgEByCQ3AIDsEhwSE4BIfgEBxq2w/PXLb0yN3MIwAAAABJRU5ErkJggg==">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- The design's three families. The app must still work with no signal, so every
+     rule falls back to a system stack; offline it renders in those. Self-host these
+     before relying on them. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=Public+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
 <style>
+  /* The design handover, applied to the app.
+
+     Every class the JavaScript writes is kept exactly as it was — this is a
+     restyle, not a rewrite. The drills, the timers, the scoring and the
+     printed papers are the same code they were.
+
+     Two things the mockups asked for are deliberately not done, because they
+     would change what a test measures rather than how it looks:
+
+       - #test stays 724px wide. How many squares fit on a line is part of the
+         paper, so the menu grows on a big monitor and the test surfaces do not.
+       - WAFV keeps its white panel and grey square. The mock draws a dark
+         screen with a brightening circle; the real test is a grey square that
+         goes darker, and inverting that changes the stimulus. The chrome round
+         it follows the design; the square itself does not. */
   :root{
-    --desk:#0F151B;        /* cab desk */
-    --panel:#18212A;
-    --line:#26333F;
-    --ink:#E6EDF3;
-    --muted:#8FA3B0;
-    --amber:#E0A11B;       /* caution aspect */
-    --green:#2E8B57;       /* proceed */
-    --red:#C6321E;         /* danger */
+    /* ground and surfaces */
+    --desk:#f6f7f8;        /* the page */
+    --panel:#ffffff;       /* anything raised off it */
+    --line:#e3e7ea;        /* borders */
+    --rule:#eceef0;        /* hairlines, progress tracks */
+    --btn-line:#d7dce0;    /* secondary button border */
+    --dash:#c6ccd2;        /* dashed placeholder, unset control */
     --paper:#FFFFFF;       /* test surfaces stay true to the real tests */
+    --night:#0f1a14;       /* the site header band */
+    --barink:#12181f;      /* the bar over a running test */
+
+    /* text */
+    --ink:#12181f;
+    --ink-2:#39434d;
+    --muted:#5a6572;
+    --faint:#8a929b;
+
+    /* accents */
+    --green:#0b6e4f;       /* proceed — the primary action */
+    --green-dark:#095c42;
+    --green-lit:#2fbf71;   /* proceed, on a dark ground or as a lamp */
+    --green-bg:#e7f6ee;
+    --amber:#e8a13a;       /* caution aspect */
+    --amber-ink:#a56a0d;
+    --amber-bg:#fdf3e6;
+    --red:#d64545;         /* danger */
+    --red-ink:#b32f2f;
+
+    --head:Archivo,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --body:'Public Sans',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{
     background:var(--desk); color:var(--ink);
-    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-family:var(--body);
     font-size:16px; line-height:1.5;
     -webkit-text-size-adjust:100%;
     padding:0 0 env(safe-area-inset-bottom);
   }
-  .wrap{max-width:760px;margin:0 auto;padding:22px 18px 60px}
-  h1{font-size:1.45rem;line-height:1.2;letter-spacing:-.02em;margin:0 0 4px;font-weight:650}
-  .sub{color:var(--muted);font-size:.92rem;margin:0 0 26px}
-  h2{font-size:1.15rem;letter-spacing:-.01em;margin:0 0 2px;font-weight:620}
+  /* The menu is a grid of cards and wants the room. The tests do not — see the
+     note at the top — so #test is pinned back to the width it always had. */
+  .wrap{max-width:1200px;margin:0 auto;padding:22px 40px 60px}
+  #test,#menu .note,#menu>.sub{max-width:724px}
+  #test{margin-left:auto;margin-right:auto}
+  h1{font:700 22px/1.2 var(--head);letter-spacing:-.01em;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:.84rem;margin:0 0 26px;line-height:1.55}
+  h2{font:700 15px/1.25 var(--head);margin:0 0 2px}
   .num{font-variant-numeric:tabular-nums}
-  /* back to the site around the simulators */
-  /* The way back to the site. The lamp and the name are the site's own mark, so
-     this reads as the header it is rather than two loose amber links. */
-  .sitebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-           margin:0 0 18px;padding-bottom:13px;border-bottom:1px solid var(--line)}
+
+  /* ---- the way back to the site, as the dark header band the mock draws */
+  .sitebar{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--night);color:#f3f5f2;
+    margin:-22px -40px 26px;padding:20px 40px;border:0;
+  }
   .sitebar a{text-decoration:none;font-size:.86rem;white-space:nowrap}
-  .sitebar .home{display:inline-flex;align-items:center;gap:8px;color:var(--ink);
-                 font-weight:640;letter-spacing:-.01em}
-  .sitebar .home .mark{width:9px;height:9px;border-radius:50%;background:var(--amber);
-                       box-shadow:0 0 0 3px rgba(224,161,27,.16)}
-  .sitebar .home:hover{color:var(--amber)}
-  .sitebar .guides{margin-left:auto;color:var(--muted);background:var(--panel);
-                   border:1px solid var(--line);border-radius:999px;padding:6px 13px}
-  .sitebar .guides:hover{color:var(--ink);border-color:#3A4C5C}
-  .sitebar a:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:4px}
+  .sitebar .home{display:inline-flex;align-items:center;gap:10px;color:#f3f5f2;
+                 font:700 17px var(--head);letter-spacing:-.01em}
+  .sitebar .home .mark{width:26px;height:26px;border-radius:6px;background:var(--green-lit);
+                       box-shadow:none;flex:none}
+  .sitebar .home:hover{color:var(--green-lit)}
+  .sitebar .guides{margin-left:auto;color:#f3f5f2;background:transparent;
+                   border:1px solid rgba(255,255,255,.3);border-radius:7px;padding:8px 16px;
+                   font-weight:500}
+  .sitebar .guides:hover{color:var(--green-lit);border-color:var(--green-lit)}
+  .sitebar a:focus-visible{outline:2px solid var(--green-lit);outline-offset:3px;border-radius:4px}
 
-  /* On a large monitor the drill list is a small strip stranded mid-screen.
-     The menu is scaled up whole with zoom rather than by raising the root font
-     size: a test surface mixes rem text with px squares and boxes, so growing
-     the type alone would burst the letter boxes and leave the squares behind.
-     Zoom takes the lot — type, rows, buttons — in proportion, and the line
-     length in characters stays exactly where it was.
+  /* ---- stage switch, as the pill row the resources mock uses */
+  .stagebar{display:flex;gap:8px;margin:0 0 12px;flex-wrap:wrap}
+  .stagebar button{flex:0 0 auto;padding:8px 16px;border-radius:999px;font:600 12.5px var(--body);
+                   border:1.5px solid var(--btn-line);background:transparent;color:var(--ink-2)}
+  .stagebar button:hover{border-color:var(--faint);color:var(--ink)}
+  .stagebar button.on{background:var(--green);border-color:var(--green);color:#fff}
+  #stagenote{margin:0 0 18px;font-size:.84rem;max-width:724px}
+  #paperpack{margin:0 0 22px}
 
-     The tests are left alone deliberately. How many squares fit on a line is
-     part of the paper, so #test keeps 724px, which is what .wrap gave it before
-     any of these rules existed (760 less 18px of padding either side). */
-  @media (min-width:1700px){
-    .wrap{max-width:900px}
-    #menu{zoom:1.12}
-    #test{max-width:724px;margin-left:auto;margin-right:auto}
+  /* ---- the drill list, as the card grid the home mock draws.
+         .drills is a wrapper round the same fifteen .drill blocks; the stage
+         switch still hides them one at a time. */
+  /* the cards stretch to the tallest in their row, so the start buttons line
+     up across the row instead of floating at the foot of each description */
+  .drills{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;
+          margin:0 0 26px;align-items:stretch}
+  .drill{
+    position:relative;display:flex;flex-direction:column;gap:0;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:18px 20px;
   }
-  @media (min-width:2300px){
-    .wrap{max-width:1000px}
-    #menu{zoom:1.22}
-  }
-  @media (min-width:3000px){
-    .wrap{max-width:1100px}
-    #menu{zoom:1.32}
-  }
+  .drill>.row{margin-top:auto}
+  .lamp{position:absolute;top:21px;right:20px;
+        width:10px;height:10px;border-radius:50%;flex:none;margin:0;
+        background:var(--dash);box-shadow:none}
+  .lamp.done{background:var(--green-lit)}
+  .drill .body{flex:1 1 auto;min-width:0;margin-bottom:14px}
+  .drill>.row,.drill>.go{margin-left:0}
+  .drill h2{padding-right:18px}
+  .drill p{margin:6px 0 0;color:var(--muted);font:400 12.5px/1.5 var(--body)}
+  .meta{color:var(--faint);font:500 11px var(--mono);margin-top:8px;font-variant-numeric:tabular-nums}
 
-  /* drill list — hairline rows, not cards */
-  /* on a narrow screen the start buttons drop under the description rather than squeezing it */
-  .drill{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-top:1px solid var(--line);
-         flex-wrap:wrap}
-  .drill:last-of-type{border-bottom:1px solid var(--line)}
-  .lamp{width:11px;height:11px;border-radius:50%;flex:0 0 11px;margin-top:7px;
-        background:#2A3A47;box-shadow:inset 0 0 0 1px #0008}
-  .lamp.done{background:var(--green)}
-  .drill .body{flex:1 1 210px;min-width:0}
-  .drill>.row,.drill>.go{margin-left:25px}   /* wrapped buttons line up with the text above them */
-  .drill p{margin:3px 0 0;color:var(--muted);font-size:.88rem}
-  .meta{color:var(--muted);font-size:.78rem;margin-top:6px;font-variant-numeric:tabular-nums}
-  button{font:inherit;cursor:pointer;border-radius:7px;border:1px solid var(--line);
-         background:var(--panel);color:var(--ink);padding:9px 15px;white-space:nowrap}
-  button:hover{border-color:#3A4C5C}
-  button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-  button.go{background:var(--amber);border-color:var(--amber);color:#171003;font-weight:600}
+  button{font:600 12.5px var(--body);cursor:pointer;border-radius:7px;
+         border:1.5px solid var(--btn-line);background:transparent;color:var(--ink-2);
+         padding:8px 14px;white-space:nowrap}
+  button:hover{border-color:var(--faint);color:var(--ink)}
+  button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+  button.go{background:var(--green);border-color:var(--green);color:#fff;padding:8px 16px}
+  button.go:hover{background:var(--green-dark);border-color:var(--green-dark);color:#fff}
   button.ghost{background:transparent}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
-  /* screens */
+  /* ---- screens */
   .screen{display:none}
   .screen.on{display:block}
-  .bar{position:sticky;top:0;z-index:10;background:var(--desk);border-bottom:1px solid var(--line);
-       display:flex;gap:12px;align-items:center;padding:12px 18px;margin:0 -18px 18px}
-  .bar .t{margin-left:auto;font-variant-numeric:tabular-nums;font-size:1.05rem;color:var(--amber)}
-  .bar .t.late{color:var(--red);font-weight:650}   /* last thirty seconds of a paper with a hard limit */
-  .note{background:var(--panel);border-left:3px solid var(--amber);padding:12px 14px;border-radius:0 7px 7px 0;
-        font-size:.9rem;margin:16px 0}
+  /* the bar over a running test — the dark player bar from the mocks */
+  .bar{position:sticky;top:0;z-index:10;background:var(--barink);color:#f3f5f2;
+       border-bottom:0;border-radius:0;
+       display:flex;gap:12px;align-items:center;padding:14px 26px;margin:0 0 18px}
+  .bar strong{font:700 15px var(--head)}
+  .bar button{background:transparent;border-color:rgba(255,255,255,.3);color:#f3f5f2;
+              font:600 13px var(--body);padding:8px 14px}
+  .bar button:hover{border-color:var(--green-lit);color:var(--green-lit)}
+  .bar .t{margin-left:auto;font:600 18px var(--mono);font-variant-numeric:tabular-nums;
+          color:var(--green-lit)}
+  .bar .t.late{color:#ff9b9b;font-weight:650}   /* last thirty seconds of a paper with a hard limit */
+  .note{background:var(--amber-bg);border-left:3px solid var(--amber);padding:14px 16px;
+        border-radius:0 10px 10px 0;font:400 13px/1.55 var(--body);color:var(--amber-bg-ink,#7a5410);
+        margin:16px 0}
   ul{padding-left:20px;margin:10px 0}
   li{margin:5px 0;font-size:.93rem}
 
-  /* paper surfaces — accurate to the real tests */
-  .paper{background:var(--paper);color:#111;border-radius:8px;padding:12px;margin-top:14px}
+  /* ---- paper surfaces — accurate to the real tests, so left alone */
+  .paper{background:var(--paper);color:#111;border-radius:10px;padding:14px;margin-top:14px;
+         border:1px solid var(--line)}
 
   .grid1{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px}
   .sq{position:relative;aspect-ratio:1;border:1.5px solid #222;background:#fff;border-radius:2px;
@@ -118,21 +175,21 @@
   .sq i.c0{top:3px;left:3px} .sq i.c1{top:3px;right:3px}
   .sq i.c2{bottom:3px;right:3px} .sq i.c3{bottom:3px;left:3px}
   .sq.mk{background:
-      linear-gradient(to top right,transparent calc(50% - 1.2px),#C6321E calc(50% - 1.2px),
-      #C6321E calc(50% + 1.2px),transparent calc(50% + 1.2px)) , #fff}
+      linear-gradient(to top right,transparent calc(50% - 1.2px),var(--red) calc(50% - 1.2px),
+      var(--red) calc(50% + 1.2px),transparent calc(50% + 1.2px)) , #fff}
   .sq.hit{border-color:var(--green)} .sq.miss{border-color:var(--red);background:#FDECEA}
-  .sq.fa{border-color:#E0A11B;background:#FEF6E3}
+  .sq.fa{border-color:var(--amber);background:var(--amber-bg)}
 
   .grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px}
   .lb{border:1.5px solid #222;border-radius:2px;padding:5px 2px;background:#fff;cursor:pointer;
       display:grid;grid-template-columns:1fr 1fr;gap:0 6px;justify-items:center;
-      font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.35;
+      font-family:var(--mono);font-size:.82rem;line-height:1.35;
       -webkit-tap-highlight-color:transparent}
   .lb.mk{background:
-      linear-gradient(to top right,transparent calc(50% - 1.2px),#C6321E calc(50% - 1.2px),
-      #C6321E calc(50% + 1.2px),transparent calc(50% + 1.2px)) , #fff}
+      linear-gradient(to top right,transparent calc(50% - 1.2px),var(--red) calc(50% - 1.2px),
+      var(--red) calc(50% + 1.2px),transparent calc(50% + 1.2px)) , #fff}
   .lb.hit{border-color:var(--green)} .lb.miss{border-color:var(--red);background:#FDECEA}
-  .lb.fa{border-color:#E0A11B;background:#FEF6E3}
+  .lb.fa{border-color:var(--amber);background:var(--amber-bg)}
 
   /* dual */
   .dual{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;justify-items:center;
@@ -142,199 +199,228 @@
   .bigsq i.c0{top:6px;left:6px} .bigsq i.c1{top:6px;right:6px}
   .bigsq i.c2{bottom:6px;right:6px} .bigsq i.c3{bottom:6px;left:6px}
   .biglb{font-size:1.3rem;padding:14px 10px;gap:0 20px;cursor:default}
-  .prog{height:4px;background:#26333F;border-radius:3px;overflow:hidden;margin-top:14px}
-  .prog b{display:block;height:100%;background:var(--amber);width:0}
+  .prog{height:6px;background:var(--rule);border-radius:3px;overflow:hidden;margin-top:14px}
+  .prog b{display:block;height:100%;background:var(--green);width:0}
   .flag{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
   .flag button{padding:16px 8px;font-size:.95rem}
   .flag button.armed{background:var(--red);border-color:var(--red);color:#fff}
 
-  /* wafv */
-  /* shorter than it was, so the tally and the stop control sit above the fold on a phone */
-  .vig{background:#fff;border-radius:8px;height:42vh;min-height:220px;display:grid;place-items:center;
+  /* ---- wafv. The panel stays white and the square stays grey: the stimulus is
+          the test. Everything round it follows the design. */
+  .vig{background:#fff;border:1px solid var(--line);border-radius:10px;height:42vh;min-height:220px;
+       display:grid;place-items:center;
        cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
   .vsq{width:96px;height:96px;border-radius:3px;background:#9A9A9A;visibility:hidden}
-  /* running tally under the panel */
   .tally{display:grid;grid-template-columns:auto auto;gap:2px 9px;justify-content:center;
-         margin-top:11px;font-variant-numeric:tabular-nums}
+         margin-top:13px;font-variant-numeric:tabular-nums;font-family:var(--mono)}
   .tally b{text-align:right;font-weight:650}
-  .tally span{color:var(--muted);font-size:.92rem}
-  .tally b.h{color:var(--green)} .tally b.m{color:var(--red)} .tally b.f{color:var(--amber)}
-  .stoprow{display:flex;justify-content:center;margin-top:6px}
+  .tally span{color:var(--muted);font-size:.86rem}
+  .tally b.h{color:var(--green)} .tally b.m{color:var(--red-ink)} .tally b.f{color:var(--amber-ink)}
+  .stoprow{display:flex;justify-content:center;margin-top:8px}
   .stoprow button{background:none;border:0;color:var(--muted);font-size:.9rem;padding:8px 14px}
   .stoprow button:hover{color:var(--ink)}
 
-  /* atavt */
-  .scene{background:#fff;border-radius:8px;overflow:hidden;aspect-ratio:4/3}
+  /* ---- atavt. The scene sits on the black stage the mock draws, and the
+          options are its chips. */
+  .scene{background:#fff;border-radius:10px;overflow:hidden;aspect-ratio:4/3}
   .scene svg{display:block;width:100%;height:100%}
-  .blank{background:#fff;border-radius:8px;aspect-ratio:4/3;display:grid;place-items:center;color:#bbb}
-  .opts{display:grid;gap:8px;margin-top:14px}
-  .opts label{display:flex;gap:11px;align-items:center;background:var(--panel);border:1px solid var(--line);
-              border-radius:7px;padding:13px 14px;cursor:pointer;font-size:.95rem}
-  .opts input{width:19px;height:19px;accent-color:var(--amber);flex:0 0 auto}
-  .opts label:has(input:checked){border-color:var(--amber)}
+  .blank{background:#fff;border:1px solid var(--line);border-radius:10px;aspect-ratio:4/3;
+         display:grid;place-items:center;color:#bbb}
+  .opts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:18px}
+  .opts label{display:inline-flex;gap:9px;align-items:center;background:transparent;
+              border:1.5px solid var(--btn-line);border-radius:10px;padding:12px 20px;
+              cursor:pointer;font:600 14px var(--body);color:var(--ink-2)}
+  .opts label:hover{border-color:var(--faint)}
+  .opts input{width:17px;height:17px;accent-color:var(--green);flex:0 0 auto;margin:0}
+  .opts label:has(input:checked){border:2px solid var(--green);background:var(--green-bg);
+                                 color:var(--green);padding:11.5px 19.5px}
 
-  /* two-hand */
-  .cvswrap{background:#fff;border-radius:8px;padding:6px;margin-top:12px}
-  .cvswrap canvas{display:block;width:100%;height:auto;border-radius:4px;touch-action:none}
+  /* ---- two-hand */
+  .cvswrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px;margin-top:12px}
+  .cvswrap canvas{display:block;width:100%;height:auto;border-radius:6px;touch-action:none}
   .pads{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
   .pad{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:12px;
        height:118px;touch-action:none;-webkit-tap-highlight-color:transparent;overflow:hidden}
-  .pad span{position:absolute;left:0;right:0;top:7px;text-align:center;font-size:.72rem;color:var(--muted)}
-  .pad b{position:absolute;width:46px;height:46px;border-radius:50%;background:var(--amber);
+  .pad span{position:absolute;left:0;right:0;top:9px;text-align:center;
+            font:600 11px var(--mono);color:var(--muted)}
+  .pad b{position:absolute;width:46px;height:46px;border-radius:50%;background:var(--green);
          left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
   .pad.v b{background:#5B8FB9}
-  .outside{color:var(--red);font-weight:620}
+  .outside{color:var(--red-ink);font-weight:620}
 
-  /* ranking */
-  .scenbox{background:var(--panel);border-left:3px solid var(--amber);padding:13px 14px;
-           border-radius:0 8px 8px 0;font-size:.96rem;line-height:1.5}
-  .ranks{display:grid;gap:9px;margin-top:14px}
-  .rankopt{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);
-           border-radius:8px;padding:12px 13px;cursor:pointer;font-size:.93rem;line-height:1.42;
-           -webkit-tap-highlight-color:transparent}
-  .rankopt .badge{flex:0 0 26px;height:26px;border-radius:50%;border:1px solid var(--line);
-                  display:grid;place-items:center;font-size:.85rem;font-weight:650;color:var(--muted)}
-  .rankopt.set{border-color:var(--amber)}
-  .rankopt.set .badge{background:var(--amber);color:#171003;border-color:var(--amber)}
-  .hintline{color:var(--muted);font-size:.82rem;margin-top:10px}
+  /* ---- ranking */
+  .scenbox{background:var(--desk);border-left:3px solid var(--green);padding:18px 22px;
+           border-radius:0 10px 10px 0;font:500 15.5px/1.55 var(--body);color:var(--ink)}
+  .ranks{display:grid;gap:10px;margin-top:16px}
+  .rankopt{display:flex;gap:12px;align-items:flex-start;background:var(--panel);
+           border:1px solid var(--line);border-radius:10px;padding:14px 18px;cursor:pointer;
+           font:500 14px/1.5 var(--body);-webkit-tap-highlight-color:transparent}
+  .rankopt:hover{border-color:var(--faint)}
+  .rankopt .badge{flex:0 0 28px;height:28px;border-radius:50%;border:1.5px solid var(--btn-line);
+                  display:grid;place-items:center;font:600 13px var(--mono);color:var(--muted)}
+  .rankopt.set{border:2px solid var(--green);background:var(--green-bg);padding:13px 17px}
+  .rankopt.set .badge{background:var(--green);color:#fff;border-color:var(--green)}
+  .hintline{color:var(--muted);font:400 13px var(--body);margin-top:12px}
 
-  /* rating */
-  .ratewrap{display:grid;gap:12px;margin-top:14px}
-  .rateopt{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 13px}
-  .rateopt p{margin:0 0 10px;font-size:.93rem;line-height:1.42}
-  .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-  .scale button{padding:11px 0;font-size:.95rem;font-variant-numeric:tabular-nums}
-  .scale button.sel{background:var(--amber);border-color:var(--amber);color:#171003;font-weight:650}
-  .scalekey{display:flex;justify-content:space-between;color:var(--muted);font-size:.72rem;margin-top:5px}
+  /* ---- rating, as the 1-to-5 row the SJE mock draws */
+  /* the response on the left, its 1-to-5 on the right, as the SJE mock draws it.
+     The three children are placed rather than wrapped, so the JS still appends
+     p, .scale and .scalekey in that order and knows nothing about this. */
+  .ratewrap{display:grid;gap:10px;margin-top:16px}
+  .rateopt{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+           padding:14px 18px;
+           display:grid;grid-template-columns:1fr 230px;gap:5px 18px;align-items:center}
+  .rateopt p{grid-column:1;grid-row:1/3;margin:0;font:500 14px/1.5 var(--body);color:var(--ink)}
+  .scale{grid-column:2;grid-row:1;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .scale button{padding:0;height:38px;border-radius:8px;font:600 14px var(--mono);
+                font-variant-numeric:tabular-nums;color:var(--muted)}
+  .scale button.sel{background:var(--green);border-color:var(--green);color:#fff}
+  .scalekey{grid-column:2;grid-row:2;display:flex;justify-content:space-between;
+            color:var(--faint);font:400 11px var(--body)}
 
-  /* review + chain */
-  .rev{border:1px solid var(--line);border-radius:8px;padding:12px 13px;margin-top:11px}
-  .rev h4{margin:0 0 6px;font-size:.9rem;font-weight:620}
-  .rev p{margin:5px 0;font-size:.87rem;line-height:1.42;color:var(--muted)}
-  .rev .ok{color:var(--green)} .rev .bad{color:var(--red)}
-  .chainbar{background:var(--panel);border:1px solid var(--amber);border-radius:8px;
-            padding:10px 13px;font-size:.86rem;margin-bottom:14px}
+  /* ---- review + chain */
+  .rev{border:1px solid var(--line);background:var(--panel);border-radius:10px;
+       padding:14px 16px;margin-top:11px}
+  .rev h4{margin:0 0 6px;font:700 12px var(--mono);color:var(--green);
+          text-transform:uppercase;letter-spacing:.02em}
+  .rev p{margin:5px 0;font:400 13.5px/1.5 var(--body);color:var(--ink-2)}
+  .rev .ok{color:var(--green)} .rev .bad{color:var(--red-ink)}
+  .rev a{color:var(--green)}
+  .chainbar{background:var(--green-bg);border:1px solid var(--green-bg-line,#bfe6d1);
+            border-radius:10px;padding:12px 15px;font:500 13px var(--body);
+            color:var(--ink);margin-bottom:14px}
 
   /* "where did you get to" — the bar sticks to the top so the paper can be scrolled
      under it, and everything past the line you set is dimmed to show what is not scored */
-  .askbar{position:sticky;top:0;z-index:15;background:var(--panel);border:1px solid var(--amber);
-          border-radius:8px;padding:11px 13px;font-size:.86rem;margin-bottom:14px}
-  .askbar .rd{display:block;margin-top:7px;color:var(--amber);font-weight:620;
+  .askbar{position:sticky;top:0;z-index:15;background:var(--amber-bg);border:1px solid var(--amber);
+          border-radius:10px;padding:12px 15px;font:400 13px var(--body);
+          color:#7a5410;margin-bottom:14px}
+  .askbar .rd{display:block;margin-top:7px;color:var(--amber-ink);font-weight:620;
               font-variant-numeric:tabular-nums}
   .askbar .row{margin-top:10px}
-  .askbar button{padding:9px 13px;font-size:.9rem}
+  .askbar button{padding:9px 13px;font-size:.9rem;background:#fff}
   .unscanned{opacity:.28}
-  .hereline{outline:2.5px solid #1A3C5E;outline-offset:1px;position:relative;z-index:1}
+  .hereline{outline:2.5px solid var(--green);outline-offset:1px;position:relative;z-index:1}
 
-  .res{border-top:1px solid var(--line);margin-top:20px;padding-top:16px;scroll-margin-top:76px}
-  .stat{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);
-        font-variant-numeric:tabular-nums}
-  .stat b{font-weight:620}
-  .big{font-size:2.1rem;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:6px 0}
+  /* ---- results */
+  .res{border-top:1px solid var(--line);margin-top:22px;padding-top:18px;scroll-margin-top:80px}
+  .stat{display:flex;justify-content:space-between;gap:14px;padding:11px 0;
+        border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums;
+        font:400 13.5px var(--body);color:var(--muted)}
+  .stat b{font-weight:620;color:var(--ink);font-family:var(--mono)}
+  .big{font:650 2.1rem var(--head);letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+       margin:8px 0;color:var(--green)}
 
-  /* the attempts line under each drill, and the history screen behind it */
-  .best{margin-top:6px;padding:0;border:0;background:none;text-align:left;cursor:pointer;
-        color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
-  .best .chev{color:var(--amber);margin-left:5px}
+  /* ---- the attempts line under each drill, and the history screen behind it */
+  .best{margin-top:10px;padding:0;border:0;background:none;text-align:left;cursor:pointer;
+        color:var(--muted);font:500 11.5px var(--mono);font-variant-numeric:tabular-nums}
+  .best .chev{color:var(--green);margin-left:5px;font-weight:600}
   .best:hover .chev{text-decoration:underline}
-  .best.none{cursor:default}
+  .best.none{cursor:default;color:var(--faint)}
   .foot{margin-top:26px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
-  .warn{color:var(--amber);font-size:.82rem}
+  .warn{color:var(--amber-ink);font-size:.82rem}
   .hchart{display:flex;align-items:flex-end;gap:4px;height:148px;margin-top:6px;padding-top:10px;
-          border-bottom:1px solid var(--line);overflow-x:auto}
-  .hbar{flex:1 0 13px;min-width:13px;background:#33434F;border-radius:3px 3px 0 0}
-  .hbar.top{background:var(--green)} .hbar.last{background:var(--amber)}
+          border-bottom:1.5px solid var(--line);overflow-x:auto}
+  .hbar{flex:1 0 13px;min-width:13px;background:var(--dash);border-radius:3px 3px 0 0}
+  .hbar.top{background:var(--green)} .hbar.last{background:var(--green-lit)}
   .hbar.slow{opacity:.4}
-  .hkey{display:flex;justify-content:space-between;color:var(--muted);font-size:.75rem;margin-top:7px}
-  .hrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);
-        font-size:.87rem;font-variant-numeric:tabular-nums}
+  .hkey{display:flex;justify-content:space-between;color:var(--faint);
+        font:500 11px var(--mono);margin-top:7px}
+  .hrow{display:flex;justify-content:space-between;gap:12px;padding:11px 0;
+        border-bottom:1px solid var(--rule);font:500 13.5px var(--body);
+        font-variant-numeric:tabular-nums}
   .hrow .when{color:var(--muted)}
-  .hrow b.slow{color:var(--amber)}
+  .hrow b{font-family:var(--mono)}
+  .hrow b.slow{color:var(--amber-ink)}
+  .hrow .paper-name{color:var(--faint);font-size:.8rem}
   [hidden]{display:none!important}
+
+  /* ---- scene library */
   .scene.shot{display:flex;align-items:center;justify-content:center;background:#000}
   .scene.shot img{width:100%;height:100%;object-fit:cover;display:block}
   .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-top:12px}
-  .thumb{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+  .thumb{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
   .thumb img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-  .thumb span{display:block;padding:7px 9px;font-size:.76rem;color:var(--muted);line-height:1.35}
-  .rev a{color:var(--amber)}
+  .thumb span{display:block;padding:8px 10px;font:400 11.5px/1.35 var(--body);color:var(--muted)}
   .tdel{width:100%;border:0;border-top:1px solid var(--line);border-radius:0;font-size:.8rem;padding:7px}
-  .tagshot{background:#000;border-radius:8px;overflow:hidden;margin-top:12px;aspect-ratio:4/3;
+  .tagshot{background:#000;border-radius:10px;overflow:hidden;margin-top:12px;aspect-ratio:4/3;
            display:flex;align-items:center;justify-content:center}
   .tagshot img{width:100%;height:100%;object-fit:contain;display:block}
+
+  /* ---- dfft panel and guide */
   .panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:7px;margin-top:8px}
   .pcell{display:flex;justify-content:space-between;gap:8px;background:#f2f4f6;border:1px solid #d7dbdf;
-         border-radius:5px;padding:7px 9px;font-size:.85rem}
+         border-radius:6px;padding:8px 10px;font-size:.85rem}
   .pk{color:#444} .pv{font-weight:650;color:#111;font-variant-numeric:tabular-nums;white-space:nowrap}
-  details.guide{background:var(--panel);border:1px solid var(--line);border-radius:8px;
-                padding:10px 13px;margin-top:14px}
-  details.guide summary{cursor:pointer;font-weight:620;font-size:.9rem}
+  details.guide{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+                padding:12px 15px;margin-top:14px}
+  details.guide summary{cursor:pointer;font:600 13px var(--body)}
   .gtab{margin-top:9px}
-  .grow{display:grid;grid-template-columns:18px 1fr 44px 1.5fr;gap:8px;padding:5px 0;
-        border-top:1px solid var(--line);font-size:.8rem;align-items:baseline}
-  .gp{color:var(--muted)} .gc{color:var(--ink)} .gk{font-weight:650;color:var(--amber)}
+  .grow{display:grid;grid-template-columns:18px 1fr 44px 1.5fr;gap:8px;padding:6px 0;
+        border-top:1px solid var(--rule);font-size:.8rem;align-items:baseline}
+  .gp{color:var(--muted)} .gc{color:var(--ink)} .gk{font-weight:650;color:var(--green)}
   .ga{color:var(--muted)}
-  .gnote{margin:9px 0 0;font-size:.82rem;color:var(--amber)}
+  .gnote{margin:9px 0 0;font-size:.82rem;color:var(--amber-ink)}
+
+  /* ---- group bourdon and the tea-occ directory */
   .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:5px}
   .bg{background:#fff;border:1px solid #bbb;border-radius:2px;cursor:pointer;aspect-ratio:1;
       -webkit-tap-highlight-color:transparent}
   .bg svg{display:block;width:100%;height:100%}
-  .bg.mk{background:linear-gradient(to top right,transparent calc(50% - 1.3px),#C6321E calc(50% - 1.3px),
-         #C6321E calc(50% + 1.3px),transparent calc(50% + 1.3px)),#fff}
+  .bg.mk{background:linear-gradient(to top right,transparent calc(50% - 1.3px),var(--red) calc(50% - 1.3px),
+         var(--red) calc(50% + 1.3px),transparent calc(50% + 1.3px)),#fff}
   .dir{max-height:56vh;overflow-y:auto;background:#fff;color:#111}
-  .dirrow{display:flex;gap:10px;align-items:center;padding:7px 8px;border-bottom:1px solid #e3e3e3;
+  .dirrow{display:flex;gap:10px;align-items:center;padding:8px 9px;border-bottom:1px solid #e3e3e3;
           cursor:pointer;font-size:.86rem;-webkit-tap-highlight-color:transparent}
   .dirrow.mk{background:#FDE8E4}
   .dirname{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .dirnum{color:#666;font-variant-numeric:tabular-nums;white-space:nowrap}
   .dirsym{font-size:1.1rem;letter-spacing:3px;white-space:nowrap}
-  input.num{width:130px;margin-top:12px;padding:11px 12px;border-radius:8px;background:var(--panel);
-            border:1px solid var(--line);color:var(--ink);font:inherit;font-size:1.3rem;
+
+  /* ---- inputs */
+  input.num{width:130px;margin-top:12px;padding:11px 12px;border-radius:9px;background:#fff;
+            border:1.5px solid var(--btn-line);color:var(--ink);font:inherit;font-size:1.3rem;
             font-variant-numeric:tabular-nums}
-  input.num:focus{outline:2px solid var(--amber);outline-offset:1px}
-  .stagebar{display:flex;gap:8px;margin:0 0 10px}
-  .stagebar button{flex:1 1 0;padding:10px 12px;font-weight:600}
-  .stagebar button.on{background:var(--amber);border-color:var(--amber);color:#171003}
-  #stagenote{margin:0 0 14px;font-size:.86rem}
-  #paperpack{margin:0 0 20px}
+  input.num:focus{outline:2px solid var(--green);outline-offset:1px}
+  textarea.pif{width:100%;margin-top:12px;min-height:130px;padding:12px 14px;border-radius:10px;
+       background:#fff;border:1.5px solid var(--btn-line);color:var(--ink);font:inherit;
+       line-height:1.5;resize:vertical}
+  textarea.pif:focus{outline:2px solid var(--green);outline-offset:1px}
+  .pifback{background:var(--panel);border:1px dashed var(--dash);border-radius:10px;padding:12px 15px;
+       margin-top:8px;font:400 13px/1.5 var(--body);color:var(--muted);white-space:pre-wrap}
+
+  /* ---- trp2 dials */
   .dials{display:flex;gap:14px;justify-content:center;align-items:center}
   .dial{text-align:center;flex:1 1 0;max-width:120px}
   .dial svg{width:100%;height:auto;display:block}
   .dial span{display:block;margin-top:5px;font-size:.8rem;font-weight:620;color:#333}
-  .paper h3{margin:0 0 8px;color:#111;font-size:1rem}
-  textarea.pif{width:100%;margin-top:12px;min-height:130px;padding:11px 12px;border-radius:8px;
-       background:var(--panel);border:1px solid var(--line);color:var(--ink);font:inherit;line-height:1.45;
-       resize:vertical}
-  textarea.pif:focus{outline:2px solid var(--amber);outline-offset:1px}
-  .pifback{background:var(--panel);border:1px dashed var(--line);border-radius:8px;padding:11px 13px;
-       margin-top:8px;font-size:.9rem;color:var(--muted);white-space:pre-wrap}
-  .hrow .paper-name{color:var(--muted);font-size:.8rem}
+  .paper h3{margin:0 0 8px;color:#111;font:700 15px var(--head)}
 
-  /* ---- printed papers. Stage 1 is a paper afternoon, so the four pen-and-paper
-         drills are also laid out for A4. The preview on screen is the printed
-         page itself: what you see here is what comes out of the printer. */
-  #printout{display:none;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  /* ---- printed papers. The preview on screen is the printed page itself:
+          what you see here is what comes out of the printer. The sheets
+          themselves are black on white A4 and are not restyled. */
+  #printout{display:none;background:var(--desk);-webkit-print-color-adjust:exact;print-color-adjust:exact}
   #printout.on{display:block}
-  body.printing{background:#fff}
+  body.printing{background:var(--desk)}
   body.printing .wrap{display:none}
   .pbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
-        background:var(--desk);color:var(--ink);padding:11px 18px;border-bottom:1px solid var(--line)}
-  .pbar strong{font-size:.95rem;font-weight:620}
+        background:var(--barink);color:#f3f5f2;padding:14px 26px;border-bottom:0}
+  .pbar strong{font:700 15px var(--head)}
+  .pbar button{background:transparent;border-color:rgba(255,255,255,.3);color:#f3f5f2;
+               padding:8px 14px;font:600 13px var(--body)}
+  .pbar button:hover{border-color:var(--green-lit);color:var(--green-lit)}
   .pbar .sp{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-  .pbar button{padding:8px 13px;font-size:.9rem}
-  .pnote{background:var(--desk);color:var(--muted);font-size:.8rem;margin:0;padding:9px 18px 12px}
-  /* a real A4 page, scaled down to fit the screen rather than reflowed, so the
-     preview is the printed page and not an approximation of it */
+  .pnote{background:var(--desk);color:var(--muted);font-size:.8rem;margin:0;padding:12px 26px}
+  /* a real A4 page, scaled down to fit the screen rather than reflowed */
   #p-body{width:210mm;margin:0 auto;padding:12px 0 60px}
-  .pp-sheet{background:#fff;color:#000;padding:14mm;margin:0 auto 14px;box-shadow:0 0 0 1px #0003;
-            font-size:10.5pt;line-height:1.42}
+  .pp-sheet{background:#fff;color:#000;padding:14mm;margin:0 auto 14px;
+            box-shadow:0 2px 8px rgba(0,0,0,.12);font-size:10.5pt;line-height:1.42}
   .pp-head{display:flex;gap:14px;align-items:baseline;border-bottom:1.5px solid #000;padding-bottom:5px}
   .pp-head h1{flex:1 1 auto;margin:0;font-size:13pt;font-weight:700;letter-spacing:0;color:#000}
   .pp-head span{font-size:8pt;color:#444;white-space:nowrap}
   .pp-instr{margin:8px 0 11px;font-size:9pt;color:#000}
   .pp-para{margin:0 0 7px;font-size:10.5pt;color:#000}
   .pp-h2{margin:9px 0 3px;font-size:10pt;font-weight:700;color:#000;break-after:avoid;page-break-after:avoid}
-  /* group bourdon: a numbered line of dot groups, fifteen to the line */
   .pp-bgrid{display:grid;grid-template-columns:7mm repeat(15,1fr);gap:2.2mm 1.6mm;margin-top:4mm}
   .pp-bnum{font-size:8pt;color:#555;align-self:center;text-align:right;padding-right:1mm}
   .pp-bcell{aspect-ratio:1;border:.4pt solid #999}
@@ -344,7 +430,6 @@
   .pp-krow{break-inside:avoid;font-variant-numeric:tabular-nums}
   .pp-krow b{display:inline-block;min-width:6mm;color:#555;font-weight:400}
   .pp-krow i{color:#777;font-style:normal}
-  /* questions on paper: never split a question across a page */
   .pp-qs{margin-top:3mm}
   .pp-q{break-inside:avoid;page-break-inside:avoid;margin-bottom:5mm;padding-bottom:3mm;
         border-bottom:.4pt solid #ccc}
@@ -356,7 +441,6 @@
   .pp-keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(26mm,1fr));gap:2mm;margin-top:4mm;
            font-variant-numeric:tabular-nums}
   .pp-keys b{display:inline-block;min-width:7mm;color:#666;font-weight:400}
-  /* trp2: three dials and four orders, two questions to a row */
   .pp-qs2{display:grid;grid-template-columns:1fr 1fr;gap:4mm 8mm;margin-top:4mm}
   .pp-q2{break-inside:avoid;page-break-inside:avoid;border:.4pt solid #bbb;padding:2mm}
   .pp-qn2{font-size:9pt;font-weight:650}
@@ -367,12 +451,11 @@
   .pp-opts2{display:flex;flex-wrap:wrap;gap:1mm 4mm;justify-content:center;margin-top:1.5mm;font-size:9pt}
   .pp-opt2{white-space:nowrap}
   .pp-opt2 b{font-size:8pt;color:#555;font-weight:400}
-  /* dfft: the fault finder guide, and the display panel on each question */
   .pp-guide{margin-top:3mm}
   .pp-grow{display:grid;grid-template-columns:6mm 1.2fr 12mm 1.6fr;gap:3mm;padding:1.6mm 0;
            border-top:.4pt solid #bbb;font-size:9.5pt;align-items:baseline}
   .pp-ghead{border-top:0;font-size:8pt;color:#555;text-transform:uppercase;letter-spacing:.04em}
-  .pp-plan{grid-template-columns:6mm 1fr 38mm 1.2fr}   /* the running order, not the guide */
+  .pp-plan{grid-template-columns:6mm 1fr 38mm 1.2fr}
   .pp-panel{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5mm;margin-bottom:2mm}
   .pp-pcell{display:flex;justify-content:space-between;gap:2mm;border:.4pt solid #999;padding:1.2mm 1.8mm;
             font-size:8.5pt}
@@ -380,14 +463,37 @@
   @media print{
     @page{size:A4 portrait;margin:12mm}
     html,body{background:#fff}
-    /* only a paper takes the page over — Ctrl-P anywhere else still prints the app */
     body.printing .wrap{display:none!important}
     .no-print{display:none!important}
     #p-body{width:auto;margin:0;padding:0;zoom:1!important}
-    /* one sheet, one page — anything longer than a page simply flows on */
     .pp-sheet{padding:0;margin:0;box-shadow:none;break-after:page;page-break-after:always}
     .pp-sheet:last-child{break-after:auto;page-break-after:auto}
   }
+
+  /* ---- phone. The mock is phone-first: one column of cards, and the chrome
+          shrinks to the name and the offline lamp. */
+  @media (max-width:760px){
+    .wrap{padding:16px 14px 40px}
+    .sitebar{margin:-16px -14px 18px;padding:16px 18px 14px}
+    .sitebar .home{font-size:15px}
+    .sitebar .home .mark{width:22px;height:22px}
+    .sitebar .guides{padding:6px 12px;font-size:.78rem}
+    h1{font-size:19px}
+    .drills{grid-template-columns:1fr;gap:9px;margin-bottom:20px}
+    .drill{padding:14px}
+    .lamp{top:17px;right:14px}
+    .bar{padding:14px 16px;margin:0 -14px 18px}
+    .opts{gap:8px}
+    .opts label{padding:10px 16px;font-size:13px}
+    .opts label:has(input:checked){padding:9.5px 15.5px}
+    .rateopt{grid-template-columns:1fr;gap:10px}
+    .rateopt p{grid-column:1;grid-row:1}
+    .scale,.scalekey{grid-column:1}
+    .scale{grid-row:2} .scalekey{grid-row:3}
+    .pads{gap:10px}
+    #p-body{width:auto;zoom:.46}
+  }
+
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -412,6 +518,7 @@
     <button onclick="PAPER.open('pack')">Print the paper pack</button>
   </div>
 
+  <div class="drills">
   <div class="drill" data-stage="2">
     <span class="lamp" id="l-vse1"></span>
     <div class="body">
@@ -611,6 +718,7 @@
       <button onclick="DAY.start('practice')">Practice</button>
       <button class="go" onclick="DAY.start('exam')">Exam</button>
     </div>
+  </div>
   </div>
 
   <div class="note">
