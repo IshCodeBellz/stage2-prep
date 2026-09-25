@@ -148,6 +148,49 @@
   .flag button{padding:16px 8px;font-size:.95rem}
   .flag button.armed{background:var(--red);border-color:var(--red);color:#fff}
 
+  /* enhanced VSE (Platinum): the track is on black like the real screen, the sets on white */
+  .vxstage{background:#000;border-radius:8px;padding:8px;margin-top:6px}
+  .vxtrack{display:block;width:100%;height:auto;max-height:60vh;margin:0 auto}
+  .vxstage,.vxpaper{scroll-margin-top:72px}
+  .vxsmall .vxtrack{max-height:34vh}
+  .vxduo .vxcard{aspect-ratio:1} .vxduo .vxcard svg{width:46%}
+  .vxduo .vxbtns{margin-top:10px}
+  .vxpaper{padding:10px}
+  .vxsets{display:grid;gap:10px}
+  .vxset{display:flex;align-items:center;gap:10px;background:#F6F8FA;border:1px solid #E1E6EB;
+         border-radius:8px;padding:8px}
+  .vxlabel{flex:0 0 auto;writing-mode:vertical-rl;transform:rotate(180deg);font-size:.7rem;
+           letter-spacing:.14em;text-transform:uppercase;color:#6B7A88}
+  .vxrow{flex:1 1 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  .vxcard{aspect-ratio:3/4;background:#fff;border:1.5px solid #E1E6EB;border-radius:6px;
+          display:grid;place-items:center;color:#0B1F5C}
+  .vxcard svg{display:block;width:56%;height:auto}
+  .vxcard.lit{background:#FEF9E6;border-color:#F2CE4B;box-shadow:inset 0 0 0 5px #FEF9E6,inset 0 0 0 6.5px #F7E08A}
+  @media (max-width:520px){
+    .vxrow{grid-template-columns:repeat(3,1fr)} .vxcard{aspect-ratio:1}
+    /* both at once has to fit a phone screen whole, so the sets stay one line of six */
+    .vxduo .vxrow{grid-template-columns:repeat(6,1fr);gap:4px} .vxduo .vxset{padding:5px;gap:6px}
+    .vxduo .vxcard svg{width:60%}
+  }
+  .vxbtns{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;align-items:stretch}
+  .vxfalse{flex:1 1 160px;padding:16px;font-size:1.05rem;font-weight:700;letter-spacing:.06em;
+           background:#EDEFF1;color:#333;border-color:#D5D9DD}
+  .vxfalse:hover{border-color:#AEB6BD}
+  .vxfalse.armed{background:var(--red);border-color:var(--red);color:#fff}
+  .vxq{flex:2 1 260px;display:flex;gap:10px;align-items:center;background:var(--panel);
+       border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  .vxq span{flex:1 1 auto;font-size:.9rem;color:var(--muted)}
+  .vxq button{padding:12px 20px;font-weight:620}
+  .vxq button.sel{background:var(--amber);border-color:var(--amber);color:#171003}
+  .vxbtns button:disabled{opacity:.45;cursor:default}
+  .ptag{display:inline-block;font-size:.66rem;font-weight:650;letter-spacing:.06em;text-transform:uppercase;
+        padding:1px 8px;border-radius:999px;color:#CFE0EE;border:1px solid rgba(159,180,199,.45);
+        background:rgba(159,180,199,.12);vertical-align:3px;margin-left:6px}
+  .btnlink{display:inline-block;text-decoration:none;border-radius:7px;padding:9px 15px;
+           background:var(--amber);color:#171003;font-weight:600;white-space:nowrap}
+  .btnlink:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  .drill>.lockrow{margin-left:25px}
+
   /* wafv */
   /* shorter than it was, so the tally and the stop control sit above the fold on a phone */
   .vig{background:#fff;border-radius:8px;height:42vh;min-height:220px;display:grid;place-items:center;
@@ -451,6 +494,48 @@
     </div>
   </div>
 
+  <div class="drill" data-stage="2" data-tier="platinum">
+    <span class="lamp" id="l-vsx1"></span>
+    <div class="body">
+      <h2>Enhanced VSE 1 — the track<span class="ptag">Platinum</span></h2>
+      <p>The GTS enhanced version. A light steps round a loop of stops, following the arrows. Press FALSE when it skips a stop or lights the wrong colour. Intense adds two lights at once and a stop lit half in another colour, at a quicker step.</p>
+      <div class="meta">120 stops · 1.5 s a stop · intense 1.2 s · practice is 30</div>
+    </div>
+    <div class="row">
+      <button onclick="VSX.start(1,'practice')">Practice</button>
+      <button class="go" onclick="VSX.start(1,'exam')">Exam</button>
+      <button onclick="VSX.start(1,'intense')">Intense</button>
+    </div>
+  </div>
+
+  <div class="drill" data-stage="2" data-tier="platinum">
+    <span class="lamp" id="l-vsx2"></span>
+    <div class="body">
+      <h2>Enhanced VSE 2 — shape sets<span class="ptag">Platinum</span></h2>
+      <p>Six shapes in set A, the same six in a different order in set B. Every few seconds two shapes light on each side — three in intense. Is there a fault? Yes if the lit shapes differ, no if they are the same shapes.</p>
+      <div class="meta">120 questions · 3 s each · intense 2.5 s with 3 lit · practice is 30</div>
+    </div>
+    <div class="row">
+      <button onclick="VSX.start(2,'practice')">Practice</button>
+      <button class="go" onclick="VSX.start(2,'exam')">Exam</button>
+      <button onclick="VSX.start(2,'intense')">Intense</button>
+    </div>
+  </div>
+
+  <div class="drill" data-stage="2" data-tier="platinum">
+    <span class="lamp" id="l-vsx3"></span>
+    <div class="body">
+      <h2>Enhanced VSE 3 — both together<span class="ptag">Platinum</span></h2>
+      <p>The track and the shape sets on one screen, on one clock: a step of the light every tick and a shape question every other tick. Scores each against how you do on it alone.</p>
+      <div class="meta">120 points · 80 stops and 40 questions · 2:00, intense 1:36 · practice is 30</div>
+    </div>
+    <div class="row">
+      <button onclick="VSX.start(3,'practice')">Practice</button>
+      <button class="go" onclick="VSX.start(3,'exam')">Exam</button>
+      <button onclick="VSX.start(3,'intense')">Intense</button>
+    </div>
+  </div>
+
   <div class="drill" data-stage="1">
     <span class="lamp" id="l-gb"></span>
     <div class="body">
@@ -649,6 +734,7 @@
   <div id="p-body"></div>
 </section>
 
+<script src="/assets/tiers.js"></script>
 <script>
 "use strict";
 const $ = s => document.querySelector(s);
@@ -760,6 +846,9 @@ const FULL_RUN={
          tag:"at full length", pass:"exam length", miss:()=>"practice run", hideTime:true,
          rawRow:"Best at any length", row:"Run at the full 45", bestRow:"Best over the full 45",
          faded:"faded bars were practice runs" },
+  vsx1:modeFull("at the full 120 points"),
+  vsx2:modeFull("at the full 120 points"),
+  vsx3:modeFull("at the full 120 points"),
   gb:modeFull("the full five parts"),
   tea:modeFull("all three parts at full length"),
   trp1:modeFull("on the seven-minute clock"),
@@ -836,7 +925,7 @@ function paintMenu(){
     const lamp=dv.querySelector(".lamp"); if(!lamp) return;
     const id=lamp.id.replace("l-","");
     const h2=dv.querySelector("h2");
-    if(h2) DRILL_NAMES[id]=h2.textContent.trim();
+    if(h2) DRILL_NAMES[id]=h2.firstChild.textContent.trim();   // not the tier tag after it
     const rec=Store.get(id);
     let line=dv.querySelector(".best");
     if(!line){ line=el("button","best"); dv.querySelector(".body").appendChild(line); }
@@ -1654,6 +1743,493 @@ const VSE3 = {
   },
   stop(){ clearTimeout(App.timer); }
 };
+
+/* ---------------------------------------------------------------- VSE enhanced (Platinum) */
+/* The GTS enhanced version of the VSE. Three parts, all paced and all scored on
+   points: every stop the light lands on is one point, and every shape question
+   is one point.
+
+   Part 1 — the track. A closed loop of stops with arrows round it. One stop at a
+   time is lit and the light moves on to the next stop in the direction of the
+   arrows. It is a fault when the light skips a stop, or lights in the wrong
+   colour. Intense adds two lit stops at once, and a stop lit half one colour and
+   half another. Press FALSE on a fault; do nothing otherwise.
+
+   Part 2 — the shape sets. Set A is six shapes in a line; set B is the same six
+   in a different order. Every few seconds two shapes are highlighted on each side
+   (three in intense). Is there a fault? Yes if the highlighted shapes are not the
+   same shapes, no if they are. Order does not matter.
+
+   Part 3 — both together: a track step every tick, a shape question every two. */
+
+const VSX_LENGTHS = {exam:120, practice:30};           // points, in every part
+const VSX_PACE = {                                      // ms
+  track:{standard:1500, intense:1200},                  // a step of the light
+  shapes:{standard:3000, intense:2500}                  // a shape question, parts 1 and 2
+};
+const VSX_GRACE = 450;       // a press this soon into the next item still answers the last one
+const VSX_SVGNS = "http://www.w3.org/2000/svg";
+const svgEl = (t, attrs) => {
+  const n=document.createElementNS(VSX_SVGNS, t);
+  for(const k in attrs||{}) n.setAttribute(k, attrs[k]);
+  return n;
+};
+
+/* the lit colours. Green is right; anything else on its own is a colour fault. */
+const VSX_LIT = {green:"#2BE02B", amber:"#F5B301", blue:"#3D8BFF", white:"#F2F2F2"};
+const VSX_ODD = ["amber","blue","white"];
+const VSX_FAULTS = {
+  skip:"skipped a stop", colour:"wrong colour", two:"two lights at once", half:"half a different colour"
+};
+
+/* A track of stops laid round a lumpy loop, and the whole run of the light over
+   it, decided up front. */
+function vxTrack(steps, intense){
+  const n = 16+rnd(5), W=1000, H=780, cx=500, cy=392, rx=430, ry=330;
+  // a lumpy loop, re-drawn until no two stops crowd each other — an arrow too short
+  // to see makes a skip look like a step
+  const lay=()=>{
+    const ph0=Math.random()*6.283, ph1=Math.random()*6.283;
+    const k1=2+rnd(2), k2=3+rnd(3), a1=.14+Math.random()*.1, a2=.06+Math.random()*.08;
+    const out=[];
+    for(let i=0;i<n;i++){
+      const ang=-Math.PI/2 + i/n*2*Math.PI + (Math.random()-.5)*(2*Math.PI/n)*.45;
+      const r=Math.max(.52, Math.min(1, .8 + a1*Math.sin(k1*ang+ph0) + a2*Math.sin(k2*ang+ph1)));
+      out.push([cx+rx*r*Math.cos(ang), cy+ry*r*Math.sin(ang)]);
+    }
+    return out;
+  };
+  const gap=q=>{
+    let m=Infinity;
+    for(let i=0;i<n;i++) for(let j=i+1;j<n;j++) m=Math.min(m, Math.hypot(q[i][0]-q[j][0], q[i][1]-q[j][1]));
+    return m;
+  };
+  let pts=lay(), best=gap(pts);
+  for(let t=0; t<60 && best<105; t++){ const q=lay(), g=gap(q); if(g>best){ pts=q; best=g; } }
+  const dir = Math.random()<.5 ? 1 : -1;
+  const wrap = i => ((i%n)+n)%n;
+
+  // the run of the light. Never two faults back to back, so each one is judged on its own.
+  const p = intense ? .14 : .11;
+  const kinds = intense ? ["skip","colour","two","half"] : ["skip","colour"];
+  const run=[{pos:rnd(n), fault:null}];
+  for(let i=1;i<steps;i++){
+    const prev=run[i-1];
+    const fault = (!prev.fault && Math.random()<p) ? pick(kinds) : null;
+    const pos = wrap(prev.pos + (fault==="skip" ? 2*dir : dir));
+    const st={pos, fault};
+    if(fault==="colour" || fault==="half") st.col=pick(VSX_ODD);
+    if(fault==="two"){
+      // the second light lands away from where it was and where it is, or it reads as a trail
+      let x=rnd(n); while(x===pos || x===prev.pos || x===wrap(pos+dir)) x=rnd(n);
+      st.extra=x;
+    }
+    run.push(st);
+  }
+
+  const svg=svgEl("svg",{viewBox:"0 0 "+W+" "+H, class:"vxtrack", role:"img",
+                         "aria-label":"A loop of stops with the light moving round it"});
+  const defs=svgEl("defs");
+  const mk=svgEl("marker",{id:"vxArrow", viewBox:"0 0 10 10", refX:"6", refY:"5",
+                           markerWidth:"4", markerHeight:"4", orient:"auto-start-reverse"});
+  mk.appendChild(svgEl("path",{d:"M0,0 L10,5 L0,10 z", fill:"#22C7A1"}));
+  defs.appendChild(mk);
+  VSX_ODD.forEach(c=>{
+    const g=svgEl("linearGradient",{id:"vxHalf-"+c, x1:"0", x2:"1", y1:"0", y2:"0"});
+    g.appendChild(svgEl("stop",{offset:"50%", "stop-color":VSX_LIT.green}));
+    g.appendChild(svgEl("stop",{offset:"50%", "stop-color":VSX_LIT[c]}));
+    defs.appendChild(g);
+  });
+  svg.appendChild(defs);
+
+  // the arrows, drawn the way the light travels
+  for(let i=0;i<n;i++){
+    const [x1,y1]=pts[i], [x2,y2]=pts[wrap(i+dir)];
+    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1, cut=Math.min(46, len*.3);
+    svg.appendChild(svgEl("line",{
+      x1:x1+dx/len*cut, y1:y1+dy/len*cut, x2:x2-dx/len*cut, y2:y2-dy/len*cut,
+      stroke:"#22C7A1", "stroke-width":"7", "stroke-linecap":"round", "marker-end":"url(#vxArrow)",
+      opacity:".85"}));
+  }
+  const tris=pts.map(([x,y])=>{
+    const t=svgEl("polygon",{points:x+","+(y-24)+" "+(x+26)+","+(y+22)+" "+(x-26)+","+(y+22),
+                             fill:"#E35B5B"});
+    svg.appendChild(t);
+    return t;
+  });
+
+  return {
+    node:svg, run, n, dir,
+    show(i){
+      tris.forEach(t=>t.setAttribute("fill","#E35B5B"));
+      const st=run[i]; if(!st) return;
+      const fill = st.fault==="colour" ? VSX_LIT[st.col]
+                 : st.fault==="half" ? "url(#vxHalf-"+st.col+")"
+                 : VSX_LIT.green;
+      tris[st.pos].setAttribute("fill", fill);
+      if(st.fault==="two") tris[st.extra].setAttribute("fill", VSX_LIT.green);
+    },
+    clear(){ tris.forEach(t=>t.setAttribute("fill","#E35B5B")); }
+  };
+}
+
+/* the shapes, drawn on a 40-unit square centred on the origin */
+const VSX_SHAPES = {
+  circle:'<circle r="12"/>',
+  square:'<rect x="-11" y="-11" width="22" height="22" rx="3"/>',
+  star:'<path d="M0,-15 Q2,-2 15,0 Q2,2 0,15 Q-2,2 -15,0 Q-2,-2 0,-15Z"/>',
+  wedge:'<path d="M-12,-12 L12,12 L-12,12Z"/>',
+  play:'<path d="M-8,-11 L12,0 L-8,11Z" stroke-linejoin="round" stroke-width="3" stroke="currentColor"/>',
+  diamond:'<path d="M0,-14 L14,0 L0,14 L-14,0Z"/>',
+  hexagon:'<path d="M-7,-12 L7,-12 L14,0 L7,12 L-7,12 L-14,0Z"/>',
+  cross:'<path d="M-4,-13h8v9h9v8h-9v9h-8v-9h-9v-8h9z"/>'
+};
+const shapeSVG = s => '<svg viewBox="-20 -20 40 40" aria-label="'+s+'"><g fill="currentColor">'+VSX_SHAPES[s]+'</g></svg>';
+
+/* Six shapes and the same six shuffled, re-dealt every ten questions, and every
+   question decided up front. A fault is decided on what was highlighted, not
+   where: the highlighted shapes on the two sides either are the same shapes or
+   they are not. */
+const VSX_DEAL_EVERY = 10;
+function vxShapes(trials, intense){
+  const k = intense ? 3 : 2;
+  const names=Object.keys(VSX_SHAPES);
+  const deals=[];
+  for(let d=0; d*VSX_DEAL_EVERY<trials; d++){
+    const six=shuffle(names.slice()).slice(0,6);
+    if(Math.random()<.35) six[5]=six[rnd(5)];          // now and then one shape turns up twice
+    const a=shuffle(six.slice());
+    let b=shuffle(six.slice()), guard=0;
+    while(b.join()===a.join() && guard++<20) b=shuffle(six.slice());
+    deals.push({a,b});
+  }
+  const bag = arr => arr.slice().sort().join();
+  const qs=[];
+  for(let j=0;j<trials;j++){
+    const {a,b}=deals[Math.floor(j/VSX_DEAL_EVERY)];
+    const fault = Math.random()<.4;
+    const ai=shuffle([0,1,2,3,4,5]).slice(0,k);
+    // the matching positions on B: each highlighted shape of A, found once on B
+    const free=shuffle([0,1,2,3,4,5]), bi=[];
+    ai.forEach(x=>{
+      const at=free.findIndex(y=>b[y]===a[x]);
+      bi.push(free[at]); free.splice(at,1);
+    });
+    if(fault){
+      // swap one of them for a different shape that is not already lit
+      const r=rnd(k), was=b[bi[r]];
+      const alt=free.filter(y=>b[y]!==was);
+      bi[r]=pick(alt);
+    }
+    qs.push({a:ai, b:bi, fault: bag(ai.map(x=>a[x]))!==bag(bi.map(y=>b[y])), deal:Math.floor(j/VSX_DEAL_EVERY)});
+  }
+
+  const node=el("div","vxsets");
+  const sides={};
+  [["a","Set A"],["b","Set B"]].forEach(([s,label])=>{
+    const w=el("div","vxset");
+    w.appendChild(el("span","vxlabel",label));
+    const row=el("div","vxrow");
+    sides[s]=[];
+    for(let i=0;i<6;i++){ const c=el("div","vxcard"); row.appendChild(c); sides[s].push(c); }
+    w.appendChild(row); node.appendChild(w);
+  });
+  let dealt=-1;
+  return {
+    node, qs, k,
+    show(j){
+      const q=qs[j]; if(!q) return;
+      if(q.deal!==dealt){
+        dealt=q.deal;
+        const d=deals[dealt];
+        ["a","b"].forEach(s=>sides[s].forEach((c,i)=>{ c.innerHTML=shapeSVG(d[s][i]); }));
+      }
+      ["a","b"].forEach(s=>sides[s].forEach((c,i)=>c.classList.toggle("lit", q[s].indexOf(i)>-1)));
+    },
+    clear(){ ["a","b"].forEach(s=>sides[s].forEach(c=>c.classList.remove("lit"))); }
+  };
+}
+
+/* Is this drill open to whoever is looking at it? Without the tier script — the file
+   opened on its own — nothing is locked, same as the site while PAYWALL is off. */
+const canUse = tier => !window.Access || window.Access.can(tier);
+
+const VSX_PARTS = {
+  1:{id:"vsx1", name:"Enhanced VSE part 1 — the track"},
+  2:{id:"vsx2", name:"Enhanced VSE part 2 — shape sets"},
+  3:{id:"vsx3", name:"Enhanced VSE part 3 — both together"}
+};
+
+const VSX = {
+  start(part, mode){
+    const P=VSX_PARTS[part];
+    if(!canUse("platinum")) return this.locked(P);
+    this.part=part; this.mode=mode;
+    this.exam = mode!=="practice";
+    this.intense = mode==="intense";
+    this.level = this.intense ? "intense" : "standard";
+    this.ended=false; this.timers=[];
+    this.N = this.exam ? VSX_LENGTHS.exam : VSX_LENGTHS.practice;   // points in all
+
+    // part 3 is a track step every tick and a shape question every other tick,
+    // so its points are two thirds track and one third shapes
+    const tick = part===2 ? VSX_PACE.shapes[this.level] : VSX_PACE.track[this.level];
+    this.tick=tick;
+    this.nT = part===1 ? this.N : part===3 ? this.N*2/3 : 0;
+    this.nS = part===2 ? this.N : part===3 ? this.N/3 : 0;
+    this.ticks = part===2 ? this.nS : this.nT;
+    this.sPace = part===2 ? tick : tick*2;
+
+    this.track = this.nT ? vxTrack(this.nT, this.intense) : null;
+    this.sets = this.nS ? vxShapes(this.nS, this.intense) : null;
+    this.tResp = new Array(this.nT).fill(false); this.tOn = new Array(this.nT).fill(0);
+    this.sResp = new Array(this.nS).fill(null); this.sOn = new Array(this.nS).fill(0);
+    this.ti=-1; this.si=-1;
+
+    const box=el("div", part===3 ? "vxduo" : null);
+    const secs=Math.round(this.ticks*tick/1000);
+    const what = part===1 ? this.N+" stops, "+(tick/1000).toFixed(1)+" s a stop"
+               : part===2 ? this.N+" questions, "+(tick/1000).toFixed(1)+" s a question"
+               : this.nT+" stops at "+(tick/1000).toFixed(1)+" s and "+this.nS+" shape questions at "+(this.sPace/1000).toFixed(1)+" s";
+    box.appendChild(el("div","chainbar",
+      "<b>"+(this.intense?"Intense":this.exam?"Exam conditions":"Practice")+".</b> "+what+
+      " — "+mmss(secs)+" in all, moving on by itself, and it scores itself at the end. "+
+      (this.exam ? "Every point is one mark: "+this.N+" to be had."
+                 : "The exam is "+VSX_LENGTHS.exam+" points; this is a short run to learn the moves on and does not set your best.")));
+
+    const how=[];
+    if(this.track) how.push("The light should step to the next stop along the arrows. Press <b>FALSE</b> (or the space bar) if it skips a stop or lights in the wrong colour"+
+      (this.intense?", if two stops light at once, or if a stop lights half one colour and half another":"")+". Leave it alone otherwise.");
+    if(this.sets) how.push("Is there a fault? <b>Yes</b> (Y) if the "+this.sets.k+" shapes highlighted in set A are not the same shapes as the "+this.sets.k+
+      " in set B; <b>No</b> (N) if they are. Order does not matter. The sets are re-dealt every "+VSX_DEAL_EVERY+" questions.");
+    box.appendChild(el("p","sub",how.join(" ")));
+
+    if(this.track){
+      const s=el("div","vxstage"+(this.sets?" vxsmall":""));
+      s.appendChild(this.track.node); box.appendChild(s);
+    }
+    if(this.sets){
+      const s=el("div","paper vxpaper"); s.appendChild(this.sets.node); box.appendChild(s);
+    }
+
+    const btns=el("div","vxbtns");
+    if(this.track){
+      this.bF=el("button","vxfalse","FALSE");
+      this.bF.onclick=()=>this.pressTrack();
+      btns.appendChild(this.bF);
+    }
+    if(this.sets){
+      const q=el("div","vxq");
+      q.appendChild(el("span",null,"Is there a fault?"));
+      this.bY=el("button",null,"Yes"); this.bN=el("button",null,"No");
+      this.bY.onclick=()=>this.answer("yes"); this.bN.onclick=()=>this.answer("no");
+      q.appendChild(this.bY); q.appendChild(this.bN);
+      btns.appendChild(q);
+    }
+    // a clicked button keeping focus would take the space bar too, and answer twice
+    btns.querySelectorAll("button").forEach(b=>b.addEventListener("mousedown", e=>e.preventDefault()));
+    box.appendChild(btns);
+    const p=el("div","prog"); this.pb=el("b"); p.appendChild(this.pb); box.appendChild(p);
+
+    this.key=e=>{
+      if(e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+      if(this.track && (e.code==="Space" || e.code==="KeyF")){ e.preventDefault(); this.pressTrack(); }
+      else if(this.sets && e.code==="KeyY"){ e.preventDefault(); this.answer("yes"); }
+      else if(this.sets && e.code==="KeyN"){ e.preventDefault(); this.answer("no"); }
+    };
+    window.addEventListener("keydown", this.key);
+
+    App.open(P.name.replace("Enhanced VSE ","Enhanced VSE · ")+(this.intense?" · intense":this.exam?"":" · practice"), box);
+    App.active=this;
+    // the instructions are read before it starts; once it is running, the test is the screen
+    box.querySelector(".vxstage, .vxpaper").scrollIntoView({block:"start"});
+
+    // one clock drives both, scheduled off the start rather than off the last tick so it cannot drift
+    this.t0=performance.now(); this.k=0;
+    const go=()=>{
+      if(this.ended) return;
+      if(this.k>=this.ticks){ this.finish(); return; }
+      this.step(this.k);
+      this.k++;
+      this.later(go, this.t0+this.k*tick-performance.now());
+    };
+    go();
+  },
+  later(fn, ms){ this.timers.push(setTimeout(fn, Math.max(0, ms))); },
+  step(k){
+    const now=performance.now();
+    if(this.track){
+      this.ti=k; this.tOn[k]=now; this.track.show(k);
+      this.bF.classList.remove("armed");
+    }
+    const sEvery = this.part===3 ? 2 : 1;
+    if(this.sets && k%sEvery===0){
+      const j=k/sEvery;
+      this.si=j; this.sOn[j]=now;
+      // a beat with nothing lit, so the same positions twice running still read as a new question
+      this.sets.clear();
+      this.bY.classList.remove("sel"); this.bN.classList.remove("sel");
+      this.later(()=>{ if(!this.ended && this.si===j) this.sets.show(j); }, 250);
+    }
+    this.pb.style.width=(k/this.ticks*100)+"%";
+    App.clock((k+1)+" / "+this.ticks);
+  },
+  /* A press answers the stop that is lit — unless it comes in the first moments of a
+     clean stop straight after an unanswered fault, which is a late answer to that fault. */
+  pressTrack(){
+    if(this.ended || this.ti<0) return;
+    let i=this.ti;
+    const run=this.track.run;
+    if(i>0 && !run[i].fault && run[i-1].fault && !this.tResp[i-1] &&
+       performance.now()-this.tOn[i] < VSX_GRACE) i=i-1;
+    if(this.tResp[i]) return;
+    this.tResp[i]=true;
+    if(i===this.ti) this.bF.classList.add("armed");
+  },
+  answer(a){
+    if(this.ended || this.si<0) return;
+    let j=this.si;
+    if(j>0 && this.sResp[j-1]==null && performance.now()-this.sOn[j] < VSX_GRACE) j=j-1;
+    else if(this.sResp[j]!=null) return;          // one answer a question, no changing it
+    this.sResp[j]=a;
+    if(j===this.si){ (a==="yes"?this.bY:this.bN).classList.add("sel"); }
+  },
+  scoreTrack(){
+    const run=this.track.run, by={};
+    let hit=0, miss=0, fa=0;
+    run.forEach((st,i)=>{
+      if(st.fault){
+        by[st.fault]=by[st.fault]||{n:0,h:0}; by[st.fault].n++;
+        if(this.tResp[i]){ hit++; by[st.fault].h++; } else miss++;
+      } else if(this.tResp[i]) fa++;
+    });
+    return {hit, miss, fa, by, right:run.length-miss-fa, of:run.length};
+  },
+  scoreSets(){
+    let hit=0, miss=0, fa=0, cr=0, none=0;
+    this.sets.qs.forEach((q,j)=>{
+      const r=this.sResp[j];
+      if(r==null){ none++; return; }
+      if(q.fault){ if(r==="yes") hit++; else miss++; }
+      else { if(r==="no") cr++; else fa++; }
+    });
+    return {hit, miss, fa, cr, none, right:hit+cr, of:this.sets.qs.length,
+            faults:this.sets.qs.filter(q=>q.fault).length};
+  },
+  finish(){
+    if(this.ended) return;
+    this.ended=true;
+    this.stop();
+    this.pb.style.width="100%";
+    this.track && this.track.clear(); this.sets && this.sets.clear();
+    [this.bF,this.bY,this.bN].forEach(b=>{ if(b) b.disabled=true; });
+
+    const P=VSX_PARTS[this.part];
+    const T=this.track ? this.scoreTrack() : null;
+    const S=this.sets ? this.scoreSets() : null;
+    const right=(T?T.right:0)+(S?S.right:0);
+    const pct=right/this.N*100;
+    App.done(P.id, pct, false, "%", this.level+" · "+this.N+" points · "+(this.exam?"exam":"practice"));
+
+    const rows=[
+      ["Conditions", (this.intense?"Intense · ":this.exam?"Exam · ":"Practice · ")+this.N+" points"],
+      ["Points scored", right+" of "+this.N+" ("+Math.round(pct)+"%)"]
+    ];
+    if(T){
+      if(S) rows.push(["Track", T.right+" of "+T.of]);
+      rows.push(["Track faults shown", T.hit+T.miss]);
+      rows.push(["Caught", T.hit]);
+      rows.push(["Missed", T.miss]);
+      rows.push(["FALSE pressed with nothing wrong", T.fa]);
+      Object.keys(VSX_FAULTS).forEach(f=>{
+        if(T.by[f]) rows.push(["· "+VSX_FAULTS[f], T.by[f].h+" of "+T.by[f].n+" caught"]);
+      });
+    }
+    if(S){
+      if(T) rows.push(["Shape sets", S.right+" of "+S.of]);
+      rows.push(["Questions with a fault", S.faults]);
+      rows.push(["Yes, rightly", S.hit]);
+      rows.push(["No, but there was a fault", S.miss]);
+      rows.push(["Yes, but they matched", S.fa]);
+      rows.push(["Not answered in time", S.none]);
+    }
+
+    const notes=[];
+    if(T){
+      const worst=Object.keys(T.by).filter(f=>T.by[f].h<T.by[f].n)
+        .sort((x,y)=>T.by[x].h/T.by[x].n - T.by[y].h/T.by[y].n)[0];
+      if(T.fa > Math.max(2, T.hit*.3))
+        notes.push("On the track you pressed FALSE "+T.fa+" times when nothing was wrong. Press on what you saw, not on a hunch: the light either landed on the next stop along the arrow in green, or it did not.");
+      else if(worst==="skip")
+        notes.push("The skipped stop is the one getting past you. Watch the gap, not the stop: before each step, know which stop comes next, and when the light lands anywhere else, that is the press.");
+      else if(worst==="colour" || worst==="half")
+        notes.push("Colour faults are getting past you — "+(worst==="half"?"especially the half-lit stop, which is green on one side and ":"a stop lit ")+
+          "a different colour. Your eye is following where the light goes and not what it looks like when it gets there. Take in both at every step.");
+      else if(worst==="two")
+        notes.push("You are missing the second light. Keep your gaze soft on the whole loop rather than locked on the lit stop, so a light anywhere else jumps out at you.");
+      else if(T.miss===0 && T.fa===0)
+        notes.push("A clean track: every fault caught and nothing pressed in error.");
+      else
+        notes.push("The track held up. Keep the next stop in mind before the light gets there, and the faults will keep looking wrong at a glance.");
+    }
+    if(S){
+      if(S.none > S.of*.1)
+        notes.push(S.none+" shape questions went unanswered. An answer is always worth more than none — if you are not sure when the window is closing, go with your first read.");
+      else if(S.fa > S.miss+1)
+        notes.push("You are calling faults on matching sets. Order does not matter: the same shapes in a different place are not a fault. Name the highlighted shapes in A to yourself, then tick them off in B.");
+      else if(S.miss > S.fa+1)
+        notes.push("Faults are getting past you on the shape sets. The one people miss is where one shape of the "+this.sets.k+" is different and the rest match — check every highlighted shape, not just the first one that agrees.");
+      else
+        notes.push("Solid on the shape sets. Name the shapes, don't look at where they are.");
+    }
+    if(this.part===3){
+      const b1=(Store.get("vsx1")||{}).best, b2=(Store.get("vsx2")||{}).best;
+      const tp=Math.round(T.right/T.of*100), sp=Math.round(S.right/S.of*100);
+      const bits=[];
+      if(b1!=null) bits.push("the track fell from your best of "+b1+"% on its own to "+tp+"%");
+      if(b2!=null) bits.push("the shape sets from "+b2+"% to "+sp+"%");
+      if(bits.length) notes.push("Doing both, "+bits.join(", and ")+". That drop is what this part measures — the smaller the better.");
+      notes.push("The track does not wait for you, and a shape question gives you two steps. Glance at the sets as soon as they light, answer, and get back to the loop before the next step.");
+    }
+    if(!this.exam) notes.push("This was a practice run, so it does not set your best — sit the exam or the intense version for that.");
+    else if(!this.intense && pct>=90) notes.push("Over 90% at standard pace. Try the intense version: faster, three shapes at a time, and two more kinds of fault on the track.");
+
+    $("#t-body").appendChild(App.results("Scores", rows, notes.join(" "), right+"/"+this.N));
+    $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
+  },
+  stop(){
+    this.timers.forEach(clearTimeout); this.timers=[];
+    if(this.key){ window.removeEventListener("keydown", this.key); this.key=null; }
+    this.ended=true;
+  },
+  locked(P){
+    const box=el("div");
+    box.appendChild(el("div","note",
+      "<b>"+P.name.split(" — ")[0]+" is a Platinum drill.</b> The enhanced VSE — the track, the shape sets and the two together — comes with Platinum. Every other simulator on this page stays free."));
+    const row=el("div","row");
+    const a=el("a","btnlink","See what Platinum includes"); a.href="/pricing";
+    const b=el("button","ghost","Back to the list"); b.onclick=()=>App.quit();
+    row.appendChild(a); row.appendChild(b); box.appendChild(row);
+    App.active=null;
+    App.open(P.name, box);
+  }
+};
+
+/* the Platinum rows on the menu: the start buttons give way to the way in */
+function paintLocks(){
+  document.querySelectorAll("#menu .drill[data-tier]").forEach(dv=>{
+    const open=canUse(dv.dataset.tier);
+    const row=dv.querySelector(":scope > .row");
+    if(row) row.hidden=!open;
+    let lock=dv.querySelector(".lockrow");
+    if(!open && !lock){
+      lock=el("div","row lockrow");
+      const a=el("a","btnlink","Unlock with Platinum"); a.href="/pricing";
+      lock.appendChild(a); dv.appendChild(lock);
+    }
+    if(lock) lock.hidden=open;
+  });
+}
 
 /* ---------------------------------------------------------------- WAFV */
 /* two practice lengths: ten to warm up on, five to check the sound and the screen */
@@ -4731,7 +5307,7 @@ const DAY = {
 };
 
 /* ---- boot */
-paintStage(); paintMenu(); paintCountdown(); buildFooter();
+paintStage(); paintMenu(); paintLocks(); paintCountdown(); buildFooter();
 setInterval(paintCountdown, 60*60*1000);
 </script>
 <script>

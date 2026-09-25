@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pricing — Cab Ready</title>
-<meta name="description" content="Starter, Gold and Platinum. One payment per tier, no subscription. Every simulator is free; the tiers open the written guides.">
+<meta name="description" content="Starter, Gold and Platinum. One payment per tier, no subscription. Every simulator for the standard battery is free; the tiers open the written guides and the enhanced VSE.">
 <meta name="theme-color" content="#0F151B">
 <link rel="icon" href="/icon-180.png">
 <link rel="stylesheet" href="/assets/site.css">
@@ -12,8 +12,9 @@
   <div class="wrap">
     <p class="eyebrow">Pricing</p>
     <h1>Three tiers. One payment each.</h1>
-    <p class="lede">The simulators are free and stay free — they are no use to anyone locked. What you
-      pay for is the written half: the method for each test, and the material for the interview.</p>
+    <p class="lede">The simulators for the standard battery are free and stay free — they are no use to
+      anyone locked. What you pay for is the written half: the method for each test, the material for
+      the interview and, with Platinum, the enhanced VSE.</p>
   </div>
 </section>
 
@@ -73,6 +74,8 @@
           <li>The Determination Test, which most material ignores entirely</li>
           <li>A four-week plan that says what to do on which day</li>
           <li>Reading your own scores: percentiles, cut-offs, and the attempts rule</li>
+          <li>The enhanced VSE simulator — the track, the shape sets and both together, with an
+              intense mode</li>
           <li>Every guide added later, at no extra cost</li>
         </ul>
         <a class="btn block" href="/resources">Read what is in them</a>
@@ -118,8 +121,10 @@
       </details>
       <details>
         <summary>Do I need Gold or Platinum to use the simulators?</summary>
-        <p>No. Every drill, both modes, the full exam lengths and Day mode are free and will stay
-          free. Locking the practice would make the thing pointless.</p>
+        <p>No. Every drill in the standard battery, both modes, the full exam lengths and Day mode
+          are free and will stay free. Locking the practice would make the thing pointless. The one
+          Platinum simulator is the enhanced VSE — the version with the track and the shape sets —
+          which sits alongside the standard VSE rather than replacing it.</p>
       </details>
       <details>
         <summary>Can you guarantee I will pass?</summary>
@@ -149,7 +154,8 @@
   };
   const rows = [
     row("All 14 simulators, practice and exam", "starter"),
-    row("Day mode, score history, offline use", "starter")
+    row("Day mode, score history, offline use", "starter"),
+    row("Enhanced VSE simulator: the track, shape sets and both together", "platinum")
   ].concat(RESOURCES.map(r => row(r.title, r.tier)));
   document.getElementById("ptbody").innerHTML = rows.join("");
 })();
