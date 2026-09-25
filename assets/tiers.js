@@ -10,16 +10,20 @@
    Gold, with a demo for Standard: one short paper, the same every time. Day
    mode and the paper pack are Gold; the enhanced VSE and the MMI, Platinum.
 
-   Nothing is charged for yet and nothing is locked yet: PAYWALL is false, so
-   the whole library is open while the site is being built out. When billing is
-   wired up, flip PAYWALL to true and the gate below starts doing its job — no
-   guide needs editing. Until then you can see exactly what a visitor on a
-   lower tier would get by adding ?paywall=1&tier=standard to any URL, which is
-   what the preview switch on the pricing page does.
+   Two switches, flipped together (the README has the steps): PAYWALL below for
+   the browser, and PAYWALL=on in Vercel's environment for the server.
 
-   The tier is kept in localStorage, which is a stand-in for an account. It is
-   a preview control, not a security boundary — when this sells, entitlement
-   has to be checked on the server and paid guides served from behind it. */
+   While PAYWALL is false nothing is locked, and the tier is a preview control
+   kept in localStorage: ?paywall=1&tier=standard on any URL, or the switch on
+   the pricing page, shows what a visitor on that tier would get.
+
+   Once it is true the tier comes from the account. The server sets it after a
+   Stripe checkout or a sign-in link, in two cookies: cr_session, signed and out
+   of reach of scripts, which is what the server believes, and cr_tier, the same
+   tier in the clear, which is what this file reads. Paid guides are trimmed on
+   the server before they are sent, so for them this file only draws the panel.
+   The simulators run in the browser, so for them cr_tier is the gate — enough
+   for anyone who does not go editing their cookies. */
 
 (function () {
   "use strict";
@@ -35,9 +39,15 @@
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   };
 
+  const cookie = name => {
+    const m = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+    return m ? decodeURIComponent(m[1]) : null;
+  };
+
+  // the preview controls only exist while the paywall is off
   const qs = new URLSearchParams(location.search);
-  if (qs.has("tier")) store.set(KEY_TIER, qs.get("tier"));
-  if (qs.has("paywall")) store.set(KEY_WALL, qs.get("paywall") === "1" ? "1" : "0");
+  if (!PAYWALL && qs.has("tier")) store.set(KEY_TIER, qs.get("tier"));
+  if (!PAYWALL && qs.has("paywall")) store.set(KEY_WALL, qs.get("paywall") === "1" ? "1" : "0");
 
   const Access = {
     tiers: ORDER,
@@ -45,17 +55,21 @@
 
     /* What the visitor currently has. Everyone is on standard until they buy. */
     tier() {
-      const t = store.get(KEY_TIER);
+      const t = PAYWALL ? cookie("cr_tier") : store.get(KEY_TIER);
       return ORDER.indexOf(OLD[t] || t) > -1 ? (OLD[t] || t) : "standard";
     },
     setTier(t) {
       t = OLD[t] || t;
-      if (ORDER.indexOf(t) > -1) store.set(KEY_TIER, t);
+      if (!PAYWALL && ORDER.indexOf(t) > -1) store.set(KEY_TIER, t);
       return Access.tier();
     },
 
+    /* signed in to an account — only once the paywall is on is there one */
+    signedIn() { return PAYWALL && !!cookie("cr_tier"); },
+
     /* Locking is off until billing exists; ?paywall=1 previews it. */
     enforcing() {
+      if (PAYWALL) return true;
       const override = store.get(KEY_WALL);
       if (override === "1") return true;
       if (override === "0") return false;
@@ -93,6 +107,7 @@
          that cost people the sitting — comes with ${plan}. One payment, no subscription.</p>
       <div class="btnrow">
         <a class="btn go" href="/pricing">See what ${plan} includes</a>
+        ${Access.signedIn() ? "" : '<a class="btn ghost" href="/account">Already bought? Sign in</a>'}
         <a class="btn ghost" href="/resources">Back to the free guides</a>
       </div>
     </div>`;
@@ -103,7 +118,8 @@
     const art = document.querySelector(".doc[data-tier]");
     if (!art) return;
     const required = art.dataset.tier;
-    if (Access.can(required)) return;
+    // data-trimmed: the server has already held the rest back
+    if (Access.can(required) && !art.hasAttribute("data-trimmed")) return;
 
     // the prev/next block is navigation, not content — it survives the trim
     const nav = art.querySelector(".nextprev");
@@ -151,7 +167,7 @@
      preview and not a purchase. */
   function switcher() {
     const host = document.querySelector("#tierswitch");
-    if (!host) return;
+    if (!host || PAYWALL) return;
     const draw = () => {
       const on = Access.enforcing(), t = Access.tier();
       host.className = "tierswitch";
@@ -172,8 +188,32 @@
     draw();
   }
 
+  /* Sign in, or the account, in the header — once there are accounts to sign in to. */
+  function accountLink() {
+    const nav = document.querySelector("#navlinks");
+    if (!PAYWALL || !nav || nav.querySelector(".acct")) return;
+    const a = document.createElement("a");
+    a.className = "acct";
+    a.href = "/account";
+    a.textContent = Access.signedIn() ? "Your account" : "Sign in";
+    if (location.pathname === "/account") a.classList.add("here");
+    nav.insertBefore(a, nav.querySelector(".cta"));
+  }
+
+  /* Once a day a signed-in visitor's tier is asked of the server again, which
+     asks Stripe — how a refund, or a purchase on another device, reaches this one. */
+  const KEY_CHECKED = "cabready.checked";
+  function refresh() {
+    if (!Access.signedIn()) return;
+    if (Date.now() - Number(store.get(KEY_CHECKED) || 0) < 24 * 60 * 60 * 1000) return;
+    store.set(KEY_CHECKED, String(Date.now()));
+    fetch("/api/me", { credentials: "same-origin" }).catch(() => {});
+  }
+
   markRoot();
   gateArticle();
   markCards();
   switcher();
+  accountLink();
+  refresh();
 })();

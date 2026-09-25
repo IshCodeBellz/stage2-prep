@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
+  "functions": {
+    "api/guide.js": { "includeFiles": "resources/**" }
+  },
   "headers": [
     {
       "source": "/sw.js",
@@ -24,7 +27,18 @@
     },
     {
       "source": "/resources/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+      "headers": [
+        { "key": "Cache-Control", "value": "private, max-age=0, must-revalidate" },
+        { "key": "Vary", "value": "Cookie" }
+      ]
+    },
+    {
+      "source": "/account",
+      "headers": [{ "key": "Cache-Control", "value": "private, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     },
     {
       "source": "/assets/(.*)",

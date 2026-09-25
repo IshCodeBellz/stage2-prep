@@ -24,9 +24,9 @@
   <div class="wrap">
     <div class="note open-only">
       <strong>Not charging yet.</strong> The library is still being written, so everything on the site
-      is open. The tiers below are what it will look like when it is finished, and anyone using it
-      during early access keeps full access to what exists today.
+      is open. The tiers below are what it will look like when it is finished.
     </div>
+    <div class="note paywall-only" id="payerror" hidden></div>
 
     <div class="plans">
       <div class="plan">
@@ -70,7 +70,11 @@
           <li>The scoring shape of each test, and what examiners do with speed against error</li>
           <li class="no">The MMI drill, the interview material and the preparation plan</li>
         </ul>
-        <a class="btn go block" href="/resources">Read what is in them</a>
+        <a class="btn go block open-only" href="/resources">Read what is in them</a>
+        <form class="buy paywall-only" method="post" action="/api/checkout">
+          <input type="hidden" name="tier" value="gold">
+          <button class="btn go block" type="submit">Buy Gold — £19</button>
+        </form>
       </div>
 
       <div class="plan">
@@ -89,9 +93,15 @@
               intense spells called on screen as they come and go</li>
           <li>Every guide added later, at no extra cost</li>
         </ul>
-        <a class="btn block" href="/resources">Read what is in them</a>
+        <a class="btn block open-only" href="/resources">Read what is in them</a>
+        <form class="buy paywall-only" method="post" action="/api/checkout">
+          <input type="hidden" name="tier" value="platinum">
+          <button class="btn block" type="submit">Buy Platinum — £29</button>
+        </form>
       </div>
     </div>
+    <p class="small paywall-only" style="margin-top:14px">Bought already, on another phone or laptop?
+      <a href="/account">Sign in with the email you paid with</a>.</p>
 
     <div id="tierswitch"></div>
   </div>
@@ -140,6 +150,12 @@
           than replacing it.</p>
       </details>
       <details>
+        <summary>I bought Gold. Can I move up to Platinum?</summary>
+        <p>Yes — buy Platinum with the same email and your account moves up. It is the full £29 rather
+          than the difference, so if you think you will want the interview material, Platinum first is
+          the better buy.</p>
+      </details>
+      <details>
         <summary>Can you guarantee I will pass?</summary>
         <p>No, and be careful with anyone who does. Cut-off scores are set by the operator, are not
           published, and move. What preparation reliably fixes is pace, method and surprise — which
@@ -174,6 +190,15 @@
     row("Enhanced VSE simulator: the track, shape sets and both together", "platinum")
   ].concat(RESOURCES.map(r => row(r.title, r.tier)));
   document.getElementById("ptbody").innerHTML = rows.join("");
+
+  // back from a checkout that did not start
+  const err = new URLSearchParams(location.search).get("error"), box = document.getElementById("payerror");
+  if (err && box) {
+    box.textContent = err === "checkout"
+      ? "Checkout could not be started just now, and nothing has been charged. Try again in a minute."
+      : "That tier could not be found. Choose one below.";
+    box.hidden = false;
+  }
 })();
 </script>
 <script src="/assets/tiers.js"></script>
