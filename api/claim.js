@@ -13,8 +13,13 @@ export async function GET(request) {
     const bought = sessionTier(s);
     const email = normEmail(s.customer_details && s.customer_details.email);
     if (bought === "standard" || !email) return redirect("/account?error=claim");
-    // anything else already bought on this email counts too
-    const tier = best(bought, await tierForEmail(email).catch(() => "standard"));
+    // Anything else already bought on this email counts too. An upgrade is only
+    // Platinum on top of a Gold that still stands, so for one of those the
+    // email's whole record decides, not this session alone.
+    const record = await tierForEmail(email).catch(() => null);
+    const upgrade = s.metadata && s.metadata.upgrade === "gold";
+    const tier = upgrade ? (record || "standard") : best(bought, record || "standard");
+    if (tier === "standard") return redirect("/account?error=claim");
     return redirect("/account?welcome=" + tier, await sessionCookies(email, tier));
   } catch (e) {
     console.error(e);

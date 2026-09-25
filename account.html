@@ -31,8 +31,11 @@
       <div class="btnrow" style="margin-top:18px">
         <a class="btn go" href="/simulators">Open the simulators</a>
         <a class="btn" href="/resources">The guides</a>
-        <a class="btn" id="acct-up" href="/pricing" hidden>Move up to Platinum</a>
       </div>
+      <form method="post" action="/api/checkout" id="acct-up" hidden style="margin-top:12px">
+        <input type="hidden" name="tier" value="platinum">
+        <button class="btn" type="submit">Move up to Platinum — £40</button>
+      </form>
       <form method="post" action="/api/logout" style="margin-top:28px">
         <button class="btn ghost sm" type="submit">Sign out on this device</button>
       </form>
@@ -87,7 +90,7 @@
       $("acct-in").hidden = false;
       $("acct-email").textContent = me.email;
       $("acct-tier").textContent = Access.label[me.tier] || me.tier;
-      $("acct-up").hidden = me.tier === "platinum";
+      $("acct-up").hidden = me.tier !== "gold";
     })
     .catch(() => { $("acct-out").hidden = false; });
 })();

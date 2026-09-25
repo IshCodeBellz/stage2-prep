@@ -3,7 +3,10 @@
    Checkout always creates a Customer, and each session carries the tier it sold
    in metadata.tier. So "what does this email hold?" is: find the customers with
    that email, list their completed checkout sessions, and take the highest tier
-   among those that were paid and not refunded. No webhook, no database — a
+   among those that were paid and not refunded. A move up from Gold is sold as
+   the difference and marked metadata.upgrade = "gold": it makes Platinum only
+   while a Gold it builds on still stands, so refunding the Gold cannot leave
+   Platinum behind for the price of the difference. No webhook, no database — a
    refund issued in the Stripe dashboard takes the tier away the next time the
    session is checked (see RECHECK_MS in auth.js).
 
@@ -46,8 +49,23 @@ export async function stripe(method, path, params) {
 
 export const PRICES = () => ({
   gold: process.env.STRIPE_PRICE_GOLD,
-  platinum: process.env.STRIPE_PRICE_PLATINUM
+  platinum: process.env.STRIPE_PRICE_PLATINUM,
+  upgrade: process.env.STRIPE_PRICE_UPGRADE      // Gold to Platinum, the difference
 });
+
+const isUpgrade = s => !!(s && s.metadata && s.metadata.upgrade === "gold");
+
+/* What a set of checkout sessions adds up to. */
+export function holdings(sessions) {
+  let tier = "standard", upgraded = false;
+  for (const s of sessions) {
+    const t = sessionTier(s);
+    if (t === "standard") continue;
+    if (isUpgrade(s)) upgraded = true;
+    else tier = best(tier, t);
+  }
+  return upgraded && tier === "gold" ? "platinum" : tier;
+}
 
 /* The tier one checkout session grants: its metadata tier if it was paid (or
    free through a 100% promotion code) and its charge has not been fully refunded. */
@@ -70,13 +88,13 @@ export async function tierForEmail(email) {
     const list = await stripe("GET", "customers", { email: e, limit: 100 });
     (list.data || []).forEach(c => customers.set(c.id, c));
   }
-  let tier = "standard";
+  const all = [];
   for (const id of customers.keys()) {
     const sessions = await stripe("GET", "checkout/sessions", {
       customer: id, status: "complete", limit: 100,
       expand: { 0: "data.payment_intent.latest_charge" }
     });
-    (sessions.data || []).forEach(s => { tier = best(tier, sessionTier(s)); });
+    all.push(...(sessions.data || []));
   }
-  return tier;
+  return holdings(all);
 }

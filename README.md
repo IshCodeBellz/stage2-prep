@@ -110,14 +110,22 @@ and Stripe is the record of what it bought.**
 - **The simulators are gated in the browser**, by `cr_tier`. They run entirely on
   the device, so someone willing to edit their own cookies can open them. That
   is accepted; the guides are where the server draws the line.
-- Gold to Platinum is a new purchase at the full £29. A 100%-off promotion code
-  made in the Stripe dashboard works at checkout, for giving access away.
+- **Prices:** Gold £49, Platinum £89, and £40 to move up from Gold. What is charged
+  is the Stripe price; the figures in `pricing.html` and `account.html` are text,
+  so change both together.
+- **Moving up.** Platinum for someone signed in whose email holds Gold (asked of
+  Stripe, not read from the cookie) is sold at the upgrade price and tagged
+  `metadata.upgrade = "gold"`. That purchase is Platinum only while the Gold under
+  it stands: refund the Gold and the upgrade grants nothing, so refund both.
+- A 100%-off promotion code made in the Stripe dashboard works at checkout, for
+  giving access away.
 
 ### Switching it on
 
-1. **Stripe.** Make two products, *Gold* and *Platinum*, each with a one-off
-   price in GBP (£19 and £29). Copy the two price IDs (`price_…`). Get the secret
-   key from Developers → API keys. Use test mode first.
+1. **Stripe.** Make three products, each with a one-off price in GBP: *Gold* £49,
+   *Platinum* £89 and *Gold to Platinum* £40. Copy the three price IDs
+   (`price_…`). Get the secret key from Developers → API keys. Use test mode
+   first.
 2. **Resend.** Add and verify the domain the sign-in email comes from, and make
    an API key.
 3. **Vercel → Settings → Environment Variables**, for Production (and Preview,
@@ -131,6 +139,7 @@ and Stripe is the record of what it bought.**
    | `STRIPE_SECRET_KEY` | `sk_live_…` (or `sk_test_…`) |
    | `STRIPE_PRICE_GOLD` | the Gold price ID |
    | `STRIPE_PRICE_PLATINUM` | the Platinum price ID |
+   | `STRIPE_PRICE_UPGRADE` | the Gold to Platinum price ID |
    | `RESEND_API_KEY` | `re_…` |
    | `MAIL_FROM` | e.g. `Cab Ready <hello@your-domain>`, on the verified domain |
 
@@ -138,7 +147,8 @@ and Stripe is the record of what it bought.**
    `CACHE` in `sw.js`. Deploy.
 5. **Try it on a preview deploy with test keys**: buy Gold with Stripe's test
    card `4242 4242 4242 4242`, open a Gold guide, sign out, sign back in with the
-   link, and refund the payment in Stripe to watch the tier go (within a day, or
+   link, move up to Platinum from the account page, and refund a payment in
+   Stripe to watch the tier go (within a day, or
    straight away after signing out and in again).
 
 Both halves have to agree. Server on and browser off gives trimmed guides with

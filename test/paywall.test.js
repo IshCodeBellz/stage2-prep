@@ -9,6 +9,7 @@ process.env.SESSION_SECRET = "test-secret-that-is-long-enough-0123456789";
 process.env.STRIPE_SECRET_KEY = "sk_test_x";
 process.env.STRIPE_PRICE_GOLD = "price_gold";
 process.env.STRIPE_PRICE_PLATINUM = "price_plat";
+process.env.STRIPE_PRICE_UPGRADE = "price_up";
 process.env.RESEND_API_KEY = "re_x";
 process.env.MAIL_FROM = "Cab Ready <hello@example.com>";
 process.env.SITE_URL = "https://cabready.example";
@@ -209,6 +210,75 @@ test("an unpaid or unknown session signs nobody in", async () => {
     assert.equal(r.headers.get("location"), "/account?error=claim");
     assert.equal(r.headers.getSetCookie().length, 0);
   }
+});
+
+/* ---- moving up */
+
+const upgrade = extra => session("platinum", Object.assign({ metadata: { tier: "platinum", upgrade: "gold" } }, extra));
+const signedIn = async (email, tier) =>
+  (await auth.sessionCookies(email, tier)).map(c => c.split(";")[0]).join("; ");
+const sent = () => new URLSearchParams(calls.find(c => c.opts.method === "POST").opts.body);
+
+test("a signed-in Gold holder moves up for the difference, on their own email", async () => {
+  buyer("buyer@example.com", session("gold"));
+  const r = await checkout.POST(req("/api/checkout", {
+    method: "POST", body: "tier=platinum",
+    headers: { "content-type": "application/x-www-form-urlencoded", cookie: await signedIn("buyer@example.com", "gold") }
+  }));
+  assert.equal(r.headers.get("location"), "https://checkout.stripe.com/c/pay/cs_new");
+  assert.equal(sent().get("line_items[0][price]"), "price_up");
+  assert.equal(sent().get("metadata[upgrade]"), "gold");
+  assert.equal(sent().get("customer_email"), "buyer@example.com");
+});
+
+test("the upgrade price is decided by Stripe's record, not the cookie", async () => {
+  // the cookie says Gold, but the Gold was refunded
+  buyer("buyer@example.com", session("gold", { payment_intent: { latest_charge: { refunded: true } } }));
+  await checkout.POST(req("/api/checkout", {
+    method: "POST", body: "tier=platinum",
+    headers: { "content-type": "application/x-www-form-urlencoded", cookie: await signedIn("buyer@example.com", "gold") }
+  }));
+  assert.equal(sent().get("line_items[0][price]"), "price_plat");
+  assert.equal(sent().get("metadata[upgrade]"), null);
+});
+
+test("nobody signed in pays full price, and a holder is not sold what they have", async () => {
+  await checkout.POST(post("/api/checkout", { tier: "platinum" }));
+  assert.equal(sent().get("line_items[0][price]"), "price_plat");
+
+  calls = [];
+  buyer("plat@example.com", session("platinum"));
+  const r = await checkout.POST(req("/api/checkout", {
+    method: "POST", body: "tier=gold",
+    headers: { "content-type": "application/x-www-form-urlencoded", cookie: await signedIn("plat@example.com", "platinum") }
+  }));
+  assert.equal(r.headers.get("location"), "/account");
+  assert.equal(calls.filter(c => c.opts.method === "POST").length, 0);
+});
+
+test("an upgrade is Platinum only while the Gold under it stands", async () => {
+  buyer("a@example.com", session("gold"), upgrade());
+  assert.equal(await tierForEmail("a@example.com"), "platinum");
+
+  buyer("b@example.com", session("gold", { payment_intent: { latest_charge: { refunded: true } } }), upgrade());
+  assert.equal(await tierForEmail("b@example.com"), "standard");
+
+  buyer("c@example.com", session("gold"), upgrade({ payment_intent: { latest_charge: { refunded: true } } }));
+  assert.equal(await tierForEmail("c@example.com"), "gold");
+
+  buyer("d@example.com", upgrade());
+  assert.equal(await tierForEmail("d@example.com"), "standard");
+});
+
+test("claiming an upgrade whose Gold has gone signs nobody in as Platinum", async () => {
+  const [, up] = buyer("buyer@example.com",
+    session("gold", { payment_intent: { latest_charge: { refunded: true } } }), upgrade());
+  const r = await claim.GET(req("/api/claim?session_id=" + up.id));
+  assert.equal(r.headers.get("location"), "/account?error=claim");
+
+  const [, ok] = buyer("fine@example.com", session("gold"), upgrade({ customer_details: { email: "fine@example.com" } }));
+  const r2 = await claim.GET(req("/api/claim?session_id=" + ok.id));
+  assert.equal(r2.headers.get("location"), "/account?welcome=platinum");
 });
 
 /* ---- signing in */

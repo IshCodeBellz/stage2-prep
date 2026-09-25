@@ -52,7 +52,7 @@
       <div class="plan feature">
         <span class="tag gold ribbon">Gold</span>
         <h3>Gold</h3>
-        <div class="price">£19 <small>once</small></div>
+        <div class="price">£49 <small>once</small></div>
         <p class="why">The obvious one. Every test in the battery, explained properly.</p>
         <ul>
           <li>Everything in Standard</li>
@@ -73,14 +73,14 @@
         <a class="btn go block open-only" href="/resources">Read what is in them</a>
         <form class="buy paywall-only" method="post" action="/api/checkout">
           <input type="hidden" name="tier" value="gold">
-          <button class="btn go block" type="submit">Buy Gold — £19</button>
+          <button class="btn go block" type="submit">Buy Gold — £49</button>
         </form>
       </div>
 
       <div class="plan">
         <span class="tag platinum ribbon">Platinum</span>
         <h3>Platinum</h3>
-        <div class="price">£29 <small>once</small></div>
+        <div class="price">£89 <small>once</small></div>
         <p class="why">For the sitting you cannot afford to get wrong — usually the second one.</p>
         <ul>
           <li>Everything in Gold</li>
@@ -96,7 +96,7 @@
         <a class="btn block open-only" href="/resources">Read what is in them</a>
         <form class="buy paywall-only" method="post" action="/api/checkout">
           <input type="hidden" name="tier" value="platinum">
-          <button class="btn block" type="submit">Buy Platinum — £29</button>
+          <button class="btn block" type="submit" id="buyplat">Buy Platinum — £89</button>
         </form>
       </div>
     </div>
@@ -151,9 +151,8 @@
       </details>
       <details>
         <summary>I bought Gold. Can I move up to Platinum?</summary>
-        <p>Yes — buy Platinum with the same email and your account moves up. It is the full £29 rather
-          than the difference, so if you think you will want the interview material, Platinum first is
-          the better buy.</p>
+        <p>Yes, for the difference: £40. Sign in with the email you bought Gold on and the Platinum
+          button on this page becomes the move up. You never pay twice for the same thing.</p>
       </details>
       <details>
         <summary>Can you guarantee I will pass?</summary>
@@ -190,6 +189,14 @@
     row("Enhanced VSE simulator: the track, shape sets and both together", "platinum")
   ].concat(RESOURCES.map(r => row(r.title, r.tier)));
   document.getElementById("ptbody").innerHTML = rows.join("");
+
+  // a Gold holder's Platinum button is the move up; the server sets the price.
+  // Access comes from tiers.js, which loads after this script.
+  window.addEventListener("DOMContentLoaded", () => {
+    const plat = document.getElementById("buyplat");
+    if (plat && window.Access && Access.signedIn() && Access.tier() === "gold")
+      plat.textContent = "Move up to Platinum — £40";
+  });
 
   // back from a checkout that did not start
   const err = new URLSearchParams(location.search).get("error"), box = document.getElementById("payerror");
