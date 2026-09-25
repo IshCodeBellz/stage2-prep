@@ -609,7 +609,7 @@
     </div>
     <div class="row">
       <button onclick="VSE1.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="VSE1.start('exam')">Exam</button>
+      <button class="go" onclick="VSE1.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -622,7 +622,7 @@
     </div>
     <div class="row">
       <button onclick="VSE2.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="VSE2.start('exam')">Exam</button>
+      <button class="go" onclick="VSE2.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -635,7 +635,7 @@
     </div>
     <div class="row">
       <button onclick="VSE3.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="VSE3.start('exam')">Exam</button>
+      <button class="go" onclick="VSE3.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -686,131 +686,131 @@
       <div class="meta">5 parts · 1 min each · exam ends at 5:00 · errors penalised</div>
     </div>
     <div class="row">
-      <button data-tier="gold" onclick="PAPER.open('gb')">Paper</button>
+      <button onclick="PAPER.open('gb')">Paper</button>
       <button onclick="GB.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="GB.start('exam')">Exam</button>
+      <button class="go" onclick="GB.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="1">
+  <div class="drill" data-stage="1" data-tier="gold" data-demo>
     <span class="lamp" id="l-tea"></span>
     <div class="body">
-      <h2>Tea-Occ — divided attention</h2>
+      <h2>Tea-Occ — divided attention<span class="ptag gold">Gold</span></h2>
       <p>Count tones while ignoring a lower one, search a directory page, then do both at once. Needs sound. Scores what doing both costs you. Every part ends itself on the clock; practice runs the same three parts short.</p>
       <div class="meta">3 parts · 1:15, 2:00, 1:30 · sound required</div>
     </div>
     <div class="row">
       <button onclick="TEA.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="TEA.start('exam')">Exam</button>
+      <button class="go" onclick="TEA.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="1">
+  <div class="drill" data-stage="1" data-tier="gold" data-demo>
     <span class="lamp" id="l-trp1"></span>
     <div class="body">
-      <h2>TRP1b — rules recall</h2>
+      <h2>TRP1b — rules recall<span class="ptag gold">Gold</span></h2>
       <p>Study a passage of procedure for three minutes, then it is taken away and you answer eighteen questions on it. Exam puts seven minutes on those questions and hands the paper in at zero; practice leaves them untimed so you see what you actually retained. Three passages, rotating.</p>
       <div class="meta">18 questions · 3 min study · exam ends at 7:00 · 3 passages</div>
     </div>
     <div class="row">
-      <button data-tier="gold" onclick="PAPER.open('trp1')">Paper</button>
+      <button onclick="PAPER.open('trp1')">Paper</button>
       <button onclick="TRP1.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="TRP1.start('exam')">Exam</button>
+      <button class="go" onclick="TRP1.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="1">
+  <div class="drill" data-stage="1" data-tier="gold" data-demo>
     <span class="lamp" id="l-trp2"></span>
     <div class="body">
-      <h2>TRP2 — order of checking</h2>
+      <h2>TRP2 — order of checking<span class="ptag gold">Gold</span></h2>
       <p>Three dials, each with an arrow over a background that sets its priority. White first, black second, grey last — give the order. Exam is the real 43 in eight minutes and ends at zero; practice is seven with no clock.</p>
       <div class="meta">43 questions · 11 s each · exam ends at 8:00 · practice is 7, untimed</div>
     </div>
     <div class="row">
-      <button data-tier="gold" onclick="PAPER.open('trp2')">Paper</button>
+      <button onclick="PAPER.open('trp2')">Paper</button>
       <button onclick="TRP2.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="TRP2.start('exam')">Exam</button>
+      <button class="go" onclick="TRP2.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="1">
+  <div class="drill" data-stage="1" data-tier="gold" data-demo>
     <span class="lamp" id="l-dfft"></span>
     <div class="body">
-      <h2>DFFT — fault finding</h2>
+      <h2>DFFT — fault finding<span class="ptag gold">Gold</span></h2>
       <p>Read a display panel against a fault finder guide, work out which fault to deal with first, and give its code and the action that goes with it. Exam is the real 20 in forty-five minutes and ends at zero; practice is five with no clock.</p>
       <div class="meta">20 questions · 2:15 each · exam ends at 45:00 · practice is 5, untimed</div>
     </div>
     <div class="row">
-      <button data-tier="gold" onclick="PAPER.open('dfft')">Paper</button>
+      <button onclick="PAPER.open('dfft')">Paper</button>
       <button onclick="DFFT.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="DFFT.start('exam')">Exam</button>
+      <button class="go" onclick="DFFT.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="2">
+  <div class="drill" data-stage="2" data-tier="gold" data-demo>
     <span class="lamp" id="l-wafv"></span>
     <div class="body">
-      <h2>WAFV — vigilance</h2>
+      <h2>WAFV — vigilance<span class="ptag gold">Gold</span></h2>
       <p>A grey square flashes. Respond the moment it appears darker than usual. Exam is the real thirty minutes and the only length that sets your best; practice is ten, which stops before the decline this test exists to find, and five is a check that the screen and your finger are working.</p>
       <div class="meta">30 minutes · counts down · practice is 10, or 5 for a quick check</div>
     </div>
     <div class="row">
       <button onclick="WAFV.start('quick')">5 min</button>
       <button onclick="WAFV.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="WAFV.start('exam')">Exam</button>
+      <button class="go" onclick="WAFV.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="2">
+  <div class="drill" data-stage="2" data-tier="gold" data-demo>
     <span class="lamp" id="l-atavt"></span>
     <div class="body">
-      <h2>ATAVT — perception</h2>
+      <h2>ATAVT — perception<span class="ptag gold">Gold</span></h2>
       <p>A traffic scene flashes for one second. Report which objects you saw. Comes with twenty-eight tagged photographs; add your own and it uses those too. The real test uses photographs and they are harder than anything drawn. Exam is twenty scenes; practice is eight.</p>
       <div class="meta">20 scenes · 1 s each · practice is 8 · 15 photographs included</div>
     </div>
     <div class="row">
       <button onclick="SCENELIB.open()">Scenes</button>
       <button onclick="ATAVT.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="ATAVT.start('exam')">Exam</button>
+      <button class="go" onclick="ATAVT.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="2">
+  <div class="drill" data-stage="2" data-tier="gold" data-demo>
     <span class="lamp" id="l-hand"></span>
     <div class="body">
-      <h2>2-Hand — co-ordination</h2>
+      <h2>2-Hand — co-ordination<span class="ptag gold">Gold</span></h2>
       <p>Left thumb moves it sideways, right thumb moves it up and down. Keep it inside the channel. A different channel shape each attempt. Exam is the ten runs the real test is set at; practice is six, which stops before the hands start to tire. A gamepad works too: left stick sideways, right stick up and down.</p>
       <div class="meta">10 runs · practice is 6 · 5 tracks · buzzer on contact</div>
     </div>
     <div class="row">
       <button onclick="HAND.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="HAND.start('exam')">Exam</button>
+      <button class="go" onclick="HAND.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="2">
+  <div class="drill" data-stage="2" data-tier="gold" data-demo>
     <span class="lamp" id="l-sjt"></span>
     <div class="body">
-      <h2>M7-SJT — ranking</h2>
+      <h2>M7-SJT — ranking<span class="ptag gold">Gold</span></h2>
       <p>Put four responses in order of preference. 45 seconds a situation, auto-advancing. Four different sets, rotating, so a second run is never the same paper. Exam is the full eight situations; practice is three. The situations are set on the railway — depot, platform, cab and control.</p>
       <div class="meta">8 situations · 45 s each · practice is 3 · 4 sets</div>
     </div>
     <div class="row">
       <button onclick="SJT.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="SJT.start('exam')">Exam</button>
+      <button class="go" onclick="SJT.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="2">
+  <div class="drill" data-stage="2" data-tier="gold" data-demo>
     <span class="lamp" id="l-sje"></span>
     <div class="body">
-      <h2>SJE — rating</h2>
+      <h2>SJE — rating<span class="ptag gold">Gold</span></h2>
       <p>Rate each response 1 to 5. Checks your answers against each other for contradictions. Exam is the twenty-one scenarios of the real exercise, drawn from all four sets; practice is one set of six. Untimed either way — the real one is too. The scenarios are set on the railway.</p>
       <div class="meta">21 scenarios · untimed · practice is one set of 6</div>
     </div>
     <div class="row">
       <button onclick="SJE.start('practice')">Practice</button>
-      <button class="go" data-tier="gold" onclick="SJE.start('exam')">Exam</button>
+      <button class="go" onclick="SJE.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -935,6 +935,7 @@ const Rot = (()=>{
   const save=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(mem)); }catch(e){} };
   return {
     next(id, n){
+      if(App.demo) return 0;                 // a demo is always the first paper
       const i = (mem[id]|0) % n;
       mem[id] = (i+1) % n;
       save();
@@ -1240,16 +1241,9 @@ const HISTORY = {
   open(id){
     const rec=Store.get(id)||{n:0};
     if(id==="day") return this.day(rec);
-    // every attempt is kept either way; Standard is shown the last one
-    const all=canUse(EXAM_TIER), kept=(rec.h||[]).length;
-    const runs=(rec.h||[]).slice(all ? 0 : -1);
+    const runs=(rec.h||[]).slice();
     const unit=rec.u||"", low=!!rec.low;
     const box=el("div");
-    if(!all && kept>1){
-      const n=el("div","note","<b>This is your last attempt.</b> All "+kept+" are kept on this device — Gold shows every one of them, with the trend across them. ");
-      const a=el("a",null,"See what Gold includes"); a.href="/pricing"; n.appendChild(a);
-      box.appendChild(n);
-    }
 
     if(!runs.length){
       box.appendChild(el("div","note","This drill was attempted "+rec.n+
@@ -1401,6 +1395,7 @@ const App = {
   },
   clock(txt){ $("#t-clock").textContent = txt || ""; },
   quit(){
+    endDemo();
     this.endDay();
     paintMenu();
     clearInterval(this.tick); clearTimeout(this.timer);
@@ -1410,6 +1405,7 @@ const App = {
     this.clock(""); this.clockPlain();
   },
   done(id, score, low, unit, paper){
+    if(this.demo) return;                    // a demo paper sets nothing
     const sec = this.tStart ? Math.round((Date.now()-this.tStart)/1000) : null;
     Store.bump(id, score, low, unit, paper, sec);
     if(this.day && id!=="day"){
@@ -1513,7 +1509,13 @@ const App = {
     rows.forEach(([k,v])=>{
       const r=el("div","stat"); r.appendChild(el("span",null,k)); r.appendChild(el("b",null,v)); w.appendChild(r);
     });
-    if(coach) w.appendChild(el("div","note",coach));
+    if(App.demo){
+      const n=el("div","note","<b>This was the demo paper</b> — the same one every time, so it is not saved and "+
+        "it does not set a best. Gold gives you a fresh paper every run, the exam version at the real length "+
+        "and the notes on what went wrong. ");
+      const a=el("a",null,"See what Gold includes"); a.href="/pricing"; n.appendChild(a);
+      w.appendChild(n);
+    } else if(coach) w.appendChild(el("div","note",coach));
     const row=el("div","row"); row.style.marginTop="16px";
     if(App.chain && App.chain.length){
       const nxt=App.chain[0];
@@ -2204,49 +2206,55 @@ function vxShapes(trials, hot){
    opened on its own — nothing is locked, same as the site while PAYWALL is off. */
 const canUse = tier => !window.Access || window.Access.can(tier);
 
-/* The line is drawn by what you can do, not how often. Practice is Standard; the
-   exam version, the printed papers, Day mode and the full history are Gold; a row
-   marked data-tier in the menu (the enhanced VSE, the MMI) is that tier whole.
-   The exam buttons carry data-tier="gold" too, for the menu — keep the two agreeing. */
-const EXAM_TIER="gold";
-const rowTier = id => {
-  const l=document.getElementById("l-"+id), dv=l && l.closest(".drill");
-  return (dv && dv.dataset.tier) || "standard";
-};
-const needs = (id, mode) => {
-  const row=rowTier(id);
-  if(row!=="standard") return row;
-  return (mode==="practice" || mode==="quick") ? "standard" : EXAM_TIER;
-};
-/* a Standard visitor gets one exam per drill on the house, to feel the real length */
-const tasteOn = id => !!window.Access && rowTier(id)==="standard" && window.Access.enforcing();
+/* The line is drawn by what is free, not how often — a count kept in this browser
+   resets in a private window. Group Bourdon and the VSE are Standard whole. A row
+   marked data-tier is that tier; one also marked data-demo gives Standard a demo
+   of it: the practice version, on one fixed paper, scored but not coached and not
+   saved. Seeding the paper rather than counting the runs is what holds — running
+   the demo again, or in another browser, is the same paper again. */
+const rowOf = id => { const l=document.getElementById("l-"+id); return l && l.closest(".drill"); };
+const rowTier = id => { const dv=rowOf(id); return (dv && dv.dataset.tier) || "standard"; };
+const hasDemo = id => { const dv=rowOf(id); return !!(dv && dv.hasAttribute("data-demo")); };
+
+/* a demo draws every random number from a sequence seeded by the drill's name */
+const NATIVE_RANDOM = Math.random;
+function seedFor(id){
+  let a=0; for(const c of "demo:"+id) a=(Math.imul(a,31)+c.charCodeAt(0))|0;
+  Math.random=()=>{                                // mulberry32
+    a=(a+0x6D2B79F5)|0; let t=a;
+    t=Math.imul(t^(t>>>15), t|1); t^=t+Math.imul(t^(t>>>7), t|61);
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
+function endDemo(){ App.demo=null; Math.random=NATIVE_RANDOM; }
 
 /* The check every start() makes on the way in. Inside a Day mode sitting the sitting
    was checked when it began, so the drills in it are not checked again. */
 function admit(id, mode, name){
+  endDemo();
   if(App.day) return true;
-  const need=needs(id, mode);
+  const need=rowTier(id);
   if(canUse(need)) return true;
-  if(need===EXAM_TIER && tasteOn(id) && window.Access.spendTaste(id)){ paintLocks(); return true; }
+  if(mode==="practice" && hasDemo(id)){ App.demo=id; seedFor(id); return true; }
   lockScreen(name || DRILL_NAMES[id] || "This drill", need, mode, id);
   return false;
 }
 
 const TIER_SAYS = {
-  gold: "Gold opens the exam version of every drill — the full length at the real pace — with Day mode, the printed papers and every attempt you have made.",
+  gold: "Gold opens every drill in the battery — a fresh paper every run, the exam version at the real length, the notes on what went wrong — with Day mode, the printed papers and every attempt you have made.",
   platinum: "Platinum adds the enhanced VSE — the track, the shape sets and the two together — and the MMI interview, on top of everything in Gold."
 };
 function lockScreen(name, need, mode, id){
   const label=(window.Access && Access.label[need]) || need;
   const who=name.split(" — ")[0];
-  const exam = mode && mode!=="practice" && mode!=="quick" && mode!=="paper" && rowTier(id)==="standard";
+  const demo = id && hasDemo(id);
   const head = mode==="paper" ? "Printing the "+(who==="Stage 1" ? "paper pack" : who+" paper")+" is "+label+"."
-             : exam ? "The exam version of "+who+" is "+label+"."
+             : demo ? "The full "+who+" is "+label+"."
              : who+" is "+label+".";
   const box=el("div");
   box.appendChild(el("div","note",
     "<b>"+head+"</b> "+
-    (exam ? "You have sat the one on the house, and the practice version stays free. " : "")+
+    (demo ? "The demo paper stays free. " : "")+
     (TIER_SAYS[need]||"")));
   const row=el("div","row");
   const a=el("a","btnlink","See what "+label+" includes"); a.href="/pricing";
@@ -2568,36 +2576,44 @@ const VSX = {
   }
 };
 
-/* The menu. A row that is a tier whole swaps its start buttons for the way in; on
-   the rest, a Gold button reads "Exam · 1 free" while the one on the house is still
-   there, then becomes a link to the pricing page. */
+/* The menu. A row that is a tier swaps its start buttons for the way in — except
+   a demo row, which keeps its practice button as the demo and turns the rest into
+   links to the pricing page. The paper pack is a tier on its own. */
 function paintLocks(){
+  const label = t => (window.Access && Access.label[t]) || t;
+  const lockLink = (b, t) => {
+    let lk=b.nextElementSibling && b.nextElementSibling.classList.contains("lockbtn") ? b.nextElementSibling : null;
+    if(!lk){ lk=el("a","btnlink lockbtn",b.dataset.was+" · "+label(t)); lk.href="/pricing"; b.after(lk); }
+    return lk;
+  };
   document.querySelectorAll("#menu .drill[data-tier]").forEach(dv=>{
-    const t=dv.dataset.tier, open=canUse(t);
+    const t=dv.dataset.tier, open=canUse(t), demo=!open && dv.hasAttribute("data-demo");
     const row=dv.querySelector(":scope > .row");
-    if(row) row.hidden=!open;
+    if(row) row.hidden=!open && !demo;
+    if(row) row.querySelectorAll("button").forEach(b=>{
+      if(!b.dataset.was) b.dataset.was=b.textContent;
+      const isDemo=/start\('practice'\)/.test(b.getAttribute("onclick")||"");
+      b.hidden = demo && !isDemo;
+      b.textContent = demo && isDemo ? "Demo paper" : b.dataset.was;
+      const lk = demo && !isDemo ? lockLink(b, t)
+               : (b.nextElementSibling && b.nextElementSibling.classList.contains("lockbtn") ? b.nextElementSibling : null);
+      if(lk) lk.hidden = !(demo && !isDemo);
+    });
     let lock=dv.querySelector(".lockrow");
-    if(!open && !lock){
+    if(!open && !demo && !lock){
       lock=el("div","row lockrow");
-      const a=el("a","btnlink","Unlock with "+((window.Access && Access.label[t]) || t)); a.href="/pricing";
+      const a=el("a","btnlink","Unlock with "+label(t)); a.href="/pricing";
       lock.appendChild(a); dv.appendChild(lock);
     }
-    if(lock) lock.hidden=open;
+    if(lock) lock.hidden=open || demo;
   });
-  document.querySelectorAll("#menu .drill:not([data-tier]) button[data-tier], #paperpack button[data-tier]").forEach(b=>{
-    const t=b.dataset.tier, lamp=b.closest(".drill") && b.closest(".drill").querySelector(".lamp");
-    const id=lamp ? lamp.id.replace("l-","") : null;
-    const exam=/start\('exam'\)/.test(b.getAttribute("onclick")||"");
+  document.querySelectorAll("#paperpack button[data-tier]").forEach(b=>{
     if(!b.dataset.was) b.dataset.was=b.textContent;
-    const open=canUse(t), taste=!open && exam && id && tasteOn(id) && Access.tasteLeft(id);
-    b.hidden = !open && !taste;
-    b.textContent = taste ? b.dataset.was+" · 1 free" : b.dataset.was;
-    let lk=b.nextElementSibling && b.nextElementSibling.classList.contains("lockbtn") ? b.nextElementSibling : null;
-    if(!open && !taste && !lk){
-      lk=el("a","btnlink lockbtn",b.dataset.was+" · "+((window.Access && Access.label[t]) || t));
-      lk.href="/pricing"; b.after(lk);
-    }
-    if(lk) lk.hidden = open || taste;
+    const open=canUse(b.dataset.tier);
+    b.hidden=!open;
+    const lk=open ? (b.nextElementSibling && b.nextElementSibling.classList.contains("lockbtn") ? b.nextElementSibling : null)
+                  : lockLink(b, b.dataset.tier);
+    if(lk) lk.hidden=open;
   });
 }
 
@@ -5304,7 +5320,8 @@ const PAPER = {
     pack:{title:"Stage 1 — the paper pack", again:"New pack", make:()=>packPaper(PAPER.set)}
   },
   open(id){
-    if(!canUse(EXAM_TIER)) return lockScreen(this.defs[id].title, EXAM_TIER, "paper");
+    const need = id==="pack" ? "gold" : rowTier(id);
+    if(!canUse(need)) return lockScreen(this.defs[id].title, need, "paper");
     this.id=id;
     document.body.classList.add("printing");
     $("#printout").classList.add("on");

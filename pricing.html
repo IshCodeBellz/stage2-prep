@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pricing — Cab Ready</title>
-<meta name="description" content="Standard, Gold and Platinum. One payment per tier, no subscription. Practise every drill free; Gold opens the exam versions, Day mode and the guides, Platinum the interview and the enhanced VSE.">
+<meta name="description" content="Standard, Gold and Platinum. One payment per tier, no subscription. Group Bourdon and the VSE are free; Gold opens the rest of the battery, Day mode and the guides, Platinum the interview and the enhanced VSE.">
 <meta name="theme-color" content="#0F151B">
 <link rel="icon" href="/icon-180.png">
 <link rel="stylesheet" href="/assets/fonts.css">
@@ -13,10 +13,10 @@
   <div class="wrap">
     <p class="eyebrow">Pricing</p>
     <h1>Three tiers. One payment each.</h1>
-    <p class="lede">Practise every drill for free, as often as you like, and find out which test you
-      are slow on. What you pay for is sitting them for real — the full length, at the real pace, a
-      whole stage in one go — and the method for each test. Platinum adds the interview and the
-      enhanced VSE.</p>
+    <p class="lede">Group Bourdon and the VSE — the two tests people meet first — are free, in full,
+      for as long as you like. Every other test has a demo paper so you can see what it asks. What
+      you pay for is the rest of the battery at full strength, a whole stage in one sitting, and the
+      method for each test. Platinum adds the interview and the enhanced VSE.</p>
   </div>
 </section>
 
@@ -35,14 +35,15 @@
         <div class="price">Free</div>
         <p class="why">Enough to find out whether you are slow, and on which test.</p>
         <ul>
-          <li>The practice version of every Stage 1 and Stage 2 drill, as often as you like</li>
-          <li>One exam version of each on the house, to feel the real length once</li>
-          <li>Your last score on each drill</li>
+          <li>Group Bourdon and all three VSE tasks in full — practice, exam, the printed paper,
+              a fresh paper every run and your score history</li>
+          <li>A demo of every other test: one short paper, the same every time, so you know what
+              it asks before you pay</li>
           <li>Works offline, installs to your home screen</li>
           <li>The free guides: how to become a train driver, whether you are eligible, the
               assessment day, which tests you will sit, Group Bourdon, visual search, and where this
               all comes from</li>
-          <li class="no">Exam versions after the first, Day mode and the printed papers</li>
+          <li class="no">The rest of the battery in full, and Day mode</li>
           <li class="no">The rest of the written guides</li>
         </ul>
         <a class="btn block" href="/simulators">Start practising</a>
@@ -55,10 +56,11 @@
         <p class="why">The obvious one. Every test in the battery, explained properly.</p>
         <ul>
           <li>Everything in Standard</li>
-          <li>The exam version of every drill, as often as you like — full length, real pace,
-              the paper taken away at zero</li>
+          <li>Every other drill in full — Tea-Occ, TRP1b, TRP2, DFFT, WAFV, ATAVT, 2-Hand, the SJT
+              and the SJE — with a fresh paper every run, the exam version at the real length and
+              the notes on what went wrong</li>
           <li>Day mode — the whole stage in one sitting, to rehearse the fatigue</li>
-          <li>Every attempt you have made, with personal bests and the trend</li>
+          <li>Score history and personal bests on every drill</li>
           <li>The Stage 1 paper pack, printed</li>
           <li>Applying: the windows, the national database and the attempts rule</li>
           <li>Training, licensing and what the job pays once you are through</li>
@@ -130,12 +132,12 @@
       </details>
       <details>
         <summary>Do I need Gold or Platinum to use the simulators?</summary>
-        <p>Not to practise. The practice version of every drill is free, as often as you like, and you
-          get one exam version of each on the house. What Gold adds is sitting them for real, again
-          and again: the full length at the real pace, a whole stage back to back in Day mode, and
-          the record of every attempt so you can see whether you are getting faster. Platinum adds
-          the MMI drill and the enhanced VSE — the version with the track and the shape sets —
-          which sits alongside the standard VSE rather than replacing it.</p>
+        <p>Not for Group Bourdon or the VSE — both are free in full, and will stay free. Every other
+          test has a free demo paper, which is enough to see what it asks. To train on them — a
+          fresh paper every run, the exam version at the real length, and a whole stage back to
+          back in Day mode — you need Gold. Platinum adds the MMI drill and the enhanced VSE — the
+          version with the track and the shape sets — which sits alongside the standard VSE rather
+          than replacing it.</p>
       </details>
       <details>
         <summary>Can you guarantee I will pass?</summary>
@@ -145,8 +147,8 @@
       </details>
       <details>
         <summary>I have my assessment in four days.</summary>
-        <p>Then do not buy anything yet. Open the simulators, sit your free exam of Group Bourdon
-          and the vigilance test tonight, and read the two free guides that go with them. If what you
+        <p>Then do not buy anything yet. Open the simulators, sit the exam version of Group Bourdon
+          and the VSE tonight, and read the two free guides that go with them. If what you
           find worries you, come back for the rest.</p>
       </details>
     </div>
@@ -164,10 +166,10 @@
       [0, 1, 2].map(i => (i >= rank ? yes : no)).join("") + "</tr>";
   };
   const rows = [
-    row("Practice version of every Stage 1 and Stage 2 drill", "standard"),
-    row("One exam version of each drill, and your last score", "standard"),
-    row("Exam versions, as often as you like", "gold"),
-    row("Day mode, the printed papers and every attempt you have made", "gold"),
+    row("Group Bourdon and the VSE in full, with history", "standard"),
+    row("A demo paper of every other test", "standard"),
+    row("Every other drill in full: fresh papers, exam versions, the notes", "gold"),
+    row("Day mode and the Stage 1 paper pack", "gold"),
     row("MMI interview drill", "platinum"),
     row("Enhanced VSE simulator: the track, shape sets and both together", "platinum")
   ].concat(RESOURCES.map(r => row(r.title, r.tier)));
