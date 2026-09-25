@@ -1,7 +1,8 @@
 # Cab Ready
 
 Marketing site, resource library and practice simulators for the trainee train
-driver assessment. Static: no build step, no dependencies, no framework.
+driver assessment. Static pages, plus a handful of Vercel Functions for accounts
+and payment: no build step, no dependencies, no framework.
 
 ```
 index.html              the landing page                    →  /
@@ -12,7 +13,12 @@ simulators.html         the app (was index.html)            →  /simulators
 assets/site.css         one stylesheet for the whole site
 assets/site.js          header, footer, cards, prev/next
 assets/resources.js     the guide catalogue — add guides here
-assets/tiers.js         the paywall scaffold
+assets/tiers.js         the paywall, in the browser
+account.html            sign in, and what you hold           →  /account
+api/*.js                checkout, sign-in, session, guides   →  /api/<name>
+api/_lib/               tokens and cookies, Stripe, email, the guide trim
+middleware.js           sends /resources/<slug> through /api/guide
+test/                   the server side, with Stripe stubbed — npm test
 sw.js                   offline cache
 scenes/                 tagged photographs for the ATAVT drill
 ```
@@ -73,6 +79,82 @@ out for anyone without it.
 While `PAYWALL` is false all of it is open. `?paywall=1&tier=standard` shows it
 as a free visitor sees it, and `?paywall=1&tier=gold` as Gold.
 
+## Accounts and payment
+
+There are no passwords and no user database. **An account is an email address,
+and Stripe is the record of what it bought.**
+
+- **Buying.** The Buy buttons on `/pricing` post to `/api/checkout`, which opens
+  Stripe Checkout for that tier's price. Checkout collects the email, always
+  creates a Stripe Customer, and tags the session `metadata.tier`. Stripe sends
+  the buyer back to `/api/claim`, which checks the session with Stripe and signs
+  them in.
+- **Signing in elsewhere.** `/account` takes an email and `/api/login` sends a
+  link to it through Resend, but only if that email has bought something; the
+  reply on screen is the same either way. The link (`/api/verify`) works for 30
+  minutes.
+- **What someone holds** is always worked out the same way (`tierForEmail` in
+  `api/_lib/stripe.js`): the customers with that email, their completed checkout
+  sessions, the highest tier among those paid and not fully refunded.
+- **The session** is two cookies. `cr_session` is signed with `SESSION_SECRET`,
+  HttpOnly, and is what the server believes. `cr_tier` is the same tier in the
+  clear for the browser to read. Both last 30 days. Once a day `tiers.js` calls
+  `/api/me`, which asks Stripe again — so **a refund issued in the Stripe
+  dashboard takes the tier away within a day**, and a purchase on another device
+  shows up.
+- **Guides are gated on the server.** `middleware.js` sends every
+  `/resources/<slug>` request to `/api/guide`, which sends the guide whole to a
+  session that holds its tier and otherwise trims it to the preview before it
+  leaves the server — the same cut `tiers.js` makes. The paid text is not in the
+  page a non-buyer downloads.
+- **The simulators are gated in the browser**, by `cr_tier`. They run entirely on
+  the device, so someone willing to edit their own cookies can open them. That
+  is accepted; the guides are where the server draws the line.
+- **Prices:** Gold £49, Platinum £89, and £40 to move up from Gold. What is charged
+  is the Stripe price; the figures in `pricing.html` and `account.html` are text,
+  so change both together.
+- **Moving up.** Platinum for someone signed in whose email holds Gold (asked of
+  Stripe, not read from the cookie) is sold at the upgrade price and tagged
+  `metadata.upgrade = "gold"`. That purchase is Platinum only while the Gold under
+  it stands: refund the Gold and the upgrade grants nothing, so refund both.
+- A 100%-off promotion code made in the Stripe dashboard works at checkout, for
+  giving access away.
+
+### Switching it on
+
+1. **Stripe.** Make three products, each with a one-off price in GBP: *Gold* £49,
+   *Platinum* £89 and *Gold to Platinum* £40. Copy the three price IDs
+   (`price_…`). Get the secret key from Developers → API keys. Use test mode
+   first.
+2. **Resend.** Add and verify the domain the sign-in email comes from, and make
+   an API key.
+3. **Vercel → Settings → Environment Variables**, for Production (and Preview,
+   with test-mode Stripe keys, to try it there first):
+
+   | Variable | What |
+   |---|---|
+   | `PAYWALL` | `on` — the server half of the switch |
+   | `SITE_URL` | `https://your-domain` — where Stripe and the sign-in email send people back to |
+   | `SESSION_SECRET` | 32+ random characters: `openssl rand -base64 48`. Changing it signs everyone out |
+   | `STRIPE_SECRET_KEY` | `sk_live_…` (or `sk_test_…`) |
+   | `STRIPE_PRICE_GOLD` | the Gold price ID |
+   | `STRIPE_PRICE_PLATINUM` | the Platinum price ID |
+   | `STRIPE_PRICE_UPGRADE` | the Gold to Platinum price ID |
+   | `RESEND_API_KEY` | `re_…` |
+   | `MAIL_FROM` | e.g. `Cab Ready <hello@your-domain>`, on the verified domain |
+
+4. **The browser half:** set `const PAYWALL = true` in `assets/tiers.js` and bump
+   `CACHE` in `sw.js`. Deploy.
+5. **Try it on a preview deploy with test keys**: buy Gold with Stripe's test
+   card `4242 4242 4242 4242`, open a Gold guide, sign out, sign back in with the
+   link, move up to Platinum from the account page, and refund a payment in
+   Stripe to watch the tier go (within a day, or
+   straight away after signing out and in again).
+
+Both halves have to agree. Server on and browser off gives trimmed guides with
+the panel still drawn (the server marks what it trimmed), but open simulators;
+browser on and server off locks the simulators but sends every guide whole.
+
 ## Adding a guide
 
 1. Add an entry to `window.RESOURCES` in `assets/resources.js` — `slug`,
@@ -124,7 +206,13 @@ Vercel does:
 
 ```bash
 node serve.js          # http://localhost:8000
+npm test               # the server side, with Stripe and Resend stubbed
 ```
+
+`serve.js` also runs `middleware.js` and the functions in `api/`, reading their
+settings from the environment or from a git-ignored `.env.local` (`KEY=value`
+lines, the same names as the table above). Use Stripe test keys locally;
+`SITE_URL` can be left out on localhost.
 
 ## Deploying
 
@@ -140,8 +228,11 @@ instead, one tap from the simulators, and can re-add it.
 ## What is stored
 
 Scores are kept in `localStorage`, per browser and per device. They do not follow
-you from phone to laptop and clearing site data wipes them. Nothing is uploaded
-and there is no account.
+you from phone to laptop and clearing site data wipes them. Nothing is uploaded.
+
+An account is only an email address, held by Stripe with the purchase. The site
+keeps nothing of its own about anyone: the session cookie carries the email and
+tier, signed, and the rest is asked of Stripe.
 
 ## The disclaimer, which is not decorative
 

@@ -24,9 +24,9 @@
   <div class="wrap">
     <div class="note open-only">
       <strong>Not charging yet.</strong> The library is still being written, so everything on the site
-      is open. The tiers below are what it will look like when it is finished, and anyone using it
-      during early access keeps full access to what exists today.
+      is open. The tiers below are what it will look like when it is finished.
     </div>
+    <div class="note paywall-only" id="payerror" hidden></div>
 
     <div class="plans">
       <div class="plan">
@@ -52,7 +52,7 @@
       <div class="plan feature">
         <span class="tag gold ribbon">Gold</span>
         <h3>Gold</h3>
-        <div class="price">£19 <small>once</small></div>
+        <div class="price">£49 <small>once</small></div>
         <p class="why">The obvious one. Every test in the battery, explained properly.</p>
         <ul>
           <li>Everything in Standard</li>
@@ -70,13 +70,17 @@
           <li>The scoring shape of each test, and what examiners do with speed against error</li>
           <li class="no">The MMI drill, the interview material and the preparation plan</li>
         </ul>
-        <a class="btn go block" href="/resources">Read what is in them</a>
+        <a class="btn go block open-only" href="/resources">Read what is in them</a>
+        <form class="buy paywall-only" method="post" action="/api/checkout">
+          <input type="hidden" name="tier" value="gold">
+          <button class="btn go block" type="submit">Buy Gold — £49</button>
+        </form>
       </div>
 
       <div class="plan">
         <span class="tag platinum ribbon">Platinum</span>
         <h3>Platinum</h3>
-        <div class="price">£29 <small>once</small></div>
+        <div class="price">£89 <small>once</small></div>
         <p class="why">For the sitting you cannot afford to get wrong — usually the second one.</p>
         <ul>
           <li>Everything in Gold</li>
@@ -89,9 +93,15 @@
               intense spells called on screen as they come and go</li>
           <li>Every guide added later, at no extra cost</li>
         </ul>
-        <a class="btn block" href="/resources">Read what is in them</a>
+        <a class="btn block open-only" href="/resources">Read what is in them</a>
+        <form class="buy paywall-only" method="post" action="/api/checkout">
+          <input type="hidden" name="tier" value="platinum">
+          <button class="btn block" type="submit" id="buyplat">Buy Platinum — £89</button>
+        </form>
       </div>
     </div>
+    <p class="small paywall-only" style="margin-top:14px">Bought already, on another phone or laptop?
+      <a href="/account">Sign in with the email you paid with</a>.</p>
 
     <div id="tierswitch"></div>
   </div>
@@ -140,6 +150,11 @@
           than replacing it.</p>
       </details>
       <details>
+        <summary>I bought Gold. Can I move up to Platinum?</summary>
+        <p>Yes, for the difference: £40. Sign in with the email you bought Gold on and the Platinum
+          button on this page becomes the move up. You never pay twice for the same thing.</p>
+      </details>
+      <details>
         <summary>Can you guarantee I will pass?</summary>
         <p>No, and be careful with anyone who does. Cut-off scores are set by the operator, are not
           published, and move. What preparation reliably fixes is pace, method and surprise — which
@@ -174,6 +189,23 @@
     row("Enhanced VSE simulator: the track, shape sets and both together", "platinum")
   ].concat(RESOURCES.map(r => row(r.title, r.tier)));
   document.getElementById("ptbody").innerHTML = rows.join("");
+
+  // a Gold holder's Platinum button is the move up; the server sets the price.
+  // Access comes from tiers.js, which loads after this script.
+  window.addEventListener("DOMContentLoaded", () => {
+    const plat = document.getElementById("buyplat");
+    if (plat && window.Access && Access.signedIn() && Access.tier() === "gold")
+      plat.textContent = "Move up to Platinum — £40";
+  });
+
+  // back from a checkout that did not start
+  const err = new URLSearchParams(location.search).get("error"), box = document.getElementById("payerror");
+  if (err && box) {
+    box.textContent = err === "checkout"
+      ? "Checkout could not be started just now, and nothing has been charged. Try again in a minute."
+      : "That tier could not be found. Choose one below.";
+    box.hidden = false;
+  }
 })();
 </script>
 <script src="/assets/tiers.js"></script>

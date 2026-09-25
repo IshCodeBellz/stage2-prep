@@ -8,7 +8,7 @@
    Bump CACHE whenever simulators.html or the shared assets change, or phones
    that already installed the app keep serving the old copy. */
 
-const CACHE = "stage2-v42";
+const CACHE = "stage2-v43";
 const APP = "/simulators";
 const ASSETS = [
   APP,
@@ -55,6 +55,8 @@ self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
+  // sign-in, checkout and the session: always the network, never a cached copy
+  if (url.pathname.startsWith("/api/")) return;
 
   if (e.request.mode === "navigate") {
     // Network first for pages, so a redeploy shows up as soon as you have signal.

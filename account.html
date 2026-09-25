@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Your account — Cab Ready</title>
+<meta name="description" content="Sign in with the email you paid with to use Gold or Platinum on this device.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0F151B">
+<link rel="icon" href="/icon-180.png">
+<link rel="stylesheet" href="/assets/fonts.css">
+<link rel="stylesheet" href="/assets/site.css">
+
+<section class="hero" style="padding:54px 0 40px">
+  <div class="wrap">
+    <p class="eyebrow">Account</p>
+    <h1 id="acct-h">Your account</h1>
+    <p class="lede" id="acct-lede">There are no passwords. Your account is the email you paid with, and
+      signing in on a new phone or laptop is a link sent to it.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap" style="max-width:640px">
+    <div class="note" id="acct-msg" hidden></div>
+
+    <div id="acct-in" hidden>
+      <dl class="spec">
+        <dt>Signed in as</dt><dd id="acct-email"></dd>
+        <dt>Your tier</dt><dd id="acct-tier"></dd>
+      </dl>
+      <div class="btnrow" style="margin-top:18px">
+        <a class="btn go" href="/simulators">Open the simulators</a>
+        <a class="btn" href="/resources">The guides</a>
+      </div>
+      <form method="post" action="/api/checkout" id="acct-up" hidden style="margin-top:12px">
+        <input type="hidden" name="tier" value="platinum">
+        <button class="btn" type="submit">Move up to Platinum — £40</button>
+      </form>
+      <form method="post" action="/api/logout" style="margin-top:28px">
+        <button class="btn ghost sm" type="submit">Sign out on this device</button>
+      </form>
+    </div>
+
+    <div id="acct-out" hidden>
+      <h2 style="font-size:1.3rem">Sign in</h2>
+      <p>Enter the email you used at checkout and we will send you a link that signs you in on this
+        device. It works for thirty minutes.</p>
+      <form method="post" action="/api/login" class="btnrow">
+        <input type="email" name="email" required autocomplete="email" placeholder="you@example.com"
+               aria-label="Email address"
+               style="flex:1 1 240px;font:inherit;padding:11px 14px;border:1.5px solid var(--btn-line);border-radius:9px;background:var(--panel);color:var(--ink)">
+        <button class="btn go" type="submit">Send the link</button>
+      </form>
+      <p class="small" style="margin-top:18px">Not bought anything? You do not need an account for the
+        free drills and guides. <a href="/pricing">See what Gold and Platinum add</a>.</p>
+    </div>
+
+    <div id="acct-off" hidden>
+      <p>Nothing is locked yet, so there is nothing to sign in to. Everything on the site is open.</p>
+      <a class="btn go" href="/simulators">Open the simulators</a>
+    </div>
+  </div>
+</section>
+
+<script src="/assets/resources.js"></script>
+<script src="/assets/site.js"></script>
+<script src="/assets/tiers.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const q = new URLSearchParams(location.search);
+  const say = (text) => { $("acct-msg").textContent = text; $("acct-msg").hidden = false; };
+  const MESSAGES = {
+    sent: "If that email has bought Gold or Platinum, a sign-in link is on its way to it now. Check the junk folder if it has not arrived in a couple of minutes.",
+    email: "That does not look like an email address. Try it again.",
+    link: "That sign-in link has expired or has already been replaced. Ask for a new one below.",
+    claim: "We could not confirm that payment just now. If you were charged, sign in below with the email you paid with — the purchase is recorded against it.",
+    stripe: "We could not reach the payment records just now. Try the link again in a minute."
+  };
+  if (q.get("sent")) say(MESSAGES.sent);
+  if (q.get("error")) say(MESSAGES[q.get("error")] || MESSAGES.link);
+  if (q.get("welcome")) say("Thank you — " + (Access.label[q.get("welcome")] || "your tier") +
+    " is yours, on this device now. On another one, sign in with the same email.");
+
+  fetch("/api/me", { credentials: "same-origin" })
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(me => {
+      if (!me.paywall) { $("acct-off").hidden = false; return; }
+      if (!me.signedIn) { $("acct-out").hidden = false; $("acct-h").textContent = "Sign in"; return; }
+      $("acct-in").hidden = false;
+      $("acct-email").textContent = me.email;
+      $("acct-tier").textContent = Access.label[me.tier] || me.tier;
+      $("acct-up").hidden = me.tier !== "gold";
+    })
+    .catch(() => { $("acct-out").hidden = false; });
+})();
+</script>

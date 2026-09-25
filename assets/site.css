@@ -148,6 +148,9 @@ p{margin:0 0 14px}
 
 /* copy that is only true while nothing is locked; tiers.js puts .paywall on <html> */
 .paywall .open-only{display:none}
+html:not(.paywall) .paywall-only{display:none}
+.buy{margin:0}
+
 .hero .tag{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);
            color:rgba(243,245,242,.8)}
 
