@@ -141,10 +141,13 @@ p{margin:0 0 14px}
 .tag{display:inline-flex;align-items:center;gap:6px;font:600 .72rem var(--mono);
      letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:999px;
      border:1px solid var(--line);color:var(--muted);background:var(--desk);white-space:nowrap}
-.tag.starter{color:var(--green);border-color:var(--green-bg);background:var(--green-bg)}
+.tag.standard{color:var(--green);border-color:var(--green-bg);background:var(--green-bg)}
 .tag.gold{color:var(--amber-ink);border-color:var(--amber-bg);background:var(--amber-bg)}
 .tag.platinum{color:#41546a;border-color:#e4e9ef;background:#eef2f6}
 .tag.stage{text-transform:none;letter-spacing:0;font-weight:600;font-family:var(--body)}
+
+/* copy that is only true while nothing is locked; tiers.js puts .paywall on <html> */
+.paywall .open-only{display:none}
 .hero .tag{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);
            color:rgba(243,245,242,.8)}
 

@@ -5,7 +5,7 @@ driver assessment. Static: no build step, no dependencies, no framework.
 
 ```
 index.html              the landing page                    →  /
-pricing.html            Starter / Gold / Platinum           →  /pricing
+pricing.html            Standard / Gold / Platinum           →  /pricing
 resources/index.html    the library, filterable             →  /resources
 resources/*.html        21 guides, one per test or topic    →  /resources/<slug>
 simulators.html         the app (was index.html)            →  /simulators
@@ -22,40 +22,56 @@ in the HTML is written without `.html`.
 
 ## The tiers
 
-Three: **starter**, **gold**, **platinum**. Each guide carries one, in
+Three: **standard** (free), **gold**, **platinum**. Each guide carries one, in
 `assets/resources.js`, and that single field drives the badge on the card, the
 row in the pricing table and whether the body of the guide is shown.
 
-Nothing is locked yet. `assets/tiers.js` has one constant:
+On the simulators the line is drawn by *what is free*, not how often — a count
+kept in the browser resets in a private window, so it cannot be what the free
+tier rests on:
 
-```js
-const PAYWALL = false;   // flip to true when billing exists
-```
+| | Standard | Gold | Platinum |
+|---|---|---|---|
+| Group Bourdon, VSE tasks 1–3 — everything | ✓ | ✓ | ✓ |
+| Every other drill in the battery | demo paper | ✓ | ✓ |
+| Day mode, the Stage 1 paper pack | — | ✓ | ✓ |
+| MMI drill, enhanced VSE | — | — | ✓ |
 
-While it is false the whole library is open. To see how it will read once it is
-on, add `?paywall=1&tier=starter` to any URL, or use the preview switch on
-`/pricing`, which does the same thing.
+The two free drills are the two with free guides, and the ones people meet
+first. A **demo paper** is the drill's practice version on one fixed paper: the
+random numbers are seeded by the drill's name and the paper rotation stands
+still, so it is the same paper on every run, in every browser. It shows the
+score but not the coaching note, and it is not saved. Clearing site data gets a
+visitor nothing new, which is the point.
 
-When it is flipped on, a guide whose tier the visitor does not hold is trimmed
-to its free preview — everything before the first `<h2>`, or before the element
-marked `data-preview-end` if you want a longer one — and the upgrade panel is
-inserted underneath. No guide needs editing for that to work.
+Copy that is only true while nothing is locked — the "early access" notes — is
+marked `class="open-only"` and disappears when the paywall is on.
 
-**The current gate is a preview, not a security boundary.** The tier lives in
-`localStorage` and the full text of every guide is in the HTML the browser
-already downloaded. Before charging for any of it, entitlement has to be checked
-on the server and paid guides served from behind that check.
+## Tiers on the simulators
 
-## Platinum simulators
+`simulators.html` loads `assets/tiers.js`, so the same `Access.can()` decides the
+drills. A row in the menu with `data-tier` is that tier: the enhanced VSE and
+the MMI are `platinum`, Day mode and the other nine battery drills `gold`. A row
+with no tier (Group Bourdon, the VSE) is free. A locked row swaps its start
+buttons for an *Unlock with …* link — unless it is also marked `data-demo`, in
+which case its Practice button becomes **Demo paper** and the others become
+links to `/pricing`. The paper pack button carries `data-tier="gold"` itself, and
+a drill's printed paper goes with its row.
 
-The enhanced VSE on `/simulators` — the track, the shape sets and both together
-(`VSX` in `simulators.html`) — is the one set of drills that carries a tier. The
-rows are marked `data-tier="platinum"`, and `simulators.html` loads
-`assets/tiers.js` so the same `Access.can()` decides them. While `PAYWALL` is
-false they are open like everything else; `?paywall=1&tier=gold` shows them
-locked, with the start buttons swapped for a link to `/pricing`. Mark any other
-drill row with `data-tier` and it is gated the same way — `VSX.start` also checks
-on the way in, and a new drill needs the same check in its own `start`.
+The menu is only the display. Every drill's `start()` begins with
+`if(!admit("<id>", mode)) return;`, which checks the tier, starts a demo if that
+is what lets it through, and otherwise shows the lock screen. A new drill needs
+that line in its own `start`. While `App.demo` is set, `Math.random` is seeded,
+`Rot.next` returns the first paper, `App.done` saves nothing and `App.results`
+shows the Gold note in place of the coaching; `App.quit` and the next `admit`
+put it all back.
+
+Inside a Day mode sitting the drills are not checked again, so a drill that is a
+tier above Gold names its id as the fourth field in `DAY_ORDERS` and sits the day
+out for anyone without it.
+
+While `PAYWALL` is false all of it is open. `?paywall=1&tier=standard` shows it
+as a free visitor sees it, and `?paywall=1&tier=gold` as Gold.
 
 ## Adding a guide
 

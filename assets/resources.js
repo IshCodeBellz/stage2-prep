@@ -2,7 +2,7 @@
    Used by the library page, the landing page and the prev/next links inside
    each guide, so a new guide only has to be added here once.
 
-   tier — starter | gold | platinum. This is what the paywall reads; see tiers.js.
+   tier — standard | gold | platinum. This is what the paywall reads; see tiers.js.
    Changing a tier here changes it everywhere, including the pricing table. */
 
 window.GROUPS = [
@@ -21,12 +21,12 @@ window.GROUPS = [
 ];
 
 window.RESOURCES = [
-  { slug:"becoming-a-train-driver", group:"career", tier:"starter", minutes:12,
+  { slug:"becoming-a-train-driver", group:"career", tier:"standard", minutes:12,
     stage:"All stages",
     title:"How to become a train driver in the UK",
     dek:"The whole route in seven steps: eligibility, finding the vacancy, the form, the assessment centre, the interview, the medical, and the eighteen months of training that follow." },
 
-  { slug:"eligibility", group:"career", tier:"starter", minutes:9,
+  { slug:"eligibility", group:"career", tier:"standard", minutes:9,
     stage:"All stages",
     title:"Can you actually apply?",
     dek:"Age — now 18 — education, eyesight, colour vision, hearing and depot distance. What the law requires, what operators add, and which common worries are not disqualifying at all." },
@@ -41,17 +41,17 @@ window.RESOURCES = [
     title:"Training, licensing and what the job pays",
     dek:"Rules school, traction and route learning, the ORR licence against the employer's certificate, the medicals that never stop, and honest numbers on trainee and qualified pay." },
 
-  { slug:"assessment-day", group:"process", tier:"starter", minutes:8,
+  { slug:"assessment-day", group:"process", tier:"standard", minutes:8,
     stage:"All stages",
     title:"The assessment day, start to finish",
     dek:"What actually happens between arriving at the centre and being sent home — the order, the breaks, and the bits nobody warns you about." },
 
-  { slug:"test-variants", group:"process", tier:"starter", minutes:6,
+  { slug:"test-variants", group:"process", tier:"standard", minutes:6,
     stage:"All stages",
     title:"Which tests will you actually sit?",
     dek:"Operators pick from the same short menu. How to find out what yours uses, and what RAAT, SCAAT and the Vienna battery mean when they appear in your invite." },
 
-  { slug:"group-bourdon", group:"stage1", tier:"starter", minutes:7,
+  { slug:"group-bourdon", group:"stage1", tier:"standard", minutes:7,
     stage:"Stage 1", drill:"Group Bourdon",
     title:"Group Bourdon: the dot groups",
     dek:"Mark every group of exactly four dots, five parts, a minute each. The test that fails more candidates than any other, and why it is nearly always pace rather than eyesight." },
@@ -76,7 +76,7 @@ window.RESOURCES = [
     title:"DFFT: fault finding against a guide",
     dek:"A panel of indications, a fault finder guide, and one correct first action. The only Stage 1 test where slowing down scores better." },
 
-  { slug:"vse", group:"stage2", tier:"starter", minutes:6,
+  { slug:"vse", group:"stage2", tier:"standard", minutes:6,
     stage:"Stage 2", drill:"VSE",
     title:"Visual search: dot sequences and letter columns",
     dek:"Two search papers and then both at once. What the combined part is really measuring, and why your score on it drops." },
@@ -121,7 +121,7 @@ window.RESOURCES = [
     title:"Reading your own scores",
     dek:"Speed against error, what a percentile means, the attempts rule as it stands since December 2024, and how to tell a bad sitting from a real weakness." },
 
-  { slug:"sources", group:"process", tier:"starter", minutes:4,
+  { slug:"sources", group:"process", tier:"standard", minutes:4,
     stage:"All stages",
     title:"Where this comes from",
     dek:"The published material, forum accounts and open-source simulators these notes were built against — and what we deliberately do not claim to know." }
