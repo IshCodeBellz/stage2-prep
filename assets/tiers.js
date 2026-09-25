@@ -1,14 +1,21 @@
 /* Access tiers.
 
-   Three of them: starter, gold, platinum. Every guide in resources.js carries
+   Three of them: standard, gold, platinum. Every guide in resources.js carries
    one, and that single field decides the badge on the card, the row in the
    pricing table and whether the body of the guide is shown.
+
+   On the simulators the line is drawn by what you can do, not how often:
+   practice versions are Standard, exam versions, Day mode, the printed papers
+   and the full score history are Gold, and the enhanced VSE and the MMI are
+   Platinum. A count would not hold — it lives in this browser and a private
+   window resets it — so the one count there is, a single exam per drill on
+   the house, is a taster and nothing rests on it.
 
    Nothing is charged for yet and nothing is locked yet: PAYWALL is false, so
    the whole library is open while the site is being built out. When billing is
    wired up, flip PAYWALL to true and the gate below starts doing its job — no
    guide needs editing. Until then you can see exactly what a visitor on a
-   lower tier would get by adding ?paywall=1&tier=starter to any URL, which is
+   lower tier would get by adding ?paywall=1&tier=standard to any URL, which is
    what the preview switch on the pricing page does.
 
    The tier is kept in localStorage, which is a stand-in for an account. It is
@@ -19,9 +26,11 @@
   "use strict";
 
   const PAYWALL = false;                 // ← the one switch. See note above.
-  const ORDER = ["starter", "gold", "platinum"];
+  const ORDER = ["standard", "gold", "platinum"];
+  const OLD = { starter: "standard" };  // names a stored tier or a link may still use
   const KEY_TIER = "cabready.tier";
   const KEY_WALL = "cabready.paywall";
+  const KEY_TASTE = "cabready.tasted";
 
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -34,14 +43,15 @@
 
   const Access = {
     tiers: ORDER,
-    label: { starter: "Starter", gold: "Gold", platinum: "Platinum" },
+    label: { standard: "Standard", gold: "Gold", platinum: "Platinum" },
 
-    /* What the visitor currently has. Everyone is on starter until they buy. */
+    /* What the visitor currently has. Everyone is on standard until they buy. */
     tier() {
       const t = store.get(KEY_TIER);
-      return ORDER.indexOf(t) > -1 ? t : "starter";
+      return ORDER.indexOf(OLD[t] || t) > -1 ? (OLD[t] || t) : "standard";
     },
     setTier(t) {
+      t = OLD[t] || t;
       if (ORDER.indexOf(t) > -1) store.set(KEY_TIER, t);
       return Access.tier();
     },
@@ -57,7 +67,22 @@
 
     can(required) {
       if (!Access.enforcing()) return true;
-      return ORDER.indexOf(Access.tier()) >= ORDER.indexOf(required || "starter");
+      required = OLD[required] || required || "standard";
+      return ORDER.indexOf(Access.tier()) >= ORDER.indexOf(required);
+    },
+
+    /* The one exam per drill a Standard visitor gets to sit, to feel the real
+       length before paying for it. Spent when the exam starts, not when it
+       ends, or quitting a minute from the end would keep it forever. */
+    tasteLeft(id) {
+      return !tasted()[id];
+    },
+    spendTaste(id) {
+      const t = tasted();
+      if (t[id]) return false;
+      t[id] = Date.now();
+      store.set(KEY_TASTE, JSON.stringify(t));
+      return true;
     },
 
     /* The cheapest tier that unlocks this guide. */
@@ -66,7 +91,18 @@
     }
   };
 
+  function tasted() {
+    try { return JSON.parse(store.get(KEY_TASTE) || "{}") || {}; } catch (e) { return {}; }
+  }
+
   window.Access = Access;
+
+  /* Copy that is only true while nothing is locked ("everything is open") is
+     marked .open-only, and copy for when it is, .paywall-only. */
+  function markRoot() {
+    document.documentElement.classList.toggle("paywall", Access.enforcing());
+  }
+  Access.markRoot = markRoot;
 
   function gateHTML(required) {
     const plan = Access.upgradeTo(required);
@@ -149,13 +185,14 @@
         b.onclick = () => {
           if (b.dataset.tier) Access.setTier(b.dataset.tier);
           else Access.setEnforcing(b.dataset.wall === "1");
-          draw(); markCards();
+          draw(); markCards(); markRoot();
         };
       });
     };
     draw();
   }
 
+  markRoot();
   gateArticle();
   markCards();
   switcher();

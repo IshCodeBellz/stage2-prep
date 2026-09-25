@@ -5,7 +5,7 @@ driver assessment. Static: no build step, no dependencies, no framework.
 
 ```
 index.html              the landing page                    →  /
-pricing.html            Starter / Gold / Platinum           →  /pricing
+pricing.html            Standard / Gold / Platinum           →  /pricing
 resources/index.html    the library, filterable             →  /resources
 resources/*.html        21 guides, one per test or topic    →  /resources/<slug>
 simulators.html         the app (was index.html)            →  /simulators
@@ -22,9 +22,26 @@ in the HTML is written without `.html`.
 
 ## The tiers
 
-Three: **starter**, **gold**, **platinum**. Each guide carries one, in
+Three: **standard** (free), **gold**, **platinum**. Each guide carries one, in
 `assets/resources.js`, and that single field drives the badge on the card, the
 row in the pricing table and whether the body of the guide is shown.
+
+On the simulators the line is drawn by *what you can do*, not how often — a
+count kept in the browser resets in a private window, so it cannot be what the
+free tier rests on:
+
+| | Standard | Gold | Platinum |
+|---|---|---|---|
+| Practice version of every Stage 1 and Stage 2 drill | ✓ | ✓ | ✓ |
+| Exam version | one per drill, on the house | ✓ | ✓ |
+| Day mode, the printed papers | — | ✓ | ✓ |
+| Score history | last attempt | every attempt | every attempt |
+| MMI drill, enhanced VSE | — | — | ✓ |
+
+Practice runs are the short versions (two parts of Group Bourdon, fifteen pairs
+of VSE 3, ten minutes of WAFV), so unlimited free use tells you where you are
+weak but never rehearses the real length or the fatigue — which is what Gold is.
+The one free exam per drill is spent when it starts, not when it ends.
 
 Nothing is locked yet. `assets/tiers.js` has one constant:
 
@@ -33,7 +50,7 @@ const PAYWALL = false;   // flip to true when billing exists
 ```
 
 While it is false the whole library is open. To see how it will read once it is
-on, add `?paywall=1&tier=starter` to any URL, or use the preview switch on
+on, add `?paywall=1&tier=standard` to any URL, or use the preview switch on
 `/pricing`, which does the same thing.
 
 When it is flipped on, a guide whose tier the visitor does not hold is trimmed
@@ -46,16 +63,33 @@ inserted underneath. No guide needs editing for that to work.
 already downloaded. Before charging for any of it, entitlement has to be checked
 on the server and paid guides served from behind that check.
 
-## Platinum simulators
+Copy that is only true while nothing is locked — the "early access" notes — is
+marked `class="open-only"` and disappears when the paywall is on.
 
-The enhanced VSE on `/simulators` — the track, the shape sets and both together
-(`VSX` in `simulators.html`) — is the one set of drills that carries a tier. The
-rows are marked `data-tier="platinum"`, and `simulators.html` loads
-`assets/tiers.js` so the same `Access.can()` decides them. While `PAYWALL` is
-false they are open like everything else; `?paywall=1&tier=gold` shows them
-locked, with the start buttons swapped for a link to `/pricing`. Mark any other
-drill row with `data-tier` and it is gated the same way — `VSX.start` also checks
-on the way in, and a new drill needs the same check in its own `start`.
+## Tiers on the simulators
+
+`simulators.html` loads `assets/tiers.js`, so the same `Access.can()` decides the
+drills. Two kinds of marking in the menu:
+
+- A **row** with `data-tier` is that tier whole — the enhanced VSE rows and the
+  MMI are `platinum`, Day mode is `gold`. Its start buttons give way to an
+  *Unlock with …* link.
+- A **button** with `data-tier="gold"` — every Exam button and every Paper
+  button — reads *Exam · 1 free* while the free exam is unspent, then becomes a
+  link to `/pricing`. `EXAM_TIER` in the script is the same tier; keep the two
+  agreeing.
+
+The menu is only the display. Every drill's `start()` begins with
+`if(!admit("<id>", mode)) return;`, which checks the tier, spends the free exam
+if that is what lets it through, and otherwise shows the lock screen. A new
+drill needs that line in its own `start`. Inside a Day mode sitting the drills
+are not checked again, so a drill that is a tier of its own names its id as the
+fourth field in `DAY_ORDERS` and sits the day out for anyone without it.
+
+While `PAYWALL` is false all of it is open. `?paywall=1&tier=standard` shows it
+as a free visitor sees it, and `?paywall=1&tier=gold` as Gold. The free exams
+spent in a preview are kept in `localStorage` under `cabready.tasted`; clear
+site data to get them back.
 
 ## Adding a guide
 

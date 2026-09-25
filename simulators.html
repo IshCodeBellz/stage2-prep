@@ -271,15 +271,20 @@
   .vxq button{padding:11px 22px;font:600 14px var(--body);border-radius:8px}
   .vxq button.sel{background:var(--green);border-color:var(--green);color:#fff}
   .vxbtns button:disabled{opacity:.45;cursor:default}
-  /* the tier pill, as the site's .tag.platinum */
+  /* the tier pill, as the site's .tag.platinum and .tag.gold */
   .ptag{display:inline-block;font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;
         padding:2px 8px;border-radius:999px;color:#41546a;border:1px solid #e4e9ef;
         background:#eef2f6;vertical-align:2px;margin-left:8px}
+  .ptag.gold{color:var(--amber-ink);border-color:var(--amber-bg);background:var(--amber-bg)}
   .btnlink{display:inline-block;text-decoration:none;border-radius:7px;padding:8px 16px;
            background:var(--green);color:#fff;font:600 12.5px var(--body);white-space:nowrap}
   .btnlink:hover{background:var(--green-dark)}
   .btnlink:focus-visible{outline:2px solid var(--green);outline-offset:2px}
   .drill>.lockrow{margin-top:auto}
+  /* a Gold button that has become a way to the pricing page: there, but not the main thing */
+  .btnlink.lockbtn{background:transparent;color:var(--green-dark);border:1.5px dashed var(--green);
+                   padding:6.5px 14px}
+  .btnlink.lockbtn:hover{background:var(--green-bg)}
 
   /* ---- wafv. The panel stays white and the square stays grey: the stimulus is
           the test. Everything round it follows the design. */
@@ -591,7 +596,7 @@
   <p class="sub" id="stagenote"></p>
 
   <div class="row" id="paperpack" hidden>
-    <button onclick="PAPER.open('pack')">Print the paper pack</button>
+    <button data-tier="gold" onclick="PAPER.open('pack')">Print the paper pack</button>
   </div>
 
   <div class="drills">
@@ -604,7 +609,7 @@
     </div>
     <div class="row">
       <button onclick="VSE1.start('practice')">Practice</button>
-      <button class="go" onclick="VSE1.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="VSE1.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -617,7 +622,7 @@
     </div>
     <div class="row">
       <button onclick="VSE2.start('practice')">Practice</button>
-      <button class="go" onclick="VSE2.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="VSE2.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -630,7 +635,7 @@
     </div>
     <div class="row">
       <button onclick="VSE3.start('practice')">Practice</button>
-      <button class="go" onclick="VSE3.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="VSE3.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -681,9 +686,9 @@
       <div class="meta">5 parts · 1 min each · exam ends at 5:00 · errors penalised</div>
     </div>
     <div class="row">
-      <button onclick="PAPER.open('gb')">Paper</button>
+      <button data-tier="gold" onclick="PAPER.open('gb')">Paper</button>
       <button onclick="GB.start('practice')">Practice</button>
-      <button class="go" onclick="GB.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="GB.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -696,7 +701,7 @@
     </div>
     <div class="row">
       <button onclick="TEA.start('practice')">Practice</button>
-      <button class="go" onclick="TEA.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="TEA.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -708,9 +713,9 @@
       <div class="meta">18 questions · 3 min study · exam ends at 7:00 · 3 passages</div>
     </div>
     <div class="row">
-      <button onclick="PAPER.open('trp1')">Paper</button>
+      <button data-tier="gold" onclick="PAPER.open('trp1')">Paper</button>
       <button onclick="TRP1.start('practice')">Practice</button>
-      <button class="go" onclick="TRP1.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="TRP1.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -722,9 +727,9 @@
       <div class="meta">43 questions · 11 s each · exam ends at 8:00 · practice is 7, untimed</div>
     </div>
     <div class="row">
-      <button onclick="PAPER.open('trp2')">Paper</button>
+      <button data-tier="gold" onclick="PAPER.open('trp2')">Paper</button>
       <button onclick="TRP2.start('practice')">Practice</button>
-      <button class="go" onclick="TRP2.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="TRP2.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -736,9 +741,9 @@
       <div class="meta">20 questions · 2:15 each · exam ends at 45:00 · practice is 5, untimed</div>
     </div>
     <div class="row">
-      <button onclick="PAPER.open('dfft')">Paper</button>
+      <button data-tier="gold" onclick="PAPER.open('dfft')">Paper</button>
       <button onclick="DFFT.start('practice')">Practice</button>
-      <button class="go" onclick="DFFT.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="DFFT.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -752,7 +757,7 @@
     <div class="row">
       <button onclick="WAFV.start('quick')">5 min</button>
       <button onclick="WAFV.start('practice')">Practice</button>
-      <button class="go" onclick="WAFV.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="WAFV.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -766,7 +771,7 @@
     <div class="row">
       <button onclick="SCENELIB.open()">Scenes</button>
       <button onclick="ATAVT.start('practice')">Practice</button>
-      <button class="go" onclick="ATAVT.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="ATAVT.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -779,7 +784,7 @@
     </div>
     <div class="row">
       <button onclick="HAND.start('practice')">Practice</button>
-      <button class="go" onclick="HAND.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="HAND.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -792,7 +797,7 @@
     </div>
     <div class="row">
       <button onclick="SJT.start('practice')">Practice</button>
-      <button class="go" onclick="SJT.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="SJT.start('exam')">Exam</button>
     </div>
   </div>
 
@@ -805,14 +810,14 @@
     </div>
     <div class="row">
       <button onclick="SJE.start('practice')">Practice</button>
-      <button class="go" onclick="SJE.start('exam')">Exam</button>
+      <button class="go" data-tier="gold" onclick="SJE.start('exam')">Exam</button>
     </div>
   </div>
 
-  <div class="drill" data-stage="2">
+  <div class="drill" data-stage="2" data-tier="platinum">
     <span class="lamp" id="l-mmi"></span>
     <div class="body">
-      <h2>MMI — the interview</h2>
+      <h2>MMI — the interview<span class="ptag">Platinum</span></h2>
       <p>Write your six pre-interview form examples, then answer the interviewer's follow-ups out loud against the clock. Scores how much of the structure you actually covered, not what you said. Exam is all eight follow-ups; practice is three.</p>
       <div class="meta">6 form examples · 8 questions · practice is 3 · 4 sets</div>
     </div>
@@ -822,10 +827,10 @@
     </div>
   </div>
 
-  <div class="drill" data-stage="both">
+  <div class="drill" data-stage="both" data-tier="gold">
     <span class="lamp" id="l-day"></span>
     <div class="body">
-      <h2>Day mode</h2>
+      <h2>Day mode<span class="ptag gold">Gold</span></h2>
       <p>Every drill of the stage you are on, back to back in one sitting. Exam runs them all in their exam version and rehearses the fatigue, not just the tasks; practice runs the same order in their practice versions, for when you want to see what is coming.</p>
       <div class="meta">runs whichever stage is selected · exam twice before the day</div>
     </div>
@@ -1235,9 +1240,16 @@ const HISTORY = {
   open(id){
     const rec=Store.get(id)||{n:0};
     if(id==="day") return this.day(rec);
-    const runs=(rec.h||[]).slice();
+    // every attempt is kept either way; Standard is shown the last one
+    const all=canUse(EXAM_TIER), kept=(rec.h||[]).length;
+    const runs=(rec.h||[]).slice(all ? 0 : -1);
     const unit=rec.u||"", low=!!rec.low;
     const box=el("div");
+    if(!all && kept>1){
+      const n=el("div","note","<b>This is your last attempt.</b> All "+kept+" are kept on this device — Gold shows every one of them, with the trend across them. ");
+      const a=el("a",null,"See what Gold includes"); a.href="/pricing"; n.appendChild(a);
+      box.appendChild(n);
+    }
 
     if(!runs.length){
       box.appendChild(el("div","note","This drill was attempted "+rec.n+
@@ -1544,6 +1556,7 @@ const DOT_DIRS = [[1,"clockwise"],[-1,"anticlockwise"]];
 const VSE1 = {
   N:180,
   start(mode){
+    if(!admit("vse1", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam; this.frozen=false; this.ranOut=false; this.reach=0;
     const v=Rot.next("vse1", DOT_DIRS.length);
@@ -1692,6 +1705,7 @@ const VSE2_PAPERS = [["mixed letters",null],["lookalike letters",LOOKALIKE]];
 const VSE2 = {
   N:96,
   start(mode){
+    if(!admit("vse2", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam; this.frozen=false; this.ranOut=false; this.reach=0;
     const v=Rot.next("vse2", VSE2_PAPERS.length);
@@ -1796,6 +1810,7 @@ const VSE3_LENGTHS = {exam:45, practice:15};
 const VSE3 = {
   N:45, PACE:4000,
   start(mode){
+    if(!admit("vse3", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam;
     this.N = exam?VSE3_LENGTHS.exam:VSE3_LENGTHS.practice;
@@ -2189,6 +2204,58 @@ function vxShapes(trials, hot){
    opened on its own — nothing is locked, same as the site while PAYWALL is off. */
 const canUse = tier => !window.Access || window.Access.can(tier);
 
+/* The line is drawn by what you can do, not how often. Practice is Standard; the
+   exam version, the printed papers, Day mode and the full history are Gold; a row
+   marked data-tier in the menu (the enhanced VSE, the MMI) is that tier whole.
+   The exam buttons carry data-tier="gold" too, for the menu — keep the two agreeing. */
+const EXAM_TIER="gold";
+const rowTier = id => {
+  const l=document.getElementById("l-"+id), dv=l && l.closest(".drill");
+  return (dv && dv.dataset.tier) || "standard";
+};
+const needs = (id, mode) => {
+  const row=rowTier(id);
+  if(row!=="standard") return row;
+  return (mode==="practice" || mode==="quick") ? "standard" : EXAM_TIER;
+};
+/* a Standard visitor gets one exam per drill on the house, to feel the real length */
+const tasteOn = id => !!window.Access && rowTier(id)==="standard" && window.Access.enforcing();
+
+/* The check every start() makes on the way in. Inside a Day mode sitting the sitting
+   was checked when it began, so the drills in it are not checked again. */
+function admit(id, mode, name){
+  if(App.day) return true;
+  const need=needs(id, mode);
+  if(canUse(need)) return true;
+  if(need===EXAM_TIER && tasteOn(id) && window.Access.spendTaste(id)){ paintLocks(); return true; }
+  lockScreen(name || DRILL_NAMES[id] || "This drill", need, mode, id);
+  return false;
+}
+
+const TIER_SAYS = {
+  gold: "Gold opens the exam version of every drill — the full length at the real pace — with Day mode, the printed papers and every attempt you have made.",
+  platinum: "Platinum adds the enhanced VSE — the track, the shape sets and the two together — and the MMI interview, on top of everything in Gold."
+};
+function lockScreen(name, need, mode, id){
+  const label=(window.Access && Access.label[need]) || need;
+  const who=name.split(" — ")[0];
+  const exam = mode && mode!=="practice" && mode!=="quick" && mode!=="paper" && rowTier(id)==="standard";
+  const head = mode==="paper" ? "Printing the "+(who==="Stage 1" ? "paper pack" : who+" paper")+" is "+label+"."
+             : exam ? "The exam version of "+who+" is "+label+"."
+             : who+" is "+label+".";
+  const box=el("div");
+  box.appendChild(el("div","note",
+    "<b>"+head+"</b> "+
+    (exam ? "You have sat the one on the house, and the practice version stays free. " : "")+
+    (TIER_SAYS[need]||"")));
+  const row=el("div","row");
+  const a=el("a","btnlink","See what "+label+" includes"); a.href="/pricing";
+  const b=el("button","ghost","Back to the list"); b.onclick=()=>App.quit();
+  row.appendChild(a); row.appendChild(b); box.appendChild(row);
+  App.active=null;
+  App.open(name, box);
+}
+
 const VSX_PARTS = {
   1:{id:"vsx1", name:"Enhanced VSE part 1 — the track"},
   2:{id:"vsx2", name:"Enhanced VSE part 2 — shape sets"},
@@ -2198,7 +2265,7 @@ const VSX_PARTS = {
 const VSX = {
   start(part, mode){
     const P=VSX_PARTS[part];
-    if(!canUse("platinum")) return this.locked(P);
+    if(!admit(P.id, mode, P.name)) return;
     this.part=part; this.mode=mode;
     this.exam = mode!=="practice";
     this.ended=false; this.timers=[];
@@ -2498,33 +2565,39 @@ const VSX = {
     $("#test").classList.remove("vxhot");
     if(this.key){ window.removeEventListener("keydown", this.key); this.key=null; }
     this.ended=true;
-  },
-  locked(P){
-    const box=el("div");
-    box.appendChild(el("div","note",
-      "<b>"+P.name.split(" — ")[0]+" is a Platinum drill.</b> The enhanced VSE — the track, the shape sets and the two together — comes with Platinum. Every other simulator on this page stays free."));
-    const row=el("div","row");
-    const a=el("a","btnlink","See what Platinum includes"); a.href="/pricing";
-    const b=el("button","ghost","Back to the list"); b.onclick=()=>App.quit();
-    row.appendChild(a); row.appendChild(b); box.appendChild(row);
-    App.active=null;
-    App.open(P.name, box);
   }
 };
 
-/* the Platinum rows on the menu: the start buttons give way to the way in */
+/* The menu. A row that is a tier whole swaps its start buttons for the way in; on
+   the rest, a Gold button reads "Exam · 1 free" while the one on the house is still
+   there, then becomes a link to the pricing page. */
 function paintLocks(){
   document.querySelectorAll("#menu .drill[data-tier]").forEach(dv=>{
-    const open=canUse(dv.dataset.tier);
+    const t=dv.dataset.tier, open=canUse(t);
     const row=dv.querySelector(":scope > .row");
     if(row) row.hidden=!open;
     let lock=dv.querySelector(".lockrow");
     if(!open && !lock){
       lock=el("div","row lockrow");
-      const a=el("a","btnlink","Unlock with Platinum"); a.href="/pricing";
+      const a=el("a","btnlink","Unlock with "+((window.Access && Access.label[t]) || t)); a.href="/pricing";
       lock.appendChild(a); dv.appendChild(lock);
     }
     if(lock) lock.hidden=open;
+  });
+  document.querySelectorAll("#menu .drill:not([data-tier]) button[data-tier], #paperpack button[data-tier]").forEach(b=>{
+    const t=b.dataset.tier, lamp=b.closest(".drill") && b.closest(".drill").querySelector(".lamp");
+    const id=lamp ? lamp.id.replace("l-","") : null;
+    const exam=/start\('exam'\)/.test(b.getAttribute("onclick")||"");
+    if(!b.dataset.was) b.dataset.was=b.textContent;
+    const open=canUse(t), taste=!open && exam && id && tasteOn(id) && Access.tasteLeft(id);
+    b.hidden = !open && !taste;
+    b.textContent = taste ? b.dataset.was+" · 1 free" : b.dataset.was;
+    let lk=b.nextElementSibling && b.nextElementSibling.classList.contains("lockbtn") ? b.nextElementSibling : null;
+    if(!open && !taste && !lk){
+      lk=el("a","btnlink lockbtn",b.dataset.was+" · "+((window.Access && Access.label[t]) || t));
+      lk.href="/pricing"; b.after(lk);
+    }
+    if(lk) lk.hidden = open || taste;
   });
 }
 
@@ -2534,6 +2607,7 @@ const WAFV_MINS={exam:30, practice:10, quick:5};
 const WAFV = {
   ON:600, OFF:400, WINDOW:1400, P:0.09,
   start(mode){
+    if(!admit("wafv", mode)) return;
     const exam = mode!=="practice" && mode!=="quick";
     this.exam=exam;
     this.mins = exam ? WAFV_MINS.exam : (mode==="quick" ? WAFV_MINS.quick : WAFV_MINS.practice);
@@ -3042,6 +3116,7 @@ const ATAVT_SCENES={exam:20, practice:8};
 const ATAVT = {
   N:20, FLASH:1000,
   start(mode){
+    if(!admit("atavt", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam;
     this.N = exam?ATAVT_SCENES.exam:ATAVT_SCENES.practice;
@@ -3213,6 +3288,7 @@ const HAND_RUNS={exam:10, practice:6};
 const HAND = {
   RUNS:10, CH:26, SPEED:150,
   start(mode){
+    if(!admit("hand", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam;
     this.RUNS = exam?HAND_RUNS.exam:HAND_RUNS.practice;
@@ -3700,6 +3776,7 @@ const SJT_PRACTICE=3;
 const SJT = {
   LIMIT:45,
   start(mode){
+    if(!admit("sjt", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam;
     this.i=0; this.answers=[];
@@ -3972,6 +4049,7 @@ let SJE_Q = SJE_SETS[0];
 const SJE = {
   FULL:21,
   start(mode){
+    if(!admit("sje", mode)) return;
     this.i=0; this.ratings=[];
     this.full = mode!=="practice";
     if(this.full){
@@ -4167,6 +4245,7 @@ const DFFT_LENGTHS={exam:[20,2700], practice:[5,null]};
 const DFFT = {
   EXAM_LIMIT:2700, EXAM_N:20,
   start(mode){
+    if(!admit("dfft", mode)) return;
     const full=mode!=="practice";
     const [n,secs]=full?DFFT_LENGTHS.exam:DFFT_LENGTHS.practice;
     this.N=n; this.LIMIT=secs; this.full=full; this.ranOut=false;
@@ -4303,6 +4382,7 @@ const GB = {
   /* MIN_PART: a part never falls below this, however long you took at the change */
   PARTS:5, PER_PART:60, MIN_PART:10, N:150,
   start(mode){
+    if(!admit("gb", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam;
     this.PARTS = exam?GB_PARTS.exam:GB_PARTS.practice;   // the minute a part is the test, so practice is fewer parts, not longer ones
@@ -4498,6 +4578,7 @@ const TEA_LENGTHS={exam:[75,120,90], practice:[40,60,45]};
 const TEA = {
   HIGH:1046, LOW:523, LISTEN:75, SEARCH:120, DIR:90,
   start(mode){
+    if(!admit("tea", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam;
     const T = exam?TEA_LENGTHS.exam:TEA_LENGTHS.practice;
@@ -4768,6 +4849,7 @@ const TRP1_SETS=[
 const TRP1 = {
   STUDY:180, ANSWER:420,
   start(mode){
+    if(!admit("trp1", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam;
     this.set=Rot.next("trp1", TRP1_SETS.length);
@@ -4915,6 +4997,7 @@ const TRP2_LENGTHS={exam:[43,480], practice:[7,null]};
 const TRP2 = {
   EXAM_LIMIT:480, EXAM_N:43,
   start(mode){
+    if(!admit("trp2", mode)) return;
     const full=mode!=="practice";
     const [n,secs]=full?TRP2_LENGTHS.exam:TRP2_LENGTHS.practice;
     this.N=n; this.LIMIT=secs; this.full=full; this.ranOut=false;
@@ -5221,6 +5304,7 @@ const PAPER = {
     pack:{title:"Stage 1 — the paper pack", again:"New pack", make:()=>packPaper(PAPER.set)}
   },
   open(id){
+    if(!canUse(EXAM_TIER)) return lockScreen(this.defs[id].title, EXAM_TIER, "paper");
     this.id=id;
     document.body.classList.add("printing");
     $("#printout").classList.add("on");
@@ -5352,6 +5436,7 @@ const MMI_PRACTICE={probes:2, scenarios:1};
 const MMI = {
   LONG:180, SHORT:45,
   start(mode){
+    if(!admit("mmi", mode)) return;
     const exam = mode!=="practice";
     this.exam=exam;
     this.set=Rot.next("mmi", MMI_SETS.length);
@@ -5556,16 +5641,19 @@ const DAY_ORDERS={
     ["2-Hand", m=>HAND.start(m),
       {exam:"10 runs", practice:"6 runs"}],
     ["MMI", m=>MMI.start(m),
-      {exam:"the form and 8 questions", practice:"the form and 3 questions"}]
+      {exam:"the form and 8 questions", practice:"the form and 3 questions"}, "mmi"]
   ]
 };
+/* a drill that is a tier of its own (the fourth field) sits out the day for anyone
+   without it, since the drills inside a sitting are not checked one by one */
 function dayOrder(mode){
   const m = mode==="practice" ? "practice" : "exam";
-  return DAY_ORDERS[Stage.get()].map(([name,run,label])=>
+  return DAY_ORDERS[Stage.get()].filter(([,,,id])=>!id || canUse(rowTier(id))).map(([name,run,label])=>
     [name+(m==="exam"?"":" · practice"), ()=>run(m), label[m]]);
 }
 const DAY = {
   start(mode){
+    if(!admit("day", mode)) return;
     const exam = mode!=="practice";
     const box=el("div");
     const S=STAGES[Stage.get()];
