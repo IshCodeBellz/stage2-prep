@@ -8,7 +8,7 @@
    Bump CACHE whenever simulators.html or the shared assets change, or phones
    that already installed the app keep serving the old copy. */
 
-const CACHE = "stage2-v34";
+const CACHE = "stage2-v37";
 const APP = "/simulators";
 const ASSETS = [
   APP,
@@ -19,7 +19,18 @@ const ASSETS = [
   "/assets/site.css",
   "/assets/site.js",
   "/assets/tiers.js",
-  "/assets/resources.js"
+  "/assets/resources.js",
+  "/assets/fonts.css",
+  /* The design's three families, self-hosted so the app keeps its type with no
+     signal. Only the latin cuts are precached: the latin-ext files carry a
+     unicode-range, so a browser fetches one only if a page actually uses a
+     character from it, which these pages almost never do. */
+  "/assets/fonts/archivo-latin-400-800.woff2",
+  "/assets/fonts/public-sans-latin-400-700.woff2",
+  "/assets/fonts/ibm-plex-mono-latin-400.woff2",
+  "/assets/fonts/ibm-plex-mono-latin-500.woff2",
+  "/assets/fonts/ibm-plex-mono-latin-600.woff2",
+  "/assets/fonts/ibm-plex-mono-latin-700.woff2"
 ];
 // scene photographs are fetched once into IndexedDB, so they are not precached
 
