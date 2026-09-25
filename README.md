@@ -46,6 +46,17 @@ inserted underneath. No guide needs editing for that to work.
 already downloaded. Before charging for any of it, entitlement has to be checked
 on the server and paid guides served from behind that check.
 
+## Platinum simulators
+
+The enhanced VSE on `/simulators` — the track, the shape sets and both together
+(`VSX` in `simulators.html`) — is the one set of drills that carries a tier. The
+rows are marked `data-tier="platinum"`, and `simulators.html` loads
+`assets/tiers.js` so the same `Access.can()` decides them. While `PAYWALL` is
+false they are open like everything else; `?paywall=1&tier=gold` shows them
+locked, with the start buttons swapped for a link to `/pricing`. Mark any other
+drill row with `data-tier` and it is gated the same way — `VSX.start` also checks
+on the way in, and a new drill needs the same check in its own `start`.
+
 ## Adding a guide
 
 1. Add an entry to `window.RESOURCES` in `assets/resources.js` — `slug`,
