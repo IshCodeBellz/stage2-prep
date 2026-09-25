@@ -200,33 +200,50 @@
   .flag button{padding:16px 8px;font-size:.95rem}
   .flag button.armed{background:var(--red);border-color:var(--red);color:#fff}
 
-  /* ---- enhanced VSE (Platinum). The track keeps the black screen of the real
-          test — that is the stimulus — and the chrome round it follows the design:
-          the sets are cards on the light ground, lit the way the SJE ranks are. */
-  .vxstage{background:#000;border-radius:10px;padding:8px;margin-top:6px}
+  /* ---- enhanced VSE (Platinum). Everything sits on the light ground of the design:
+          the track is a white panel of round red stops and grey arrows with the
+          light in green, and the two sets stand side by side in portrait, two
+          across and three down, lit the way the design marks a selection. */
+  .vxstage{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+           padding:8px;margin-top:6px}
   .vxtrack{display:block;width:100%;height:auto;max-height:60vh;margin:0 auto}
   .vxstage,.vxpaper{scroll-margin-top:76px}
   .vxsmall .vxtrack{max-height:34vh}
-  .vxduo .vxcard{aspect-ratio:1} .vxduo .vxcard svg{width:46%}
   .vxduo .vxbtns{margin-top:10px}
-  .vxpaper{padding:10px}
-  .vxsets{display:grid;gap:10px}
-  .vxset{display:flex;align-items:center;gap:10px;background:var(--desk);border:1px solid var(--line);
-         border-radius:10px;padding:8px}
-  .vxlabel{flex:0 0 auto;writing-mode:vertical-rl;transform:rotate(180deg);
-           font:600 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
-  .vxrow{flex:1 1 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-  .vxcard{aspect-ratio:3/4;background:var(--panel);border:1.5px solid var(--line);border-radius:8px;
+  .vxpaper{padding:12px}
+  .vxsets{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:560px;margin:0 auto}
+  .vxduo .vxsets{max-width:380px;gap:10px}
+  .vxset{display:flex;flex-direction:column;gap:8px;background:var(--desk);border:1px solid var(--line);
+         border-radius:10px;padding:10px}
+  .vxlabel{font:600 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;
+           color:var(--faint);text-align:center}
+  .vxrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .vxcard{aspect-ratio:1;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;
           display:grid;place-items:center;color:var(--ink)}
-  .vxcard svg{display:block;width:56%;height:auto}
+  .vxcard svg{display:block;width:42%;height:auto}
   .vxcard.lit{background:var(--amber-bg);border-color:var(--amber);
-              box-shadow:inset 0 0 0 4px var(--amber-bg),inset 0 0 0 5.5px #f3cd8f}
+              box-shadow:inset 0 0 0 5px var(--amber-bg),inset 0 0 0 7px #f3cd8f}
+  .vxduo .vxset{padding:7px;gap:5px} .vxduo .vxrow{gap:5px}
   @media (max-width:520px){
-    .vxrow{grid-template-columns:repeat(3,1fr)} .vxcard{aspect-ratio:1}
-    /* both at once has to fit a phone screen whole, so the sets stay one line of six */
-    .vxduo .vxrow{grid-template-columns:repeat(6,1fr);gap:4px} .vxduo .vxset{padding:5px;gap:6px}
-    .vxduo .vxcard svg{width:60%}
+    .vxsets{gap:8px} .vxset{padding:6px;gap:5px} .vxrow{gap:5px}
+    .vxcard.lit{box-shadow:inset 0 0 0 3px var(--amber-bg),inset 0 0 0 4.5px #f3cd8f}
+    .vxduo .vxsets{max-width:300px}
   }
+  /* the intense call, in the dark bar where the title sits: amber coming in,
+     green going out, then a small amber pill for as long as the spell lasts */
+  .vxpill{display:inline-block;font:700 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;
+          padding:4px 10px;border-radius:999px;margin-right:9px;vertical-align:1px;
+          animation:vxpill .5s ease}
+  .vxpill.in{background:var(--amber);color:#1a1204}
+  .vxpill.out{background:var(--green-lit);color:var(--night)}
+  .vxpill.small{font-size:9.5px;padding:2px 8px;margin:0 0 0 9px;animation:none}
+  .vxnote{font:500 13px var(--body);color:#f3f5f2}
+  @keyframes vxpill{0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.08);opacity:1} 100%{transform:scale(1)}}
+  .vxsr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  /* while a spell lasts: an amber edge on the panels and an amber clock */
+  .vxhot .vxstage,.vxhot .vxpaper{border-color:var(--amber);box-shadow:0 0 0 2px var(--amber-bg)}
+  #test.vxhot .bar .t{color:var(--amber)}
+  .bar .t{white-space:nowrap}   /* "1 / 80" on one line, even on a phone */
   .vxbtns{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;align-items:stretch}
   .vxfalse{flex:1 1 160px;padding:16px;font:700 15px var(--mono);letter-spacing:.08em;
            background:var(--panel);color:var(--ink);border-color:var(--btn-line);border-radius:10px}
@@ -605,13 +622,12 @@
     <span class="lamp" id="l-vsx1"></span>
     <div class="body">
       <h2>Enhanced VSE 1 — the track<span class="ptag">Platinum</span></h2>
-      <p>The GTS enhanced version. A light steps round a loop of stops, following the arrows. Press FALSE when it skips a stop or lights the wrong colour. Intense adds two lights at once and a stop lit half in another colour, at a quicker step.</p>
-      <div class="meta">120 stops · 1.5 s a stop · intense 1.2 s · practice is 30</div>
+      <p>The GTS enhanced version. A light steps round a loop of round stops, following the arrows. Press FALSE when it skips a stop or lights the wrong colour. Once or twice a run it turns intense for 10 to 35 stops, called on screen as it comes in and goes: quicker, with two lights at once and a stop lit half in another colour.</p>
+      <div class="meta">120 stops · 1.5 s a stop · 1.2 s when intense · practice is 30</div>
     </div>
     <div class="row">
       <button onclick="VSX.start(1,'practice')">Practice</button>
       <button class="go" onclick="VSX.start(1,'exam')">Exam</button>
-      <button onclick="VSX.start(1,'intense')">Intense</button>
     </div>
   </div>
 
@@ -619,13 +635,12 @@
     <span class="lamp" id="l-vsx2"></span>
     <div class="body">
       <h2>Enhanced VSE 2 — shape sets<span class="ptag">Platinum</span></h2>
-      <p>Six shapes in set A, the same six in a different order in set B. Every few seconds two shapes light on each side — three in intense. Is there a fault? Yes if the lit shapes differ, no if they are the same shapes.</p>
-      <div class="meta">120 questions · 3 s each · intense 2.5 s with 3 lit · practice is 30</div>
+      <p>Six shapes in set A and the same six, in a different order, in set B beside it. Every few seconds two shapes light on each side. Is there a fault? Yes if the lit shapes differ, no if they are the same shapes. Once or twice a run it turns intense for 10 to 35 questions, called on screen as it comes in and goes: three lit on each side, and quicker.</p>
+      <div class="meta">120 questions · 3 s each · 2.5 s with 3 lit when intense · practice is 30</div>
     </div>
     <div class="row">
       <button onclick="VSX.start(2,'practice')">Practice</button>
       <button class="go" onclick="VSX.start(2,'exam')">Exam</button>
-      <button onclick="VSX.start(2,'intense')">Intense</button>
     </div>
   </div>
 
@@ -633,13 +648,12 @@
     <span class="lamp" id="l-vsx3"></span>
     <div class="body">
       <h2>Enhanced VSE 3 — both together<span class="ptag">Platinum</span></h2>
-      <p>The track and the shape sets on one screen, on one clock: a step of the light every tick and a shape question every other tick. Scores each against how you do on it alone.</p>
-      <div class="meta">120 points · 80 stops and 40 questions · 2:00, intense 1:36 · practice is 30</div>
+      <p>The track and the shape sets on one screen, on one clock: a step of the light every tick and a shape question every other tick. The intense spells, called as they come and go, land on both at once. Scores each against how you do on it alone.</p>
+      <div class="meta">120 points · 80 stops and 40 questions · about 2:00 · practice is 30</div>
     </div>
     <div class="row">
       <button onclick="VSX.start(3,'practice')">Practice</button>
       <button class="go" onclick="VSX.start(3,'exam')">Exam</button>
-      <button onclick="VSX.start(3,'intense')">Intense</button>
     </div>
   </div>
 
@@ -1857,24 +1871,45 @@ const VSE3 = {
    points: every stop the light lands on is one point, and every shape question
    is one point.
 
-   Part 1 — the track. A closed loop of stops with arrows round it. One stop at a
-   time is lit and the light moves on to the next stop in the direction of the
+   Part 1 — the track. A closed loop of round stops with arrows round it. One stop
+   at a time is lit and the light moves on to the next stop in the direction of the
    arrows. It is a fault when the light skips a stop, or lights in the wrong
-   colour. Intense adds two lit stops at once, and a stop lit half one colour and
-   half another. Press FALSE on a fault; do nothing otherwise.
+   colour. Press FALSE on a fault; do nothing otherwise.
 
-   Part 2 — the shape sets. Set A is six shapes in a line; set B is the same six
-   in a different order. Every few seconds two shapes are highlighted on each side
-   (three in intense). Is there a fault? Yes if the highlighted shapes are not the
-   same shapes, no if they are. Order does not matter.
+   Part 2 — the shape sets. Set A is six shapes; set B, beside it, is the same six
+   in a different order. Every few seconds two shapes are highlighted on each side.
+   Is there a fault? Yes if the highlighted shapes are not the same shapes, no if
+   they are. Order does not matter.
 
-   Part 3 — both together: a track step every tick, a shape question every two. */
+   Part 3 — both together: a track step every tick, a shape question every two.
+
+   Intense is not a mode you pick. It arrives unannounced, once or twice a run, for
+   a spell of ten to thirty-five items: the pace quickens, the track adds two
+   lights at once and a stop lit half in another colour, and three shapes light on
+   each side instead of two. Then it drops back. */
 
 const VSX_LENGTHS = {exam:120, practice:30};           // points, in every part
-const VSX_PACE = {                                      // ms
-  track:{standard:1500, intense:1200},                  // a step of the light
-  shapes:{standard:3000, intense:2500}                  // a shape question, parts 1 and 2
+const VSX_PACE = {                                      // ms, outside a spell and inside one
+  track:{calm:1500, hot:1200},                          // a step of the light
+  shapes:{calm:3000, hot:2500}                          // a shape question, parts 1 and 2
 };
+
+/* Where the intense spells fall in a run of n items: once or twice, ten to
+   thirty-five items each, never in the opening stretch and never back to back.
+   A practice run is too short for that, so it gets one short spell. */
+function vxSpells(n, practice){
+  const hot=new Array(n).fill(false), spans=[];
+  const count = practice ? 1 : (Math.random()<.5 ? 1 : 2);
+  const lo = practice ? 6 : 10, hi = practice ? 10 : 35, lead = practice ? 5 : 8, gap = 10;
+  for(let c=0, tries=0; c<count && tries<200; tries++){
+    const len=lo+rnd(hi-lo+1), at=lead+rnd(Math.max(1, n-lead-len+1));
+    if(at+len>n) continue;
+    if(spans.some(([a,b])=>at<b+gap && a<at+len+gap)) continue;
+    spans.push([at, at+len]); c++;
+  }
+  spans.sort((x,y)=>x[0]-y[0]).forEach(([a,b])=>{ for(let i=a;i<b;i++) hot[i]=true; });
+  return {hot, spans};
+}
 const VSX_GRACE = 450;       // a press this soon into the next item still answers the last one
 const VSX_SVGNS = "http://www.w3.org/2000/svg";
 const svgEl = (t, attrs) => {
@@ -1884,15 +1919,16 @@ const svgEl = (t, attrs) => {
 };
 
 /* the lit colours. Green is right; anything else on its own is a colour fault. */
-const VSX_LIT = {green:"#2BE02B", amber:"#F5B301", blue:"#3D8BFF", white:"#F2F2F2"};
-const VSX_ODD = ["amber","blue","white"];
+const VSX_LIT = {green:"#2fbf71", amber:"#e8a13a", blue:"#3d7be0", purple:"#8a4fd6"};
+const VSX_ODD = ["amber","blue","purple"];
+const VSX_STOP = "#d64545", VSX_ARROW = "#9aa3ab";
 const VSX_FAULTS = {
   skip:"skipped a stop", colour:"wrong colour", two:"two lights at once", half:"half a different colour"
 };
 
 /* A track of stops laid round a lumpy loop, and the whole run of the light over
    it, decided up front. */
-function vxTrack(steps, intense){
+function vxTrack(steps, hot){
   const n = 16+rnd(5), W=1000, H=780, cx=500, cy=392, rx=430, ry=330;
   // a lumpy loop, re-drawn until no two stops crowd each other — an arrow too short
   // to see makes a skip look like a step
@@ -1918,14 +1954,13 @@ function vxTrack(steps, intense){
   const wrap = i => ((i%n)+n)%n;
 
   // the run of the light. Never two faults back to back, so each one is judged on its own.
-  const p = intense ? .14 : .11;
-  const kinds = intense ? ["skip","colour","two","half"] : ["skip","colour"];
   const run=[{pos:rnd(n), fault:null}];
   for(let i=1;i<steps;i++){
-    const prev=run[i-1];
-    const fault = (!prev.fault && Math.random()<p) ? pick(kinds) : null;
+    const prev=run[i-1], h=!!hot[i];
+    const kinds = h ? ["skip","colour","two","half"] : ["skip","colour"];
+    const fault = (!prev.fault && Math.random()<(h ? .15 : .11)) ? pick(kinds) : null;
     const pos = wrap(prev.pos + (fault==="skip" ? 2*dir : dir));
-    const st={pos, fault};
+    const st={pos, fault, hot:h};
     if(fault==="colour" || fault==="half") st.col=pick(VSX_ODD);
     if(fault==="two"){
       // the second light lands away from where it was and where it is, or it reads as a trail
@@ -1936,11 +1971,11 @@ function vxTrack(steps, intense){
   }
 
   const svg=svgEl("svg",{viewBox:"0 0 "+W+" "+H, class:"vxtrack", role:"img",
-                         "aria-label":"A loop of stops with the light moving round it"});
+                         "aria-label":"A loop of round stops with the light moving round it"});
   const defs=svgEl("defs");
   const mk=svgEl("marker",{id:"vxArrow", viewBox:"0 0 10 10", refX:"6", refY:"5",
                            markerWidth:"4", markerHeight:"4", orient:"auto-start-reverse"});
-  mk.appendChild(svgEl("path",{d:"M0,0 L10,5 L0,10 z", fill:"#22C7A1"}));
+  mk.appendChild(svgEl("path",{d:"M0,0 L10,5 L0,10 z", fill:VSX_ARROW}));
   defs.appendChild(mk);
   VSX_ODD.forEach(c=>{
     const g=svgEl("linearGradient",{id:"vxHalf-"+c, x1:"0", x2:"1", y1:"0", y2:"0"});
@@ -1953,15 +1988,13 @@ function vxTrack(steps, intense){
   // the arrows, drawn the way the light travels
   for(let i=0;i<n;i++){
     const [x1,y1]=pts[i], [x2,y2]=pts[wrap(i+dir)];
-    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1, cut=Math.min(46, len*.3);
+    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1, cut=Math.min(42, len*.3);
     svg.appendChild(svgEl("line",{
       x1:x1+dx/len*cut, y1:y1+dy/len*cut, x2:x2-dx/len*cut, y2:y2-dy/len*cut,
-      stroke:"#22C7A1", "stroke-width":"7", "stroke-linecap":"round", "marker-end":"url(#vxArrow)",
-      opacity:".85"}));
+      stroke:VSX_ARROW, "stroke-width":"7", "stroke-linecap":"round", "marker-end":"url(#vxArrow)"}));
   }
   const tris=pts.map(([x,y])=>{
-    const t=svgEl("polygon",{points:x+","+(y-24)+" "+(x+26)+","+(y+22)+" "+(x-26)+","+(y+22),
-                             fill:"#E35B5B"});
+    const t=svgEl("circle",{cx:x, cy:y, r:24, fill:VSX_STOP});
     svg.appendChild(t);
     return t;
   });
@@ -1969,7 +2002,7 @@ function vxTrack(steps, intense){
   return {
     node:svg, run, n, dir,
     show(i){
-      tris.forEach(t=>t.setAttribute("fill","#E35B5B"));
+      tris.forEach(t=>t.setAttribute("fill",VSX_STOP));
       const st=run[i]; if(!st) return;
       const fill = st.fault==="colour" ? VSX_LIT[st.col]
                  : st.fault==="half" ? "url(#vxHalf-"+st.col+")"
@@ -1977,7 +2010,7 @@ function vxTrack(steps, intense){
       tris[st.pos].setAttribute("fill", fill);
       if(st.fault==="two") tris[st.extra].setAttribute("fill", VSX_LIT.green);
     },
-    clear(){ tris.forEach(t=>t.setAttribute("fill","#E35B5B")); }
+    clear(){ tris.forEach(t=>t.setAttribute("fill",VSX_STOP)); }
   };
 }
 
@@ -1999,8 +2032,7 @@ const shapeSVG = s => '<svg viewBox="-20 -20 40 40" aria-label="'+s+'"><g fill="
    where: the highlighted shapes on the two sides either are the same shapes or
    they are not. */
 const VSX_DEAL_EVERY = 10;
-function vxShapes(trials, intense){
-  const k = intense ? 3 : 2;
+function vxShapes(trials, hot){
   const names=Object.keys(VSX_SHAPES);
   const deals=[];
   for(let d=0; d*VSX_DEAL_EVERY<trials; d++){
@@ -2015,6 +2047,7 @@ function vxShapes(trials, intense){
   const qs=[];
   for(let j=0;j<trials;j++){
     const {a,b}=deals[Math.floor(j/VSX_DEAL_EVERY)];
+    const k = hot[j] ? 3 : 2;
     const fault = Math.random()<.4;
     const ai=shuffle([0,1,2,3,4,5]).slice(0,k);
     // the matching positions on B: each highlighted shape of A, found once on B
@@ -2029,7 +2062,8 @@ function vxShapes(trials, intense){
       const alt=free.filter(y=>b[y]!==was);
       bi[r]=pick(alt);
     }
-    qs.push({a:ai, b:bi, fault: bag(ai.map(x=>a[x]))!==bag(bi.map(y=>b[y])), deal:Math.floor(j/VSX_DEAL_EVERY)});
+    qs.push({a:ai, b:bi, k, hot:!!hot[j], fault: bag(ai.map(x=>a[x]))!==bag(bi.map(y=>b[y])),
+             deal:Math.floor(j/VSX_DEAL_EVERY)});
   }
 
   const node=el("div","vxsets");
@@ -2044,7 +2078,7 @@ function vxShapes(trials, intense){
   });
   let dealt=-1;
   return {
-    node, qs, k,
+    node, qs,
     show(j){
       const q=qs[j]; if(!q) return;
       if(q.deal!==dealt){
@@ -2074,44 +2108,54 @@ const VSX = {
     if(!canUse("platinum")) return this.locked(P);
     this.part=part; this.mode=mode;
     this.exam = mode!=="practice";
-    this.intense = mode==="intense";
-    this.level = this.intense ? "intense" : "standard";
     this.ended=false; this.timers=[];
     this.N = this.exam ? VSX_LENGTHS.exam : VSX_LENGTHS.practice;   // points in all
 
     // part 3 is a track step every tick and a shape question every other tick,
     // so its points are two thirds track and one third shapes
-    const tick = part===2 ? VSX_PACE.shapes[this.level] : VSX_PACE.track[this.level];
-    this.tick=tick;
     this.nT = part===1 ? this.N : part===3 ? this.N*2/3 : 0;
     this.nS = part===2 ? this.N : part===3 ? this.N/3 : 0;
     this.ticks = part===2 ? this.nS : this.nT;
-    this.sPace = part===2 ? tick : tick*2;
 
-    this.track = this.nT ? vxTrack(this.nT, this.intense) : null;
-    this.sets = this.nS ? vxShapes(this.nS, this.intense) : null;
+    // the intense spells are laid over the ticks; in part 3 a shape question is
+    // intense when the tick it starts on is
+    const sp = vxSpells(this.ticks, !this.exam);
+    this.hot = sp.hot; this.spans = sp.spans;
+    const pace = part===2 ? VSX_PACE.shapes : VSX_PACE.track;
+    this.at=[0];                                   // when each tick starts, from the off
+    for(let k=0;k<this.ticks;k++) this.at.push(this.at[k] + (this.hot[k] ? pace.hot : pace.calm));
+    const sHot = part===3 ? this.hot.filter((_,k)=>k%2===0) : this.hot;
+
+    this.track = this.nT ? vxTrack(this.nT, this.hot) : null;
+    this.sets = this.nS ? vxShapes(this.nS, sHot) : null;
     this.tResp = new Array(this.nT).fill(false); this.tOn = new Array(this.nT).fill(0);
     this.sResp = new Array(this.nS).fill(null); this.sOn = new Array(this.nS).fill(0);
     this.ti=-1; this.si=-1;
 
     const box=el("div", part===3 ? "vxduo" : null);
-    const secs=Math.round(this.ticks*tick/1000);
-    const what = part===1 ? this.N+" stops, "+(tick/1000).toFixed(1)+" s a stop"
-               : part===2 ? this.N+" questions, "+(tick/1000).toFixed(1)+" s a question"
-               : this.nT+" stops at "+(tick/1000).toFixed(1)+" s and "+this.nS+" shape questions at "+(this.sPace/1000).toFixed(1)+" s";
+    this.box=box;
+    const secs=Math.round(this.at[this.ticks]/1000), sec=ms=>(ms/1000).toFixed(1)+" s";
+    const what = part===1 ? this.N+" stops, "+sec(pace.calm)+" a stop"
+               : part===2 ? this.N+" questions, "+sec(pace.calm)+" a question"
+               : this.nT+" stops at "+sec(pace.calm)+" and "+this.nS+" shape questions at "+sec(pace.calm*2);
     box.appendChild(el("div","chainbar",
-      "<b>"+(this.intense?"Intense":this.exam?"Exam conditions":"Practice")+".</b> "+what+
-      " — "+mmss(secs)+" in all, moving on by itself, and it scores itself at the end. "+
+      "<b>"+(this.exam?"Exam conditions":"Practice")+".</b> "+what+
+      " — about "+mmss(secs)+" in all, moving on by itself, and it scores itself at the end. "+
+      "Somewhere in it, it turns intense for a spell"+(this.exam?" or two":"")+
+      " — quicker, and harder — and you are told when it comes in and when it goes. "+
       (this.exam ? "Every point is one mark: "+this.N+" to be had."
                  : "The exam is "+VSX_LENGTHS.exam+" points; this is a short run to learn the moves on and does not set your best.")));
 
     const how=[];
     if(this.track) how.push("The light should step to the next stop along the arrows. Press <b>FALSE</b> (or the space bar) if it skips a stop or lights in the wrong colour"+
-      (this.intense?", if two stops light at once, or if a stop lights half one colour and half another":"")+". Leave it alone otherwise.");
-    if(this.sets) how.push("Is there a fault? <b>Yes</b> (Y) if the "+this.sets.k+" shapes highlighted in set A are not the same shapes as the "+this.sets.k+
-      " in set B; <b>No</b> (N) if they are. Order does not matter. The sets are re-dealt every "+VSX_DEAL_EVERY+" questions.");
+      " — and, in an intense spell, if two stops light at once or a stop lights half one colour and half another. Leave it alone otherwise.");
+    if(this.sets) how.push("Is there a fault? <b>Yes</b> (Y) if the shapes highlighted in set A are not the same shapes as the ones in set B; <b>No</b> (N) if they are."+
+      " Two light on each side, three in an intense spell. Order does not matter. The sets are re-dealt every "+VSX_DEAL_EVERY+" questions.");
     box.appendChild(el("p","sub",how.join(" ")));
 
+    this.call=el("div","vxsr");
+    this.call.setAttribute("role","status"); this.call.setAttribute("aria-live","assertive");
+    box.appendChild(this.call);
     if(this.track){
       const s=el("div","vxstage"+(this.sets?" vxsmall":""));
       s.appendChild(this.track.node); box.appendChild(s);
@@ -2147,7 +2191,8 @@ const VSX = {
     };
     window.addEventListener("keydown", this.key);
 
-    App.open(P.name.replace("Enhanced VSE ","Enhanced VSE · ")+(this.intense?" · intense":this.exam?"":" · practice"), box);
+    this.title=P.name.replace("Enhanced VSE ","Enhanced VSE · ")+(this.exam?"":" · practice");
+    App.open(this.title, box);
     App.active=this;
     // the instructions are read before it starts; once it is running, the test is the screen
     box.querySelector(".vxstage, .vxpaper").scrollIntoView({block:"start"});
@@ -2159,13 +2204,14 @@ const VSX = {
       if(this.k>=this.ticks){ this.finish(); return; }
       this.step(this.k);
       this.k++;
-      this.later(go, this.t0+this.k*tick-performance.now());
+      this.later(go, this.t0+this.at[this.k]-performance.now());
     };
     go();
   },
   later(fn, ms){ this.timers.push(setTimeout(fn, Math.max(0, ms))); },
   step(k){
     const now=performance.now();
+    if(this.hot[k] !== !!this.hot[k-1]) this.announce(this.hot[k]);
     if(this.track){
       this.ti=k; this.tOn[k]=now; this.track.show(k);
       this.bF.classList.remove("armed");
@@ -2181,6 +2227,29 @@ const VSX = {
     }
     this.pb.style.width=(k/this.ticks*100)+"%";
     App.clock((k+1)+" / "+this.ticks);
+  },
+  /* A spell is called when it comes in and again when it goes, in the bar over the
+     test — where the title is — so the call never covers a stop or a shape. The
+     call holds for a moment, then the title comes back with an amber INTENSE pill
+     beside it for as long as the spell lasts, the panels take an amber edge and
+     the clock turns amber, so there is never any doubt which pace you are on. */
+  announce(on){
+    const what = on
+      ? {1:"quicker · two lights or a half-lit stop now count",
+         2:"quicker · three shapes light on each side",
+         3:"quicker · two lights or a half-lit stop · three shapes"}[this.part]
+      : {1:"back to the normal pace", 2:"normal pace · two shapes", 3:"normal pace · two shapes"}[this.part];
+    this.box.classList.toggle("vxhot", on);
+    $("#test").classList.toggle("vxhot", on);
+    const t=$("#t-title");
+    t.replaceChildren(el("span","vxpill "+(on?"in":"out"), on?"Intense":"Intense over"),
+                      el("span","vxnote", what));
+    this.call.textContent=(on?"Intense: ":"Intense over: ")+what;      // for a screen reader
+    clearTimeout(this.callT);
+    this.callT=setTimeout(()=>{
+      t.replaceChildren(document.createTextNode(this.title));
+      if(on) t.appendChild(el("span","vxpill in small","Intense"));
+    }, 2600);
   },
   /* A press answers the stop that is lit — unless it comes in the first moments of a
      clean stop straight after an unanswered fault, which is a late answer to that fault. */
@@ -2237,11 +2306,23 @@ const VSX = {
     const S=this.sets ? this.scoreSets() : null;
     const right=(T?T.right:0)+(S?S.right:0);
     const pct=right/this.N*100;
-    App.done(P.id, pct, false, "%", this.level+" · "+this.N+" points · "+(this.exam?"exam":"practice"));
+    App.done(P.id, pct, false, "%", this.N+" points · "+(this.exam?"exam":"practice"));
+
+    // the same points split by whether they fell inside an intense spell
+    const split={in:{r:0,n:0}, out:{r:0,n:0}};
+    const tally=(hot,ok)=>{ const b=hot?split.in:split.out; b.n++; if(ok) b.r++; };
+    if(T) this.track.run.forEach((st,i)=>tally(st.hot, !!st.fault===this.tResp[i]));
+    if(S) this.sets.qs.forEach((q,j)=>tally(q.hot, this.sResp[j]===(q.fault?"yes":"no")));
+    const unit = this.part===2 ? "questions" : "stops";
+    const where = this.spans.map(([a,b])=>(a+1)+"–"+b).join(" and ");
+    const pc = b => b.n ? Math.round(b.r/b.n*100) : null;
 
     const rows=[
-      ["Conditions", (this.intense?"Intense · ":this.exam?"Exam · ":"Practice · ")+this.N+" points"],
-      ["Points scored", right+" of "+this.N+" ("+Math.round(pct)+"%)"]
+      ["Conditions", (this.exam?"Exam · ":"Practice · ")+this.N+" points"],
+      ["Points scored", right+" of "+this.N+" ("+Math.round(pct)+"%)"],
+      ["Intense "+(this.spans.length===1?"spell":"spells"), unit+" "+where],
+      ["Points in the intense "+(this.spans.length===1?"spell":"spells"), split.in.r+" of "+split.in.n+" ("+pc(split.in)+"%)"],
+      ["Points outside", split.out.r+" of "+split.out.n+" ("+pc(split.out)+"%)"]
     ];
     if(T){
       if(S) rows.push(["Track", T.right+" of "+T.of]);
@@ -2286,7 +2367,7 @@ const VSX = {
       else if(S.fa > S.miss+1)
         notes.push("You are calling faults on matching sets. Order does not matter: the same shapes in a different place are not a fault. Name the highlighted shapes in A to yourself, then tick them off in B.");
       else if(S.miss > S.fa+1)
-        notes.push("Faults are getting past you on the shape sets. The one people miss is where one shape of the "+this.sets.k+" is different and the rest match — check every highlighted shape, not just the first one that agrees.");
+        notes.push("Faults are getting past you on the shape sets. The one people miss is where one highlighted shape is different and the rest match — check every one, not just the first one that agrees.");
       else
         notes.push("Solid on the shape sets. Name the shapes, don't look at where they are.");
     }
@@ -2299,14 +2380,23 @@ const VSX = {
       if(bits.length) notes.push("Doing both, "+bits.join(", and ")+". That drop is what this part measures — the smaller the better.");
       notes.push("The track does not wait for you, and a shape question gives you two steps. Glance at the sets as soon as they light, answer, and get back to the loop before the next step.");
     }
-    if(!this.exam) notes.push("This was a practice run, so it does not set your best — sit the exam or the intense version for that.");
-    else if(!this.intense && pct>=90) notes.push("Over 90% at standard pace. Try the intense version: faster, three shapes at a time, and two more kinds of fault on the track.");
+    const dIn=pc(split.in), dOut=pc(split.out);
+    if(dIn!=null && dOut!=null){
+      notes.push(dOut-dIn>=10
+        ? "The intense "+(this.spans.length===1?"spell":"spells")+" cost you: "+dIn+"% inside against "+dOut+"% outside. That is the point of them — it arrives mid-run, so the fix is not to brace for it but to keep the same routine at the quicker pace, and not to let one missed fault turn into three."
+        : "You held up through the intense "+(this.spans.length===1?"spell":"spells")+": "+dIn+"% inside against "+dOut+"% outside. That steadiness under a change of pace is what it is there to find.");
+    }
+    if(!this.exam) notes.push("This was a practice run, so it does not set your best — sit the exam for that.");
 
     $("#t-body").appendChild(App.results("Scores", rows, notes.join(" "), right+"/"+this.N));
     $("#t-body").querySelector(".res").scrollIntoView({behavior:"smooth"});
   },
   stop(){
     this.timers.forEach(clearTimeout); this.timers=[];
+    clearTimeout(this.callT);
+    if(this.box && this.box.classList.contains("vxhot") && this.title) $("#t-title").textContent=this.title;
+    if(this.box) this.box.classList.remove("vxhot");
+    $("#test").classList.remove("vxhot");
     if(this.key){ window.removeEventListener("keydown", this.key); this.key=null; }
     this.ended=true;
   },
