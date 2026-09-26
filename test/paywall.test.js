@@ -387,3 +387,42 @@ test("a paid session goes on to the calendar with the email filled in; anything 
   delete process.env.BOOKING_URL;
   assert.equal((await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location"), "/coaching?paid=1#book");
 });
+
+test("with Calendly set up, a payment gets one single-use link, and the same one on every return", async () => {
+  process.env.CALENDLY_TOKEN = "cal_token";
+  process.env.CALENDLY_EVENT_TYPE = "https://api.calendly.com/event_types/ET1";
+  const customer = { id: "cus_cal", metadata: {} };
+  const [s] = buyer("buyer@example.com", session(undefined, {
+    metadata: { product: "session" }, customer,
+    customer_details: { email: "buyer@example.com", name: "Sam Driver" }
+  }));
+  const stripeFetch = globalThis.fetch;
+  let minted = 0;
+  globalThis.fetch = async (url, opts = {}) => {
+    const u = new URL(url);
+    if (u.host === "api.calendly.com") {
+      calls.push({ url: u, opts });
+      minted++;
+      return new Response(JSON.stringify({ resource: { booking_url: "https://calendly.com/d/link-" + minted } }), { status: 200 });
+    }
+    if (u.pathname === "/v1/customers/cus_cal" && opts.method === "POST") {
+      new URLSearchParams(opts.body).forEach((v, k) => { customer.metadata[k.slice(9, -1)] = v; });
+      return new Response(JSON.stringify(customer), { status: 200 });
+    }
+    return stripeFetch(url, opts);
+  };
+  try {
+    const first = (await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location");
+    assert.equal(first, "https://calendly.com/d/link-1?email=buyer%40example.com&name=Sam+Driver");
+    const ask = JSON.parse(calls.find(c => c.url.host === "api.calendly.com").opts.body);
+    assert.deepEqual(ask, { max_event_count: 1, owner: "https://api.calendly.com/event_types/ET1", owner_type: "EventType" });
+    assert.equal(calls.find(c => c.url.host === "api.calendly.com").opts.headers.Authorization, "Bearer cal_token");
+
+    const again = (await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location");
+    assert.equal(again, first);
+    assert.equal(minted, 1);
+  } finally {
+    delete process.env.CALENDLY_TOKEN;
+    delete process.env.CALENDLY_EVENT_TYPE;
+  }
+});

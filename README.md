@@ -126,10 +126,14 @@ and Stripe is the record of what it bought.**
   tier, so it never changes what an email holds. The rescheduling terms — free
   with 48 hours' notice, used after that — are shown on the page and on the
   Stripe pay button. After paying, `/api/booked` checks the payment and sends the
-  buyer to `BOOKING_URL` with their email filled in; with no `BOOKING_URL` they
-  are told times will come by email. The calendar link itself is not secret, so
-  make it an unlisted event and turn down any booking that has no payment
-  behind it. With the paywall off, the page offers booking by email instead.
+  buyer to book with their name and email filled in. With Calendly set up it
+  asks Calendly for a **single-use link** — one booking, then spent — and keeps
+  it on the Stripe customer (`metadata.cal_…`), so a refresh or a closed tab gets
+  the same link back rather than a new one: one payment, one booking. Buyers
+  never see the event type's own link, so make that event **secret** in
+  Calendly and do not share it. Without Calendly, `BOOKING_URL` is used as it
+  is (anyone holding it can book), and with neither the buyer is told times will
+  come by email. With the paywall off, the page offers booking by email instead.
 
 ### Switching it on
 
@@ -153,9 +157,23 @@ and Stripe is the record of what it bought.**
    | `STRIPE_PRICE_UPGRADE` | the Gold to Platinum price ID |
    | `STRIPE_PRICE_SESSION` | the one-to-one session's £79 price ID |
    | `STRIPE_PRICE_SESSION_PLATINUM` | its £59 price ID, for Platinum holders |
-   | `BOOKING_URL` | the calendar page a paid session books on (Calendly, Cal.com) — set it to need 48 hours' notice |
+   | `CALENDLY_TOKEN` | a Calendly personal access token (Integrations → API and webhooks) |
+   | `CALENDLY_EVENT_TYPE` | the session's event type URI, `https://api.calendly.com/event_types/…` — see below |
+   | `BOOKING_URL` | only without Calendly: a plain calendar link, which anyone holding it can use |
    | `RESEND_API_KEY` | `re_…` |
    | `MAIL_FROM` | e.g. `Cab Ready <hello@your-domain>`, on the verified domain |
+
+   **Calendly.** Make one event type for the session: an hour, video call,
+   minimum scheduling notice 48 hours, and set to secret. Put the rescheduling
+   terms in its description and confirmation email. To find its URI:
+
+   ```bash
+   curl -s -H "Authorization: Bearer $CALENDLY_TOKEN" https://api.calendly.com/users/me
+   # copy resource.uri, then:
+   curl -s -H "Authorization: Bearer $CALENDLY_TOKEN" \
+     "https://api.calendly.com/event_types?user=<that uri>"
+   # the session's "uri" is CALENDLY_EVENT_TYPE
+   ```
 
 4. **The browser half:** set `const PAYWALL = true` in `assets/tiers.js` and bump
    `CACHE` in `sw.js`. Deploy.
