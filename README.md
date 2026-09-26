@@ -8,7 +8,8 @@ and payment: no build step, no dependencies, no framework.
 index.html              the landing page                    →  /
 pricing.html            Standard / Gold / Platinum           →  /pricing
 resources/index.html    the library, filterable             →  /resources
-resources/*.html        21 guides, one per test or topic    →  /resources/<slug>
+resources/*.html        22 guides, one per test or topic    →  /resources/<slug>
+coaching.html           one-to-one sessions, and how to book →  /coaching
 simulators.html         the app (was index.html)            →  /simulators
 assets/site.css         one stylesheet for the whole site
 assets/site.js          header, footer, cards, prev/next
@@ -171,7 +172,8 @@ The brand appears in `window.SITE` at the top of `assets/site.js`, in each page'
 `<title>` and in the footer's small print. `Cab Ready` is a placeholder — a
 find-and-replace across `*.html` and `assets/site.js` changes it everywhere.
 
-Before launch, also replace the placeholder contact details and confirm the
+Before launch, also replace the placeholder contact details — including the
+`coaching@example.com` booking address on `/coaching` — and confirm the
 prices on `/pricing` are the ones you mean.
 
 ## Printing the stage 1 papers

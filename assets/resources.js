@@ -36,6 +36,11 @@ window.RESOURCES = [
     title:"Applying: windows, forms and the attempts you get",
     dek:"How vacancies open and close, what the form screens for, the national database behind it, and the three-attempt rule with a five-year gap almost nobody knows about." },
 
+  { slug:"cv", group:"career", tier:"standard", minutes:9,
+    stage:"All stages",
+    title:"Your CV for a trainee driver application",
+    dek:"What the recruiter is reading it for, a layout that survives the recruitment system, how to turn an ordinary job into driver evidence, and how to handle gaps, short jobs and the things you are worried about." },
+
   { slug:"training-and-pay", group:"career", tier:"gold", minutes:9,
     stage:"All stages",
     title:"Training, licensing and what the job pays",

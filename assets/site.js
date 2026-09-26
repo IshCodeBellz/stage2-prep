@@ -16,6 +16,7 @@ window.SITE = {
 
   const NAV = [
     { href: "/resources", label: "Resources" },
+    { href: "/coaching",  label: "1:1 sessions" },
     { href: "/pricing",   label: "Pricing" },
     { href: "/simulators", label: "Open the simulators", cta: true }
   ];
@@ -59,6 +60,7 @@ window.SITE = {
               <li><a href="/">Home</a></li>
               <li><a href="/simulators">Simulators</a></li>
               <li><a href="/resources">Resource library</a></li>
+              <li><a href="/coaching">One-to-one sessions</a></li>
               <li><a href="/pricing">Pricing</a></li>
             </ul>
           </div>
