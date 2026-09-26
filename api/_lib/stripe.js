@@ -50,7 +50,9 @@ export async function stripe(method, path, params) {
 export const PRICES = () => ({
   gold: process.env.STRIPE_PRICE_GOLD,
   platinum: process.env.STRIPE_PRICE_PLATINUM,
-  upgrade: process.env.STRIPE_PRICE_UPGRADE      // Gold to Platinum, the difference
+  upgrade: process.env.STRIPE_PRICE_UPGRADE,     // Gold to Platinum, the difference
+  session: process.env.STRIPE_PRICE_SESSION,     // the one-to-one session, £79
+  sessionPlatinum: process.env.STRIPE_PRICE_SESSION_PLATINUM   // the same, £59 to Platinum holders
 });
 
 const isUpgrade = s => !!(s && s.metadata && s.metadata.upgrade === "gold");
@@ -67,13 +69,20 @@ export function holdings(sessions) {
   return upgraded && tier === "gold" ? "platinum" : tier;
 }
 
-/* The tier one checkout session grants: its metadata tier if it was paid (or
-   free through a 100% promotion code) and its charge has not been fully refunded. */
-export function sessionTier(s) {
-  if (!s || s.status !== "complete") return "standard";
-  if (s.payment_status !== "paid" && s.payment_status !== "no_payment_required") return "standard";
+/* A checkout session that was paid (or free through a 100% promotion code) and
+   whose charge has not been fully refunded. */
+export function paid(s) {
+  if (!s || s.status !== "complete") return false;
+  if (s.payment_status !== "paid" && s.payment_status !== "no_payment_required") return false;
   const charge = s.payment_intent && s.payment_intent.latest_charge;
-  if (charge && typeof charge === "object" && charge.refunded) return "standard";
+  return !(charge && typeof charge === "object" && charge.refunded);
+}
+
+/* The tier one checkout session grants: its metadata tier, if it was paid. A
+   one-to-one session is tagged metadata.product = "session" and has no tier, so
+   it never grants one. */
+export function sessionTier(s) {
+  if (!paid(s)) return "standard";
   const t = s.metadata && s.metadata.tier;
   return TIERS.indexOf(t) > 0 ? t : "standard";
 }

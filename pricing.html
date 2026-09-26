@@ -92,6 +92,7 @@
           <li>The enhanced VSE simulator — the track, the shape sets and both together, with
               intense spells called on screen as they come and go</li>
           <li>Every guide added later, at no extra cost</li>
+          <li>£20 off a <a href="/coaching">one-to-one session</a> — £59 instead of £79</li>
         </ul>
         <a class="btn block open-only" href="/resources">Read what is in them</a>
         <form class="buy paywall-only" method="post" action="/api/checkout">
@@ -164,7 +165,7 @@
         <summary>Can I talk it through with someone?</summary>
         <p>Yes. <a href="/coaching">A one-to-one session</a> is an hour on your own application: advice
           on getting in, a read of your CV and form, and a talk-through of how the tests and the
-          interviews will go. It is £79, booked separately, and not part of any tier.</p>
+          interviews will go. It is £79, or £59 if you hold Platinum, and booked separately.</p>
       </details>
       <details>
         <summary>I have my assessment in four days.</summary>
@@ -192,6 +193,7 @@
     row("Every other drill in full: fresh papers, exam versions, the notes", "gold"),
     row("Day mode and the Stage 1 paper pack", "gold"),
     row("MMI interview drill", "platinum"),
+    row("£20 off a one-to-one session", "platinum"),
     row("Enhanced VSE simulator: the track, shape sets and both together", "platinum")
   ].concat(RESOURCES.map(r => row(r.title, r.tier)));
   document.getElementById("ptbody").innerHTML = rows.join("");

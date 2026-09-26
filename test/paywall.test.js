@@ -338,3 +338,52 @@ test("signing out clears both cookies", async () => {
   assert.equal(set.length, 2);
   assert.ok(set.every(c => /Max-Age=0/.test(c)));
 });
+
+/* ---- one-to-one sessions */
+
+const book = await import("../api/book.js");
+const booked = await import("../api/booked.js");
+process.env.STRIPE_PRICE_SESSION = "price_session";
+process.env.STRIPE_PRICE_SESSION_PLATINUM = "price_session_plat";
+
+test("a session is £79, with the rescheduling terms on the pay button, and grants no tier", async () => {
+  const r = await book.POST(post("/api/book", {}));
+  assert.equal(r.headers.get("location"), "https://checkout.stripe.com/c/pay/cs_new");
+  assert.equal(sent().get("line_items[0][price]"), "price_session");
+  assert.equal(sent().get("metadata[product]"), "session");
+  assert.equal(sent().get("metadata[tier]"), null);
+  assert.match(sent().get("custom_text[submit][message]"), /48 hours/);
+  assert.equal(sent().get("success_url"), "https://cabready.example/api/booked?session_id={CHECKOUT_SESSION_ID}");
+  assert.equal(sessionTier(session(undefined, { metadata: { product: "session" } })), "standard");
+
+  process.env.PAYWALL = "off";
+  assert.equal((await book.POST(post("/api/book", {}))).headers.get("location"), "/coaching#book");
+});
+
+test("the Platinum session price is decided by Stripe's record, not the cookie", async () => {
+  buyer("plat@example.com", session("platinum"));
+  await book.POST(req("/api/book", { method: "POST", body: "",
+    headers: { "content-type": "application/x-www-form-urlencoded", cookie: await signedIn("plat@example.com", "platinum") } }));
+  assert.equal(sent().get("line_items[0][price]"), "price_session_plat");
+
+  calls = [];
+  buyer("gold@example.com", session("gold"));
+  await book.POST(req("/api/book", { method: "POST", body: "",
+    headers: { "content-type": "application/x-www-form-urlencoded", cookie: await signedIn("gold@example.com", "platinum") } }));
+  assert.equal(sent().get("line_items[0][price]"), "price_session");
+});
+
+test("a paid session goes on to the calendar with the email filled in; anything else does not", async () => {
+  const [s, unpaid, tier] = buyer("Buyer@Example.com",
+    session(undefined, { metadata: { product: "session" }, customer_details: { email: "Buyer@Example.com" } }),
+    session(undefined, { metadata: { product: "session" }, payment_status: "unpaid" }),
+    session("gold"));
+  process.env.BOOKING_URL = "https://cal.example/cab-ready/one-to-one";
+  assert.equal((await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location"),
+    "https://cal.example/cab-ready/one-to-one?email=buyer%40example.com");
+  for (const id of [unpaid.id, tier.id, "cs_missing", "nope"])
+    assert.equal((await booked.GET(req("/api/booked?session_id=" + id))).headers.get("location"), "/coaching?error=booked#book");
+
+  delete process.env.BOOKING_URL;
+  assert.equal((await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location"), "/coaching?paid=1#book");
+});

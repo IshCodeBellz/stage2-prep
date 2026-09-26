@@ -129,20 +129,47 @@
   <div class="wrap" style="max-width:720px">
     <div class="sechead">
       <h2>Booking a session</h2>
-      <p>Email to ask for a session. Tell us which operator you are applying to and where you are in
-        the process, and we will reply with the times available. You pay once a time is agreed.</p>
+      <p class="paywall-only">Pay, then pick a time that suits you from the calendar. Afterwards,
+        email your CV, the advert and your invite letter if you have one, and tell us where you are in
+        the process.</p>
+      <p class="open-only">Email to ask for a session. Tell us which operator you are applying to and
+        where you are in the process, and we will reply with the times available. You pay once a time
+        is agreed.</p>
     </div>
+    <div class="note" id="bookmsg" hidden></div>
     <dl class="spec">
       <dt>Price</dt><dd>£79, one payment, nothing to renew</dd>
+      <dt>Platinum holders</dt><dd>£59</dd>
+      <dt>Moving it</dt><dd>Free with at least 48 hours' notice</dd>
       <dt>Length</dt><dd>About an hour</dd>
       <dt>Where</dt><dd>Video call, or phone if you prefer</dd>
       <dt>Send beforehand</dt><dd>Your CV, the advert, and your invite letter if you have one</dd>
       <dt>Afterwards</dt><dd>A written summary within two working days</dd>
     </dl>
-    <div class="btnrow" style="margin-top:20px">
+    <form class="paywall-only" method="post" action="/api/book" style="margin-top:20px">
+      <div class="btnrow">
+        <button class="btn go" type="submit" id="paysession">Pay £79 and pick a time</button>
+        <a class="btn ghost" href="mailto:coaching@example.com?subject=One-to-one%20session&amp;body=Operator%20and%20depot%3A%0AWhere%20I%20am%20in%20the%20process%20(applying%20%2F%20invited%20%2F%20interview)%3A%0AKey%20dates%3A%0AWhat%20I%20most%20want%20to%20cover%3A%0A">Questions first? Email</a>
+      </div>
+      <p class="small muted" style="margin-top:12px">Hold Platinum? <a href="/account">Sign in with
+        the email you paid with</a> first, and the price is £59.</p>
+    </form>
+    <div class="btnrow open-only" style="margin-top:20px">
       <a class="btn go" href="mailto:coaching@example.com?subject=One-to-one%20session&amp;body=Operator%20and%20depot%3A%0AWhere%20I%20am%20in%20the%20process%20(applying%20%2F%20invited%20%2F%20interview)%3A%0AKey%20dates%3A%0AWhat%20I%20most%20want%20to%20cover%3A%0A">Email to book</a>
       <a class="btn ghost" href="/resources/cv">Read the CV guide first</a>
     </div>
+
+    <h3 style="margin:30px 0 8px">Rescheduling and cancelling</h3>
+    <ul>
+      <li><strong>48 hours' notice or more:</strong> move it or cancel it free, as often as you need.
+        A cancellation gets a full refund.</li>
+      <li><strong>Less than 48 hours' notice, or a missed call:</strong> the session counts as used and
+        is not refunded. The time was held for you and cannot be given to anyone else at that
+        notice.</li>
+      <li><strong>A genuine emergency</strong> — illness, a family emergency, a shift you could not
+        have known about — tell us as soon as you can, and we will look at it fairly.</li>
+      <li><strong>If we have to move it,</strong> you choose: a new time, or a full refund.</li>
+    </ul>
   </div>
 </section>
 
@@ -170,9 +197,11 @@
       </details>
       <details>
         <summary>What if I need to move it, or it does not help?</summary>
-        <p>Move it as often as you need with a day's notice, at no cost. And if you finish the call
-          feeling it was not worth £79, say so within fourteen days and the payment is refunded —
-          the same policy as everything else on the site.</p>
+        <p>Move it free with at least 48 hours' notice; with less, the session counts as used — the
+          <a href="#book">rescheduling terms</a> are above. And if you have the call and finish it
+          feeling it was not worth the money, say so within fourteen days and the payment is refunded,
+          the same policy as everything else on the site. That refund is for a session that took
+          place, not one that was missed.</p>
       </details>
       <details>
         <summary>When is the best time to book?</summary>
@@ -192,4 +221,22 @@
 
 <script src="/assets/resources.js"></script>
 <script src="/assets/site.js"></script>
+<script>
+(function () {
+  // a Platinum holder's price; the server checks it with Stripe, this is only the label.
+  // Access comes from tiers.js, which loads after this script.
+  window.addEventListener("DOMContentLoaded", () => {
+    const pay = document.getElementById("paysession");
+    if (pay && window.Access && Access.signedIn() && Access.tier() === "platinum")
+      pay.textContent = "Pay £59 and pick a time";
+  });
+
+  const q = new URLSearchParams(location.search), box = document.getElementById("bookmsg");
+  const msg = q.get("paid") ? "Paid — thank you. We will email you within one working day with times to choose from."
+    : q.get("error") === "book" ? "Checkout could not be started just now, and nothing has been charged. Try again in a minute, or email us."
+    : q.get("error") === "booked" ? "We could not confirm that payment. If you were charged, email us and we will sort out a time."
+    : "";
+  if (msg && box) { box.textContent = msg; box.hidden = false; }
+})();
+</script>
 <script src="/assets/tiers.js"></script>

@@ -120,12 +120,22 @@ and Stripe is the record of what it bought.**
   it stands: refund the Gold and the upgrade grants nothing, so refund both.
 - A 100%-off promotion code made in the Stripe dashboard works at checkout, for
   giving access away.
+- **One-to-one sessions** are sold on `/coaching` through `/api/book`: £79, or
+  £59 to someone signed in whose email holds Platinum (asked of Stripe, as with
+  the upgrade). The checkout is tagged `metadata.product = "session"` with no
+  tier, so it never changes what an email holds. The rescheduling terms — free
+  with 48 hours' notice, used after that — are shown on the page and on the
+  Stripe pay button. After paying, `/api/booked` checks the payment and sends the
+  buyer to `BOOKING_URL` with their email filled in; with no `BOOKING_URL` they
+  are told times will come by email. The calendar link itself is not secret, so
+  make it an unlisted event and turn down any booking that has no payment
+  behind it. With the paywall off, the page offers booking by email instead.
 
 ### Switching it on
 
-1. **Stripe.** Make three products, each with a one-off price in GBP: *Gold* £49,
-   *Platinum* £89 and *Gold to Platinum* £40. Copy the three price IDs
-   (`price_…`). Get the secret key from Developers → API keys. Use test mode
+1. **Stripe.** Make four products, each with a one-off price in GBP: *Gold* £49,
+   *Platinum* £89, *Gold to Platinum* £40, and *One-to-one session* with two
+   prices, £79 and £59. Copy the price IDs (`price_…`). Get the secret key from Developers → API keys. Use test mode
    first.
 2. **Resend.** Add and verify the domain the sign-in email comes from, and make
    an API key.
@@ -141,6 +151,9 @@ and Stripe is the record of what it bought.**
    | `STRIPE_PRICE_GOLD` | the Gold price ID |
    | `STRIPE_PRICE_PLATINUM` | the Platinum price ID |
    | `STRIPE_PRICE_UPGRADE` | the Gold to Platinum price ID |
+   | `STRIPE_PRICE_SESSION` | the one-to-one session's £79 price ID |
+   | `STRIPE_PRICE_SESSION_PLATINUM` | its £59 price ID, for Platinum holders |
+   | `BOOKING_URL` | the calendar page a paid session books on (Calendly, Cal.com) — set it to need 48 hours' notice |
    | `RESEND_API_KEY` | `re_…` |
    | `MAIL_FROM` | e.g. `Cab Ready <hello@your-domain>`, on the verified domain |
 
@@ -173,10 +186,10 @@ The brand appears in `window.SITE` at the top of `assets/site.js`, in each page'
 find-and-replace across `*.html` and `assets/site.js` changes it everywhere.
 
 Before launch, also replace the placeholder contact details — including the
-`coaching@example.com` booking address on `/coaching` — and confirm the
-prices on `/pricing` are the ones you mean. The one-to-one session is £79, taken
-by hand once a time is agreed rather than through Stripe Checkout; the figure is
-text in `coaching.html` and the pricing FAQ, so change both together.
+`coaching@example.com` address on `/coaching` — and confirm the prices on
+`/pricing` are the ones you mean. The one-to-one prices, £79 and £59, are
+charged from Stripe but written as text in `coaching.html` and `pricing.html`,
+so change them together.
 
 ## Printing the stage 1 papers
 
