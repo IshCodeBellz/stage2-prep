@@ -174,7 +174,9 @@ find-and-replace across `*.html` and `assets/site.js` changes it everywhere.
 
 Before launch, also replace the placeholder contact details — including the
 `coaching@example.com` booking address on `/coaching` — and confirm the
-prices on `/pricing` are the ones you mean.
+prices on `/pricing` are the ones you mean. The one-to-one session is £79, taken
+by hand once a time is agreed rather than through Stripe Checkout; the figure is
+text in `coaching.html` and the pricing FAQ, so change both together.
 
 ## Printing the stage 1 papers
 
