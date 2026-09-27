@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The home-screen icon: the mark full bleed, the signal inside the maskable safe zone. -->
+  <rect width="64" height="64" fill="#1c2b23"/>
+  <g transform="translate(32 32) scale(.78) translate(-32 -32)">
+    <rect x="20" y="7" width="24" height="50" rx="12" fill="#0a120d"/>
+    <circle cx="32" cy="20" r="7" fill="#34443b"/>
+    <circle cx="32" cy="44" r="11" fill="#2fbf71" opacity=".25"/>
+    <circle cx="32" cy="44" r="7" fill="#2fbf71"/>
+  </g>
+</svg>

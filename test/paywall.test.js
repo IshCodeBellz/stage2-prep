@@ -11,8 +11,8 @@ process.env.STRIPE_PRICE_GOLD = "price_gold";
 process.env.STRIPE_PRICE_PLATINUM = "price_plat";
 process.env.STRIPE_PRICE_UPGRADE = "price_up";
 process.env.RESEND_API_KEY = "re_x";
-process.env.MAIL_FROM = "Cab Ready <hello@example.com>";
-process.env.SITE_URL = "https://cabready.example";
+process.env.MAIL_FROM = "Booked On <hello@example.com>";
+process.env.SITE_URL = "https://bookedon.example";
 
 const auth = await import("../api/_lib/auth.js");
 const { sessionTier, tierForEmail } = await import("../api/_lib/stripe.js");
@@ -62,7 +62,7 @@ const buyer = (email, ...sessions) => {
   db.sessions[id] = sessions;
   return sessions;
 };
-const req = (path, opts = {}) => new Request("https://cabready.example" + path, opts);
+const req = (path, opts = {}) => new Request("https://bookedon.example" + path, opts);
 const cookieHeader = res => res.headers.getSetCookie().map(c => c.split(";")[0]).join("; ");
 const withCookies = (path, cookies, opts = {}) => req(path, { ...opts, headers: { ...(opts.headers || {}), cookie: cookies } });
 const post = (path, form, headers) => req(path, {
@@ -168,8 +168,8 @@ test("/api/guide sends a paid guide whole only to a session that holds its tier"
 
 test("the middleware routes guides through /api/guide only while the paywall is on", () => {
   const rw = r => r && r.headers.get("x-middleware-rewrite");
-  assert.equal(rw(middleware(req("/resources/trp2"))), "https://cabready.example/api/guide?slug=trp2");
-  assert.equal(rw(middleware(req("/resources/trp2.html"))), "https://cabready.example/api/guide?slug=trp2");
+  assert.equal(rw(middleware(req("/resources/trp2"))), "https://bookedon.example/api/guide?slug=trp2");
+  assert.equal(rw(middleware(req("/resources/trp2.html"))), "https://bookedon.example/api/guide?slug=trp2");
   assert.equal(middleware(req("/resources/index")), undefined);
   process.env.PAYWALL = "off";
   assert.equal(middleware(req("/resources/trp2")), undefined);
@@ -185,7 +185,7 @@ test("checkout sends the buyer to Stripe with the tier's price and the site's re
   assert.equal(sent.get("line_items[0][price]"), "price_gold");
   assert.equal(sent.get("metadata[tier]"), "gold");
   assert.equal(sent.get("mode"), "payment");
-  assert.equal(sent.get("success_url"), "https://cabready.example/api/claim?session_id={CHECKOUT_SESSION_ID}");
+  assert.equal(sent.get("success_url"), "https://bookedon.example/api/claim?session_id={CHECKOUT_SESSION_ID}");
 
   assert.equal((await checkout.POST(post("/api/checkout", { tier: "diamond" }))).headers.get("location"), "/pricing?error=tier");
   process.env.PAYWALL = "off";
@@ -291,7 +291,7 @@ test("a sign-in link goes only to a buyer, to SITE_URL whatever the Host, and th
   assert.equal(b.headers.get("location"), "/account?sent=1");
   assert.equal(mails.length, 1);
   assert.deepEqual(mails[0].to, ["buyer@example.com"]);
-  const link = /https:\/\/cabready\.example\/api\/verify\?t=([^"\s]+)/.exec(mails[0].text);
+  const link = /https:\/\/bookedon\.example\/api\/verify\?t=([^"\s]+)/.exec(mails[0].text);
   assert.ok(link, "link points at SITE_URL");
 
   const r = await verify.GET(req("/api/verify?t=" + link[1]));
@@ -353,7 +353,7 @@ test("a session is £79, with the rescheduling terms on the pay button, and gran
   assert.equal(sent().get("metadata[product]"), "session");
   assert.equal(sent().get("metadata[tier]"), null);
   assert.match(sent().get("custom_text[submit][message]"), /48 hours/);
-  assert.equal(sent().get("success_url"), "https://cabready.example/api/booked?session_id={CHECKOUT_SESSION_ID}");
+  assert.equal(sent().get("success_url"), "https://bookedon.example/api/booked?session_id={CHECKOUT_SESSION_ID}");
   assert.equal(sessionTier(session(undefined, { metadata: { product: "session" } })), "standard");
 
   process.env.PAYWALL = "off";
@@ -378,9 +378,9 @@ test("a paid session goes on to the calendar with the email filled in; anything 
     session(undefined, { metadata: { product: "session" }, customer_details: { email: "Buyer@Example.com" } }),
     session(undefined, { metadata: { product: "session" }, payment_status: "unpaid" }),
     session("gold"));
-  process.env.BOOKING_URL = "https://cal.example/cab-ready/one-to-one";
+  process.env.BOOKING_URL = "https://cal.example/booked-on/one-to-one";
   assert.equal((await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location"),
-    "https://cal.example/cab-ready/one-to-one?email=buyer%40example.com");
+    "https://cal.example/booked-on/one-to-one?email=buyer%40example.com");
   for (const id of [unpaid.id, tier.id, "cs_missing", "nope"])
     assert.equal((await booked.GET(req("/api/booked?session_id=" + id))).headers.get("location"), "/coaching?error=booked#book");
 

@@ -1,4 +1,4 @@
-# Cab Ready
+# Booked On
 
 Marketing site, resource library and practice simulators for the trainee train
 driver assessment. Static pages, plus a handful of Vercel Functions for accounts
@@ -161,7 +161,7 @@ and Stripe is the record of what it bought.**
    | `CALENDLY_EVENT_TYPE` | the session's event type URI, `https://api.calendly.com/event_types/…` — see below |
    | `BOOKING_URL` | only without Calendly: a plain calendar link, which anyone holding it can use |
    | `RESEND_API_KEY` | `re_…` |
-   | `MAIL_FROM` | e.g. `Cab Ready <hello@your-domain>`, on the verified domain |
+   | `MAIL_FROM` | e.g. `Booked On <hello@your-domain>`, on the verified domain |
 
    **Calendly.** Make one event type for the session: an hour, video call,
    minimum scheduling notice 48 hours, and set to secret. Put the rescheduling
@@ -200,8 +200,19 @@ browser on and server off locks the simulators but sends every guide whole.
 ## Renaming the site
 
 The brand appears in `window.SITE` at the top of `assets/site.js`, in each page's
-`<title>` and in the footer's small print. `Cab Ready` is a placeholder — a
-find-and-replace across `*.html` and `assets/site.js` changes it everywhere.
+`<title>`, in the footer's small print, the sign-in email (`api/_lib/mail.js`) and
+`manifest.webmanifest`. A find-and-replace across those changes it everywhere.
+It was Cab Ready until September 2026; the browser storage keys in
+`assets/tiers.js` still say `cabready.` and are left alone, because renaming
+them would sign every visitor out of the tier they chose.
+
+## The logo
+
+A signal head with the green aspect lit, in `assets/brand/`: `mark.svg` is the
+rounded tile used in the header and the simulators, and `icon.svg` is the same
+thing full bleed, with the signal inside the maskable safe zone, which is what
+`icon-180.png` and `icon-512.png` are rendered from. Colours are the site's own:
+the tile `#1c2b23`, the head `#0a120d`, the lit lamp `--green-lit` `#2fbf71`.
 
 Before launch, also replace the placeholder contact details — including the
 `coaching@example.com` address on `/coaching` — and confirm the prices on
