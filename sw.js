@@ -1,4 +1,4 @@
-/* Offline cache for Cab Ready.
+/* Offline cache for Booked On.
 
    The simulators are the part that has to work with no signal — on the
    Underground, between stations, in a depot mess room. The marketing and
@@ -8,7 +8,7 @@
    Bump CACHE whenever simulators.html or the shared assets change, or phones
    that already installed the app keep serving the old copy. */
 
-const CACHE = "stage2-v43";
+const CACHE = "stage2-v46";
 const APP = "/simulators";
 const ASSETS = [
   APP,
@@ -16,6 +16,7 @@ const ASSETS = [
   "/manifest.webmanifest",
   "/icon-180.png",
   "/icon-512.png",
+  "/assets/brand/mark.svg",
   "/assets/site.css",
   "/assets/site.js",
   "/assets/tiers.js",

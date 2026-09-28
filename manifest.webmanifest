@@ -1,9 +1,9 @@
 {
-  "name": "Stage 2 Test Simulators",
-  "short_name": "Stage 2",
+  "name": "Booked On — test simulators",
+  "short_name": "Booked On",
   "start_url": "/simulators",
   "display": "standalone",
-  "background_color": "#0F151B",
+  "background_color": "#1c2b23",
   "theme_color": "#0F151B",
   "icons": [
     {

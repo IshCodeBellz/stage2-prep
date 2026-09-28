@@ -1,4 +1,4 @@
-/* Cab Ready — marketing site and resource library.
+/* Booked On — marketing site and resource library.
 
    Same palette as the simulators, so the two halves of the product look like
    one thing. No build step: this file is served as written.
@@ -94,9 +94,8 @@ p{margin:0 0 14px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;
        font:700 1.06rem var(--head);letter-spacing:-.01em;color:#f3f5f2;white-space:nowrap}
 .brand:hover{color:var(--green-lit)}
-/* the mark from the handover — a green square rather than a lamp */
-.brand .lamp{width:26px;height:26px;border-radius:6px;background:var(--green-lit);
-             box-shadow:none;flex:none}
+/* the mark: a signal head with the green aspect lit (assets/brand/mark.svg) */
+.brand .logo{width:28px;height:28px;flex:none;display:block}
 .nav nav{display:flex;gap:4px;margin-left:auto;align-items:center}
 .nav nav a{text-decoration:none;color:rgba(243,245,242,.75);font:500 .92rem var(--body);
            padding:8px 12px;border-radius:7px}

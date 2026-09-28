@@ -3,7 +3,7 @@
    the page content itself is static HTML so it still reads without JavaScript. */
 
 window.SITE = {
-  name: "Cab Ready",
+  name: "Booked On",
   tagline: "Train driver assessment practice that behaves like the real thing.",
   app: "/simulators"
 };
@@ -16,6 +16,7 @@ window.SITE = {
 
   const NAV = [
     { href: "/resources", label: "Resources" },
+    { href: "/coaching",  label: "1:1 sessions" },
     { href: "/pricing",   label: "Pricing" },
     { href: "/simulators", label: "Open the simulators", cta: true }
   ];
@@ -33,7 +34,7 @@ window.SITE = {
     h.className = "nav";
     h.innerHTML =
       `<div class="wrap">
-         <a class="brand" href="/"><span class="lamp"></span>${esc(window.SITE.name)}</a>
+         <a class="brand" href="/"><img class="logo" src="/assets/brand/mark.svg" alt="" width="28" height="28">${esc(window.SITE.name)}</a>
          <button class="burger" aria-expanded="false" aria-controls="navlinks">Menu</button>
          <nav id="navlinks">${links}</nav>
        </div>`;
@@ -59,6 +60,7 @@ window.SITE = {
               <li><a href="/">Home</a></li>
               <li><a href="/simulators">Simulators</a></li>
               <li><a href="/resources">Resource library</a></li>
+              <li><a href="/coaching">One-to-one sessions</a></li>
               <li><a href="/pricing">Pricing</a></li>
             </ul>
           </div>

@@ -11,8 +11,8 @@ process.env.STRIPE_PRICE_GOLD = "price_gold";
 process.env.STRIPE_PRICE_PLATINUM = "price_plat";
 process.env.STRIPE_PRICE_UPGRADE = "price_up";
 process.env.RESEND_API_KEY = "re_x";
-process.env.MAIL_FROM = "Cab Ready <hello@example.com>";
-process.env.SITE_URL = "https://cabready.example";
+process.env.MAIL_FROM = "Booked On <hello@example.com>";
+process.env.SITE_URL = "https://bookedon.example";
 
 const auth = await import("../api/_lib/auth.js");
 const { sessionTier, tierForEmail } = await import("../api/_lib/stripe.js");
@@ -62,7 +62,7 @@ const buyer = (email, ...sessions) => {
   db.sessions[id] = sessions;
   return sessions;
 };
-const req = (path, opts = {}) => new Request("https://cabready.example" + path, opts);
+const req = (path, opts = {}) => new Request("https://bookedon.example" + path, opts);
 const cookieHeader = res => res.headers.getSetCookie().map(c => c.split(";")[0]).join("; ");
 const withCookies = (path, cookies, opts = {}) => req(path, { ...opts, headers: { ...(opts.headers || {}), cookie: cookies } });
 const post = (path, form, headers) => req(path, {
@@ -168,8 +168,8 @@ test("/api/guide sends a paid guide whole only to a session that holds its tier"
 
 test("the middleware routes guides through /api/guide only while the paywall is on", () => {
   const rw = r => r && r.headers.get("x-middleware-rewrite");
-  assert.equal(rw(middleware(req("/resources/trp2"))), "https://cabready.example/api/guide?slug=trp2");
-  assert.equal(rw(middleware(req("/resources/trp2.html"))), "https://cabready.example/api/guide?slug=trp2");
+  assert.equal(rw(middleware(req("/resources/trp2"))), "https://bookedon.example/api/guide?slug=trp2");
+  assert.equal(rw(middleware(req("/resources/trp2.html"))), "https://bookedon.example/api/guide?slug=trp2");
   assert.equal(middleware(req("/resources/index")), undefined);
   process.env.PAYWALL = "off";
   assert.equal(middleware(req("/resources/trp2")), undefined);
@@ -185,7 +185,7 @@ test("checkout sends the buyer to Stripe with the tier's price and the site's re
   assert.equal(sent.get("line_items[0][price]"), "price_gold");
   assert.equal(sent.get("metadata[tier]"), "gold");
   assert.equal(sent.get("mode"), "payment");
-  assert.equal(sent.get("success_url"), "https://cabready.example/api/claim?session_id={CHECKOUT_SESSION_ID}");
+  assert.equal(sent.get("success_url"), "https://bookedon.example/api/claim?session_id={CHECKOUT_SESSION_ID}");
 
   assert.equal((await checkout.POST(post("/api/checkout", { tier: "diamond" }))).headers.get("location"), "/pricing?error=tier");
   process.env.PAYWALL = "off";
@@ -291,7 +291,7 @@ test("a sign-in link goes only to a buyer, to SITE_URL whatever the Host, and th
   assert.equal(b.headers.get("location"), "/account?sent=1");
   assert.equal(mails.length, 1);
   assert.deepEqual(mails[0].to, ["buyer@example.com"]);
-  const link = /https:\/\/cabready\.example\/api\/verify\?t=([^"\s]+)/.exec(mails[0].text);
+  const link = /https:\/\/bookedon\.example\/api\/verify\?t=([^"\s]+)/.exec(mails[0].text);
   assert.ok(link, "link points at SITE_URL");
 
   const r = await verify.GET(req("/api/verify?t=" + link[1]));
@@ -337,4 +337,92 @@ test("signing out clears both cookies", async () => {
   const set = r.headers.getSetCookie();
   assert.equal(set.length, 2);
   assert.ok(set.every(c => /Max-Age=0/.test(c)));
+});
+
+/* ---- one-to-one sessions */
+
+const book = await import("../api/book.js");
+const booked = await import("../api/booked.js");
+process.env.STRIPE_PRICE_SESSION = "price_session";
+process.env.STRIPE_PRICE_SESSION_PLATINUM = "price_session_plat";
+
+test("a session is £79, with the rescheduling terms on the pay button, and grants no tier", async () => {
+  const r = await book.POST(post("/api/book", {}));
+  assert.equal(r.headers.get("location"), "https://checkout.stripe.com/c/pay/cs_new");
+  assert.equal(sent().get("line_items[0][price]"), "price_session");
+  assert.equal(sent().get("metadata[product]"), "session");
+  assert.equal(sent().get("metadata[tier]"), null);
+  assert.match(sent().get("custom_text[submit][message]"), /48 hours/);
+  assert.equal(sent().get("success_url"), "https://bookedon.example/api/booked?session_id={CHECKOUT_SESSION_ID}");
+  assert.equal(sessionTier(session(undefined, { metadata: { product: "session" } })), "standard");
+
+  process.env.PAYWALL = "off";
+  assert.equal((await book.POST(post("/api/book", {}))).headers.get("location"), "/coaching#book");
+});
+
+test("the Platinum session price is decided by Stripe's record, not the cookie", async () => {
+  buyer("plat@example.com", session("platinum"));
+  await book.POST(req("/api/book", { method: "POST", body: "",
+    headers: { "content-type": "application/x-www-form-urlencoded", cookie: await signedIn("plat@example.com", "platinum") } }));
+  assert.equal(sent().get("line_items[0][price]"), "price_session_plat");
+
+  calls = [];
+  buyer("gold@example.com", session("gold"));
+  await book.POST(req("/api/book", { method: "POST", body: "",
+    headers: { "content-type": "application/x-www-form-urlencoded", cookie: await signedIn("gold@example.com", "platinum") } }));
+  assert.equal(sent().get("line_items[0][price]"), "price_session");
+});
+
+test("a paid session goes on to the calendar with the email filled in; anything else does not", async () => {
+  const [s, unpaid, tier] = buyer("Buyer@Example.com",
+    session(undefined, { metadata: { product: "session" }, customer_details: { email: "Buyer@Example.com" } }),
+    session(undefined, { metadata: { product: "session" }, payment_status: "unpaid" }),
+    session("gold"));
+  process.env.BOOKING_URL = "https://cal.example/booked-on/one-to-one";
+  assert.equal((await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location"),
+    "https://cal.example/booked-on/one-to-one?email=buyer%40example.com");
+  for (const id of [unpaid.id, tier.id, "cs_missing", "nope"])
+    assert.equal((await booked.GET(req("/api/booked?session_id=" + id))).headers.get("location"), "/coaching?error=booked#book");
+
+  delete process.env.BOOKING_URL;
+  assert.equal((await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location"), "/coaching?paid=1#book");
+});
+
+test("with Calendly set up, a payment gets one single-use link, and the same one on every return", async () => {
+  process.env.CALENDLY_TOKEN = "cal_token";
+  process.env.CALENDLY_EVENT_TYPE = "https://api.calendly.com/event_types/ET1";
+  const customer = { id: "cus_cal", metadata: {} };
+  const [s] = buyer("buyer@example.com", session(undefined, {
+    metadata: { product: "session" }, customer,
+    customer_details: { email: "buyer@example.com", name: "Sam Driver" }
+  }));
+  const stripeFetch = globalThis.fetch;
+  let minted = 0;
+  globalThis.fetch = async (url, opts = {}) => {
+    const u = new URL(url);
+    if (u.host === "api.calendly.com") {
+      calls.push({ url: u, opts });
+      minted++;
+      return new Response(JSON.stringify({ resource: { booking_url: "https://calendly.com/d/link-" + minted } }), { status: 200 });
+    }
+    if (u.pathname === "/v1/customers/cus_cal" && opts.method === "POST") {
+      new URLSearchParams(opts.body).forEach((v, k) => { customer.metadata[k.slice(9, -1)] = v; });
+      return new Response(JSON.stringify(customer), { status: 200 });
+    }
+    return stripeFetch(url, opts);
+  };
+  try {
+    const first = (await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location");
+    assert.equal(first, "https://calendly.com/d/link-1?email=buyer%40example.com&name=Sam+Driver");
+    const ask = JSON.parse(calls.find(c => c.url.host === "api.calendly.com").opts.body);
+    assert.deepEqual(ask, { max_event_count: 1, owner: "https://api.calendly.com/event_types/ET1", owner_type: "EventType" });
+    assert.equal(calls.find(c => c.url.host === "api.calendly.com").opts.headers.Authorization, "Bearer cal_token");
+
+    const again = (await booked.GET(req("/api/booked?session_id=" + s.id))).headers.get("location");
+    assert.equal(again, first);
+    assert.equal(minted, 1);
+  } finally {
+    delete process.env.CALENDLY_TOKEN;
+    delete process.env.CALENDLY_EVENT_TYPE;
+  }
 });

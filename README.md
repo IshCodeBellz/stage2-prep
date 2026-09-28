@@ -1,4 +1,4 @@
-# Cab Ready
+# Booked On
 
 Marketing site, resource library and practice simulators for the trainee train
 driver assessment. Static pages, plus a handful of Vercel Functions for accounts
@@ -8,7 +8,8 @@ and payment: no build step, no dependencies, no framework.
 index.html              the landing page                    →  /
 pricing.html            Standard / Gold / Platinum           →  /pricing
 resources/index.html    the library, filterable             →  /resources
-resources/*.html        21 guides, one per test or topic    →  /resources/<slug>
+resources/*.html        22 guides, one per test or topic    →  /resources/<slug>
+coaching.html           one-to-one sessions, and how to book →  /coaching
 simulators.html         the app (was index.html)            →  /simulators
 assets/site.css         one stylesheet for the whole site
 assets/site.js          header, footer, cards, prev/next
@@ -119,12 +120,26 @@ and Stripe is the record of what it bought.**
   it stands: refund the Gold and the upgrade grants nothing, so refund both.
 - A 100%-off promotion code made in the Stripe dashboard works at checkout, for
   giving access away.
+- **One-to-one sessions** are sold on `/coaching` through `/api/book`: £79, or
+  £59 to someone signed in whose email holds Platinum (asked of Stripe, as with
+  the upgrade). The checkout is tagged `metadata.product = "session"` with no
+  tier, so it never changes what an email holds. The rescheduling terms — free
+  with 48 hours' notice, used after that — are shown on the page and on the
+  Stripe pay button. After paying, `/api/booked` checks the payment and sends the
+  buyer to book with their name and email filled in. With Calendly set up it
+  asks Calendly for a **single-use link** — one booking, then spent — and keeps
+  it on the Stripe customer (`metadata.cal_…`), so a refresh or a closed tab gets
+  the same link back rather than a new one: one payment, one booking. Buyers
+  never see the event type's own link, so make that event **secret** in
+  Calendly and do not share it. Without Calendly, `BOOKING_URL` is used as it
+  is (anyone holding it can book), and with neither the buyer is told times will
+  come by email. With the paywall off, the page offers booking by email instead.
 
 ### Switching it on
 
-1. **Stripe.** Make three products, each with a one-off price in GBP: *Gold* £49,
-   *Platinum* £89 and *Gold to Platinum* £40. Copy the three price IDs
-   (`price_…`). Get the secret key from Developers → API keys. Use test mode
+1. **Stripe.** Make four products, each with a one-off price in GBP: *Gold* £49,
+   *Platinum* £89, *Gold to Platinum* £40, and *One-to-one session* with two
+   prices, £79 and £59. Copy the price IDs (`price_…`). Get the secret key from Developers → API keys. Use test mode
    first.
 2. **Resend.** Add and verify the domain the sign-in email comes from, and make
    an API key.
@@ -140,8 +155,25 @@ and Stripe is the record of what it bought.**
    | `STRIPE_PRICE_GOLD` | the Gold price ID |
    | `STRIPE_PRICE_PLATINUM` | the Platinum price ID |
    | `STRIPE_PRICE_UPGRADE` | the Gold to Platinum price ID |
+   | `STRIPE_PRICE_SESSION` | the one-to-one session's £79 price ID |
+   | `STRIPE_PRICE_SESSION_PLATINUM` | its £59 price ID, for Platinum holders |
+   | `CALENDLY_TOKEN` | a Calendly personal access token (Integrations → API and webhooks) |
+   | `CALENDLY_EVENT_TYPE` | the session's event type URI, `https://api.calendly.com/event_types/…` — see below |
+   | `BOOKING_URL` | only without Calendly: a plain calendar link, which anyone holding it can use |
    | `RESEND_API_KEY` | `re_…` |
-   | `MAIL_FROM` | e.g. `Cab Ready <hello@your-domain>`, on the verified domain |
+   | `MAIL_FROM` | e.g. `Booked On <hello@your-domain>`, on the verified domain |
+
+   **Calendly.** Make one event type for the session: an hour, video call,
+   minimum scheduling notice 48 hours, and set to secret. Put the rescheduling
+   terms in its description and confirmation email. To find its URI:
+
+   ```bash
+   curl -s -H "Authorization: Bearer $CALENDLY_TOKEN" https://api.calendly.com/users/me
+   # copy resource.uri, then:
+   curl -s -H "Authorization: Bearer $CALENDLY_TOKEN" \
+     "https://api.calendly.com/event_types?user=<that uri>"
+   # the session's "uri" is CALENDLY_EVENT_TYPE
+   ```
 
 4. **The browser half:** set `const PAYWALL = true` in `assets/tiers.js` and bump
    `CACHE` in `sw.js`. Deploy.
@@ -168,11 +200,25 @@ browser on and server off locks the simulators but sends every guide whole.
 ## Renaming the site
 
 The brand appears in `window.SITE` at the top of `assets/site.js`, in each page's
-`<title>` and in the footer's small print. `Cab Ready` is a placeholder — a
-find-and-replace across `*.html` and `assets/site.js` changes it everywhere.
+`<title>`, in the footer's small print, the sign-in email (`api/_lib/mail.js`) and
+`manifest.webmanifest`. A find-and-replace across those changes it everywhere.
+It was Cab Ready until September 2026; the browser storage keys in
+`assets/tiers.js` still say `cabready.` and are left alone, because renaming
+them would sign every visitor out of the tier they chose.
 
-Before launch, also replace the placeholder contact details and confirm the
-prices on `/pricing` are the ones you mean.
+## The logo
+
+A signal head with the green aspect lit, in `assets/brand/`: `mark.svg` is the
+rounded tile used in the header and the simulators, and `icon.svg` is the same
+thing full bleed, with the signal inside the maskable safe zone, which is what
+`icon-180.png` and `icon-512.png` are rendered from. Colours are the site's own:
+the tile `#1c2b23`, the head `#0a120d`, the lit lamp `--green-lit` `#2fbf71`.
+
+Before launch, also replace the placeholder contact details — including the
+`coaching@example.com` address on `/coaching` — and confirm the prices on
+`/pricing` are the ones you mean. The one-to-one prices, £79 and £59, are
+charged from Stripe but written as text in `coaching.html` and `pricing.html`,
+so change them together.
 
 ## Printing the stage 1 papers
 
