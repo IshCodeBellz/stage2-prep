@@ -3,7 +3,7 @@
    asked of Stripe again and the cookies are reissued, so a refund takes the
    tier away within a day. tiers.js calls this at most once a day. */
 
-import { json, session, sessionCookies, clearCookies, paywallOn, RECHECK_MS } from "./_lib/auth.js";
+import { json, session, sessionCookies, clearCookies, hasTierCookie, paywallOn, RECHECK_MS } from "./_lib/auth.js";
 import { tierForEmail } from "./_lib/stripe.js";
 
 export async function GET(request) {
@@ -11,7 +11,7 @@ export async function GET(request) {
   const s = await session(request).catch(() => null);
   if (!s) {
     // a leftover display cookie with no session behind it is cleared
-    const stale = (request.headers.get("cookie") || "").includes("cr_tier=");
+    const stale = hasTierCookie(request);
     return json({ paywall, signedIn: false, tier: "standard" }, 200, stale ? clearCookies() : null);
   }
   if (Date.now() - s.i < RECHECK_MS) return json({ paywall, signedIn: true, email: s.e, tier: s.t });

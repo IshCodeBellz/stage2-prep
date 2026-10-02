@@ -97,8 +97,9 @@ and Stripe is the record of what it bought.**
 - **What someone holds** is always worked out the same way (`tierForEmail` in
   `api/_lib/stripe.js`): the customers with that email, their completed checkout
   sessions, the highest tier among those paid and not fully refunded.
-- **The session** is two cookies. `cr_session` is signed with `SESSION_SECRET`,
-  HttpOnly, and is what the server believes. `cr_tier` is the same tier in the
+- **The session** is two cookies. `bookedon_session` is signed with
+  `SESSION_SECRET`, HttpOnly, and is what the server believes. `bookedon_tier` is
+  the same tier in the
   clear for the browser to read. Both last 30 days. Once a day `tiers.js` calls
   `/api/me`, which asks Stripe again — so **a refund issued in the Stripe
   dashboard takes the tier away within a day**, and a purchase on another device
@@ -108,7 +109,7 @@ and Stripe is the record of what it bought.**
   session that holds its tier and otherwise trims it to the preview before it
   leaves the server — the same cut `tiers.js` makes. The paid text is not in the
   page a non-buyer downloads.
-- **The simulators are gated in the browser**, by `cr_tier`. They run entirely on
+- **The simulators are gated in the browser**, by `bookedon_tier`. They run entirely on
   the device, so someone willing to edit their own cookies can open them. That
   is accepted; the guides are where the server draws the line.
 - **Prices:** Gold £49, Platinum £89, and £40 to move up from Gold. What is charged
@@ -202,9 +203,32 @@ browser on and server off locks the simulators but sends every guide whole.
 The brand appears in `window.SITE` at the top of `assets/site.js`, in each page's
 `<title>`, in the footer's small print, the sign-in email (`api/_lib/mail.js`) and
 `manifest.webmanifest`. A find-and-replace across those changes it everywhere.
-It was Cab Ready until September 2026; the browser storage keys in
-`assets/tiers.js` still say `cabready.` and are left alone, because renaming
-them would sign every visitor out of the tier they chose.
+It was Cab Ready until September 2026, and Stage2 Prep before that.
+
+Do not include `group:"stage2"` in such a replace. In `assets/resources.js` and
+`resources/index.html` that is the assessment's own Stage 2, not the old title.
+
+**The storage names**, which a visitor carries between releases, are renamed
+behind one-time shims rather than in place, so nobody loses work or is signed
+out:
+
+| What | Now | Was | How it carries over |
+| --- | --- | --- | --- |
+| simulator progress, sets, stage, dates, PIF answers | `bookedon.*` | `stage2.*` | `lsGet` in `simulators.html` reads the old key once and moves it |
+| tier preview, paywall override, daily check | `bookedon.*` | `cabready.*` | `store.get` in `assets/tiers.js`, the same way |
+| the ATAVT photographs (IndexedDB) | `bookedon.scenes` | `stage2.scenes` | `move()` in `simulators.html` copies the records, counts them in the new database, and only then deletes the old one |
+| the two cookies | `bookedon_*` | `cr_*` | `session()` in `api/_lib/auth.js` reads either name; the token is unchanged, so it still verifies and is reissued under the new name |
+
+The two localStorage sweeps and the database move all run **on page load**, not
+on first use, so one visit to `/simulators` is enough to leave nothing under an
+old name. That is what makes them safe to delete: a release after the one that
+introduced them, once visitors have opened the app again, drop the fallback, the
+`OLD_`/`old` name beside it, and the `bookedon.scenes.moved` marker. Anyone who
+has not been back in that window loses what was stored, so do not cut it short.
+
+The cookies are the exception to "one visit is enough": a session held under the
+old name keeps working and is rewritten under the new one at the next daily
+`/api/me` recheck or the next sign-in, whichever comes first.
 
 ## The logo
 

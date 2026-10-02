@@ -6,7 +6,7 @@
    signature checks out.
 
    A token is base64url(JSON) + "." + base64url(HMAC-SHA256). Two kinds:
-     k:"s"  the session — email and tier, kept in the cr_session cookie
+     k:"s"  the session — email and tier, kept in the bookedon_session cookie
      k:"l"  a sign-in link — email only, good for LINK_MINUTES
 
    Web Crypto, so the same file runs in a Vercel Function, the middleware and
@@ -63,6 +63,14 @@ export const looksLikeEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.len
 
 /* ---- cookies */
 
+/* Both cookies carried an earlier title's prefix. The token inside is unchanged
+   and still verifies, so a session is read under the old name as well and
+   reissued under the new one: the rename signs nobody out. Any pair that is set
+   or cleared expires the old names too, so a browser stops sending both. Drop
+   the two OLD_ names a release after the rename. */
+const SESSION_COOKIE = "bookedon_session", TIER_COOKIE = "bookedon_tier";
+const OLD_SESSION_COOKIE = "cr_session", OLD_TIER_COOKIE = "cr_tier";
+
 export function readCookie(request, name) {
   const all = request.headers.get("cookie") || "";
   for (const part of all.split(/;\s*/)) {
@@ -79,21 +87,29 @@ function cookie(name, value, maxAge, httpOnly) {
          (httpOnly ? "; HttpOnly" : "");
 }
 
-/* cr_session is the proof and the browser's scripts cannot read it. cr_tier says
-   the same tier in the clear, for the simulators and the header to read; it is
-   a display value, and nothing on the server believes it. */
+/* bookedon_session is the proof and the browser's scripts cannot read it.
+   bookedon_tier says the same tier in the clear, for the simulators and the
+   header to read; it is a display value, and nothing on the server believes it. */
 export async function sessionCookies(email, tier) {
   const now = Date.now(), age = SESSION_DAYS * 86400;
   const token = await sign({ k: "s", e: email, t: tier, i: now, x: now + age * 1000 });
-  return [cookie("cr_session", token, age, true), cookie("cr_tier", tier, age, false)];
+  return [cookie(SESSION_COOKIE, token, age, true), cookie(TIER_COOKIE, tier, age, false),
+          cookie(OLD_SESSION_COOKIE, "", 0, true), cookie(OLD_TIER_COOKIE, "", 0, false)];
 }
 
-export const clearCookies = () => [cookie("cr_session", "", 0, true), cookie("cr_tier", "", 0, false)];
+export const clearCookies = () => [
+  cookie(SESSION_COOKIE, "", 0, true), cookie(TIER_COOKIE, "", 0, false),
+  cookie(OLD_SESSION_COOKIE, "", 0, true), cookie(OLD_TIER_COOKIE, "", 0, false)];
 
 /* The signed-in session on this request, or null. */
 export async function session(request) {
-  return verify(readCookie(request, "cr_session"), "s");
+  return verify(readCookie(request, SESSION_COOKIE) || readCookie(request, OLD_SESSION_COOKIE), "s");
 }
+
+/* A display cookie on this request, under either name — a leftover with no
+   session behind it is what /api/me clears. */
+export const hasTierCookie = request =>
+  readCookie(request, TIER_COOKIE) != null || readCookie(request, OLD_TIER_COOKIE) != null;
 
 /* ---- responses */
 

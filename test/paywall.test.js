@@ -197,10 +197,10 @@ test("claiming a paid session signs the buyer in on the tier they bought", async
   const r = await claim.GET(req("/api/claim?session_id=" + s.id));
   assert.equal(r.headers.get("location"), "/account?welcome=platinum");
   const cookies = cookieHeader(r);
-  assert.match(cookies, /cr_tier=platinum/);
-  const token = decodeURIComponent(/cr_session=([^;]+)/.exec(cookies)[1]);
+  assert.match(cookies, /bookedon_tier=platinum/);
+  const token = decodeURIComponent(/bookedon_session=([^;]+)/.exec(cookies)[1]);
   assert.equal((await auth.verify(token, "s")).e, "buyer@example.com");
-  assert.ok(r.headers.getSetCookie().some(c => c.startsWith("cr_session=") && /HttpOnly/.test(c)));
+  assert.ok(r.headers.getSetCookie().some(c => c.startsWith("bookedon_session=") && /HttpOnly/.test(c)));
 });
 
 test("an unpaid or unknown session signs nobody in", async () => {
@@ -296,7 +296,7 @@ test("a sign-in link goes only to a buyer, to SITE_URL whatever the Host, and th
 
   const r = await verify.GET(req("/api/verify?t=" + link[1]));
   assert.equal(r.headers.get("location"), "/account");
-  assert.match(cookieHeader(r), /cr_tier=gold/);
+  assert.match(cookieHeader(r), /bookedon_tier=gold/);
 });
 
 test("a bad or expired sign-in link, or a session token used as one, is refused", async () => {
@@ -321,22 +321,48 @@ test("/api/me trusts a fresh session and re-asks Stripe once it is a day old", a
   // a day on, and the purchase has been refunded
   buyer("buyer@example.com", session("gold", { payment_intent: { latest_charge: { refunded: true } } }));
   const stale = await auth.sign({ k: "s", e: "buyer@example.com", t: "gold", i: Date.now() - auth.RECHECK_MS - 1, x: Date.now() + 60000 });
-  const res = await me.GET(withCookies("/api/me", "cr_session=" + encodeURIComponent(stale) + "; cr_tier=gold"));
+  const res = await me.GET(withCookies("/api/me", "bookedon_session=" + encodeURIComponent(stale) + "; bookedon_tier=gold"));
   assert.equal((await res.json()).tier, "standard");
-  assert.match(cookieHeader(res), /cr_tier=standard/);
+  assert.match(cookieHeader(res), /bookedon_tier=standard/);
 });
 
 test("/api/me with no session says so, and clears a stray display cookie", async () => {
+  const r = await me.GET(withCookies("/api/me", "bookedon_tier=platinum"));
+  assert.deepEqual(await r.json(), { paywall: true, signedIn: false, tier: "standard" });
+  assert.ok(r.headers.getSetCookie().some(c => c.startsWith("bookedon_tier=;") && /Max-Age=0/.test(c)));
+});
+
+test("signing out clears both cookies, under the old names too", async () => {
+  const r = await logout.POST(req("/api/logout", { method: "POST" }));
+  const set = r.headers.getSetCookie();
+  assert.equal(set.length, 4);
+  assert.ok(set.every(c => /Max-Age=0/.test(c)));
+  for (const name of ["bookedon_session", "bookedon_tier", "cr_session", "cr_tier"])
+    assert.ok(set.some(c => c.startsWith(name + "=;")), name + " is cleared");
+});
+
+/* ---- the rename to Booked On. The cookies were cr_session and cr_tier, and a
+   visitor arrives still holding them: the token inside is unchanged, so it has
+   to keep verifying, and the pair has to come back under the new names. */
+
+test("a session held under the old cookie name is still read", async () => {
+  const old = await auth.sign({ k: "s", e: "buyer@example.com", t: "gold", i: Date.now(), x: Date.now() + 60000 });
+  const r = await me.GET(withCookies("/api/me", "cr_session=" + encodeURIComponent(old) + "; cr_tier=gold"));
+  assert.deepEqual(await r.json(), { paywall: true, signedIn: true, email: "buyer@example.com", tier: "gold" });
+});
+
+test("a stray display cookie under the old name is cleared too", async () => {
   const r = await me.GET(withCookies("/api/me", "cr_tier=platinum"));
   assert.deepEqual(await r.json(), { paywall: true, signedIn: false, tier: "standard" });
   assert.ok(r.headers.getSetCookie().some(c => c.startsWith("cr_tier=;") && /Max-Age=0/.test(c)));
 });
 
-test("signing out clears both cookies", async () => {
-  const r = await logout.POST(req("/api/logout", { method: "POST" }));
-  const set = r.headers.getSetCookie();
-  assert.equal(set.length, 2);
-  assert.ok(set.every(c => /Max-Age=0/.test(c)));
+test("a reissued pair expires the old names, so a browser stops sending both", async () => {
+  const set = await auth.sessionCookies("buyer@example.com", "gold");
+  assert.ok(set.some(c => c.startsWith("bookedon_session=") && /HttpOnly/.test(c)));
+  assert.ok(set.some(c => c.startsWith("bookedon_tier=gold")));
+  for (const name of ["cr_session", "cr_tier"])
+    assert.ok(set.some(c => c.startsWith(name + "=;") && /Max-Age=0/.test(c)), name + " is expired");
 });
 
 /* ---- one-to-one sessions */

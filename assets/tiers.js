@@ -18,12 +18,13 @@
    the pricing page, shows what a visitor on that tier would get.
 
    Once it is true the tier comes from the account. The server sets it after a
-   Stripe checkout or a sign-in link, in two cookies: cr_session, signed and out
-   of reach of scripts, which is what the server believes, and cr_tier, the same
-   tier in the clear, which is what this file reads. Paid guides are trimmed on
-   the server before they are sent, so for them this file only draws the panel.
-   The simulators run in the browser, so for them cr_tier is the gate — enough
-   for anyone who does not go editing their cookies. */
+   Stripe checkout or a sign-in link, in two cookies: bookedon_session, signed
+   and out of reach of scripts, which is what the server believes, and
+   bookedon_tier, the same tier in the clear, which is what this file reads.
+   Paid guides are trimmed on the server before they are sent, so for them this
+   file only draws the panel. The simulators run in the browser, so for them
+   bookedon_tier is the gate — enough for anyone who does not go editing their
+   cookies. */
 
 (function () {
   "use strict";
@@ -31,18 +32,39 @@
   const PAYWALL = false;                 // ← the one switch. See note above.
   const ORDER = ["standard", "gold", "platinum"];
   const OLD = { starter: "standard" };  // names a stored tier or a link may still use
-  const KEY_TIER = "cabready.tier";
-  const KEY_WALL = "cabready.paywall";
+  const KEY_TIER = "bookedon.tier";
+  const KEY_WALL = "bookedon.paywall";
+  const KEY_CHECKED = "bookedon.checked";
+
+  /* These keys, and the two cookies, were named for earlier titles. A read falls
+     back to the old name once and moves the value across; writes only ever go to
+     the new name. Drop the fallbacks a release after the rename. */
+  const oldKey = k => k.replace(/^bookedon\./, "cabready.");
 
   const store = {
-    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    get(k) {
+      try {
+        const v = localStorage.getItem(k);
+        if (v != null) return v;
+        const old = localStorage.getItem(oldKey(k));
+        if (old != null) { localStorage.setItem(k, old); localStorage.removeItem(oldKey(k)); }
+        return old;
+      } catch (e) { return null; }
+    },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   };
+
+  /* Read all three once at load, so a single visit moves them over rather than
+     leaving an old key behind until something happens to ask for it. */
+  [KEY_TIER, KEY_WALL, KEY_CHECKED].forEach(k => store.get(k));
 
   const cookie = name => {
     const m = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
     return m ? decodeURIComponent(m[1]) : null;
   };
+  /* the server reissues both cookies under the new names on the next /api/me,
+     so the old name only has to be readable until then */
+  const tierCookie = () => cookie("bookedon_tier") || cookie("cr_tier");
 
   // the preview controls only exist while the paywall is off
   const qs = new URLSearchParams(location.search);
@@ -55,7 +77,7 @@
 
     /* What the visitor currently has. Everyone is on standard until they buy. */
     tier() {
-      const t = PAYWALL ? cookie("cr_tier") : store.get(KEY_TIER);
+      const t = PAYWALL ? tierCookie() : store.get(KEY_TIER);
       return ORDER.indexOf(OLD[t] || t) > -1 ? (OLD[t] || t) : "standard";
     },
     setTier(t) {
@@ -65,7 +87,7 @@
     },
 
     /* signed in to an account — only once the paywall is on is there one */
-    signedIn() { return PAYWALL && !!cookie("cr_tier"); },
+    signedIn() { return PAYWALL && !!tierCookie(); },
 
     /* Locking is off until billing exists; ?paywall=1 previews it. */
     enforcing() {
@@ -201,8 +223,8 @@
   }
 
   /* Once a day a signed-in visitor's tier is asked of the server again, which
-     asks Stripe — how a refund, or a purchase on another device, reaches this one. */
-  const KEY_CHECKED = "cabready.checked";
+     asks Stripe — how a refund, or a purchase on another device, reaches this one.
+     KEY_CHECKED is declared with the other keys, at the top. */
   function refresh() {
     if (!Access.signedIn()) return;
     if (Date.now() - Number(store.get(KEY_CHECKED) || 0) < 24 * 60 * 60 * 1000) return;

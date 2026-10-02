@@ -890,12 +890,29 @@ const pick = a => a[rnd(a.length)];
 const shuffle = a => { for(let i=a.length-1;i>0;i--){ const k=rnd(i+1); const t=a[i]; a[i]=a[k]; a[k]=t; } return a; };
 const mmss = s => Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
 
+/* ---- the storage keys were named for the old title until the rename to Booked
+   On. Anyone who has practised here already has their work under the old name,
+   so a read falls back to it once and moves the value across. Writes only ever
+   go to the new key. Drop this and read localStorage directly a release after
+   everyone has opened the app again. */
+function lsGet(key){
+  let v=null;
+  try{ v=localStorage.getItem(key); }catch(e){ return null; }
+  if(v!=null) return v;
+  try{
+    const old=key.replace(/^bookedon\./,"stage2.");
+    v=localStorage.getItem(old);
+    if(v!=null){ localStorage.setItem(key,v); localStorage.removeItem(old); }
+  }catch(e){}
+  return v;
+}
+
 /* ---- progress, saved on this device only. Degrades to memory if storage is blocked. */
 const Store = (()=>{
-  const KEY="stage2.progress.v1";
+  const KEY="bookedon.progress.v1";
   let mem={}, ok=true;
   try{
-    const raw=localStorage.getItem(KEY);
+    const raw=lsGet(KEY);
     mem = raw ? JSON.parse(raw) : {};
     localStorage.setItem(KEY, JSON.stringify(mem));   // prove it is writable
   }catch(e){ ok=false; mem={}; }
@@ -932,9 +949,9 @@ const Store = (()=>{
 
 /* ---- which question set you get next. Rotates so a second attempt is never the same paper. */
 const Rot = (()=>{
-  const KEY="stage2.sets.v1";
+  const KEY="bookedon.sets.v1";
   let mem={};
-  try{ mem = JSON.parse(localStorage.getItem(KEY)||"{}") || {}; }catch(e){ mem={}; }
+  try{ mem = JSON.parse(lsGet(KEY)||"{}") || {}; }catch(e){ mem={}; }
   const save=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(mem)); }catch(e){} };
   return {
     next(id, n){
@@ -1037,9 +1054,9 @@ const STAGES={
         missing:null }
 };
 const Stage=(()=>{
-  const KEY="stage2.stage.v1";
+  const KEY="bookedon.stage.v1";
   let cur="2";
-  try{ const v=localStorage.getItem(KEY); if(v==="1"||v==="2") cur=v; }catch(e){}
+  try{ const v=lsGet(KEY); if(v==="1"||v==="2") cur=v; }catch(e){}
   return {
     get:()=>cur,
     set(v){ cur=v; try{ localStorage.setItem(KEY,v); }catch(e){} }
@@ -1355,9 +1372,9 @@ const HISTORY = {
 /* The countdown to the visitor's own sitting. Everyone's date is different, so
    it is theirs to set, one per stage, kept in this browser as yyyy-mm-dd. */
 const Dates=(()=>{
-  const KEY="stage2.dates.v1";
+  const KEY="bookedon.dates.v1";
   let d={};
-  try{ d=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){}
+  try{ d=JSON.parse(lsGet(KEY))||{}; }catch(e){}
   return {
     get:s=>(/^\d{4}-\d{2}-\d{2}$/.test(d[s]||"")?d[s]:""),
     set(s,v){ if(v) d[s]=v; else delete d[s]; try{ localStorage.setItem(KEY,JSON.stringify(d)); }catch(e){} }
@@ -2951,17 +2968,68 @@ function scene(has, t){
    to be tagged once by hand. They are kept on this device and never uploaded. */
 const CAT_SHORT={ped:"Pedestrians", veh:"Vehicles", bike:"Bikes", sign:"Signs", light:"Lights"};
 const Photos=(()=>{
-  const DB="stage2.scenes", STORE="scenes";
+  const DB="bookedon.scenes", OLD_DB="stage2.scenes", STORE="scenes";
+  const MOVED="bookedon.scenes.moved";
   let dbp=null;
-  function open(){
-    if(dbp) return dbp;
-    dbp=new Promise((res,rej)=>{
+  function openNamed(name){
+    return new Promise((res,rej)=>{
       let r;
-      try{ r=indexedDB.open(DB,1); }catch(e){ rej(e); return; }
+      try{ r=indexedDB.open(name,1); }catch(e){ rej(e); return; }
       r.onupgradeneeded=()=>{ r.result.createObjectStore(STORE,{keyPath:"id",autoIncrement:true}); };
       r.onsuccess=()=>res(r.result);
       r.onerror=()=>rej(r.error);
     });
+  }
+  function drop(name){
+    return new Promise(res=>{
+      let r;
+      try{ r=indexedDB.deleteDatabase(name); }catch(e){ res(); return; }
+      r.onsuccess=r.onerror=r.onblocked=()=>res();
+    });
+  }
+  /* The photographs sat in a database named for the old title. They are tagged
+     by hand and never uploaded, so there is no copy of them anywhere else: they
+     are moved across keeping their ids, counted in their new home, and only
+     then is the old database deleted. A move that fails part way leaves the old
+     database alone and is retried on the next load — putting the same ids back
+     is harmless. Drop this, OLD_DB and MOVED once the old name is long gone. */
+  function move(){
+    let done=false;
+    try{ done = localStorage.getItem(MOVED)==="1"; }catch(e){}
+    if(done) return Promise.resolve();
+    return openNamed(OLD_DB).then(old =>
+      new Promise((res,rej)=>{
+        const t=old.transaction(STORE,"readonly"), q=t.objectStore(STORE).getAll();
+        t.onerror=()=>rej(t.error);
+        t.oncomplete=()=>res(q.result||[]);
+      })
+      .then(recs=>{
+        old.close();
+        if(!recs.length) return;                      // nothing there, or a first visit
+        return openNamed(DB)
+          .then(db=>new Promise((res,rej)=>{
+            const t=db.transaction(STORE,"readwrite"), s=t.objectStore(STORE);
+            recs.forEach(r=>s.put(r));
+            t.onerror=()=>rej(t.error);
+            t.oncomplete=()=>res(db);
+          }))
+          .then(db=>new Promise((res,rej)=>{           // read them back before anything is deleted
+            const t=db.transaction(STORE,"readonly"), q=t.objectStore(STORE).count();
+            t.onerror=()=>rej(t.error);
+            t.oncomplete=()=>{ db.close(); q.result>=recs.length ? res() : rej(new Error("scenes short")); };
+          }));
+      })
+      .then(()=>drop(OLD_DB))
+      .then(()=>{ try{ localStorage.setItem(MOVED,"1"); }catch(e){} })
+    ).catch(()=>{});
+  }
+  /* Started at load, not on first use: the ATAVT library is opened rarely, and
+     photographs left under the old name would still be there when the fallback
+     above is deleted. It resolves either way, so open() just waits on it. */
+  const moved=move();
+  function open(){
+    if(dbp) return dbp;
+    dbp=moved.then(()=>openNamed(DB));
     return dbp;
   }
   function run(mode, fn){
@@ -5462,9 +5530,9 @@ const MMI_CHECKS=[
 
 /* your six form answers live on this device so you turn up with them ready */
 const PIF=(()=>{
-  const KEY="stage2.pif.v1";
+  const KEY="bookedon.pif.v1";
   let mem=[];
-  try{ mem=JSON.parse(localStorage.getItem(KEY)||"[]")||[]; }catch(e){ mem=[]; }
+  try{ mem=JSON.parse(lsGet(KEY)||"[]")||[]; }catch(e){ mem=[]; }
   return {
     all:()=>PIF_PROMPTS.map((_,i)=>mem[i]||""),
     set(i,v){ mem[i]=v; try{ localStorage.setItem(KEY, JSON.stringify(mem)); }catch(e){} },
